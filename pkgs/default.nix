@@ -1,8 +1,8 @@
-{ nixpkgs ? import <nixpkgs> {}}:
+{ nixlib, nixpkgs }:
 
 let
   pkgs = nixpkgs // turrispkgs;
-  callPackage = pkgs.lib.callPackageWith pkgs;
+  callPackage = nixlib.callPackageWith pkgs;
 
   turrispkgs = with pkgs; {
     bootstrapHook = callPackage (
