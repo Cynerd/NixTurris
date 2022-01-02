@@ -1,6 +1,7 @@
 { stdenv, lib, fetchgit
 , bootstrapHook, pkg-config
 , czmq, msgpack, logc-0_1, logc-libs, libconfig, libnetfilter_log
+, check
 }:
 
 stdenv.mkDerivation rec {
@@ -9,7 +10,7 @@ stdenv.mkDerivation rec {
   meta = with lib; {
     homepage = "https://gitlab.nic.cz/turris/sentinel/fwlogs";
     description = "Firewall logs collector";
-    platforms = with platforms; linux;
+    platforms = platforms.linux;
     license = licenses.gpl3;
   };
 
@@ -21,4 +22,9 @@ stdenv.mkDerivation rec {
 
   buildInputs = [czmq msgpack logc-0_1 logc-libs libconfig libnetfilter_log];
   nativeBuildInputs = [bootstrapHook pkg-config];
+  depsBuildBuild = [check];
+
+  doCheck = true;
+  doInstallCheck = true;
+  configureFlags = lib.optional (stdenv.hostPlatform == stdenv.buildPlatform) "--enable-tests";
 }

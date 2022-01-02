@@ -1,0 +1,31 @@
+From ecd66fc7d0079093fc56c16233c1fb2e88879df3 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Karel=20Ko=C4=8D=C3=AD?= <karel.koci@nic.cz>
+Date: Thu, 24 Feb 2022 17:52:59 +0100
+Subject: [PATCH] tests/cmzq: try to fix test failure
+
+The errno seems to be possibly set by logc_czmq_init and thus we have to
+reset errno after that.
+---
+ tests/czmq.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tests/czmq.c b/tests/czmq.c
+index b6244d1..f25ab07 100644
+--- a/tests/czmq.c
++++ b/tests/czmq.c
+@@ -10,11 +10,11 @@ char *stderr_data;
+ size_t stderr_len;
+ 
+ void f_setup() {
+-	errno = 0;
+ 	orig_stderr = stderr;
+ 	stderr = open_memstream(&stderr_data, &stderr_len);
+ 	logc_czmq_init();
+ 	log_set_level(log_czmq, LL_DEBUG);
++	errno = 0;
+ }
+ void f_teardown() {
+ 	ck_assert_int_eq(errno, 0);
+-- 
+2.35.1
+

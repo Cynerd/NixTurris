@@ -1,6 +1,7 @@
 { stdenv, lib, fetchgit
 , bootstrapHook, pkg-config
 , logc, czmq, libevent
+, check
 }:
 
 stdenv.mkDerivation rec {
@@ -9,7 +10,6 @@ stdenv.mkDerivation rec {
   meta = with lib; {
     homepage = "https://gitlab.nic.cz/turris/logc-libs";
     description = "Logging for C";
-    platforms = with platforms; linux;
     license = licenses.mit;
   };
 
@@ -21,4 +21,9 @@ stdenv.mkDerivation rec {
 
   buildInputs = [logc czmq libevent];
   nativeBuildInputs = [bootstrapHook pkg-config];
+  depsBuildBuild = [check];
+
+  doCheck = false; #  TODO the test fails due to errno being set by czmq for some reason
+  doInstallCheck = false;
+  configureFlags = lib.optional (stdenv.hostPlatform == stdenv.buildPlatform) "--enable-tests";
 }

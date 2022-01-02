@@ -1,5 +1,6 @@
 { stdenv, lib, fetchgit
 , bootstrapHook, pkg-config
+, check
 }:
 
 stdenv.mkDerivation rec {
@@ -8,7 +9,6 @@ stdenv.mkDerivation rec {
   meta = with lib; {
     homepage = "https://gitlab.nic.cz/turris/base64c";
     description = "Base64 encoding/decoding library for C";
-    platforms = with platforms; linux;
     license = licenses.mit;
   };
 
@@ -19,4 +19,9 @@ stdenv.mkDerivation rec {
   };
 
   nativeBuildInputs = [bootstrapHook pkg-config];
+  depsBuildBuild = [check];
+
+  doCheck = true;
+  doInstallCheck = true;
+  configureFlags = lib.optional (stdenv.hostPlatform == stdenv.buildPlatform) "--enable-tests";
 }

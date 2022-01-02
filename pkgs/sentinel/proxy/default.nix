@@ -1,6 +1,7 @@
 { stdenv, lib, fetchgit
-, autoconf, autoconf-archive, automake, libtool, pkgconfig, gperf
+, bootstrapHook, pkg-config, gperf
 , openssl, zlib, czmq, libconfig, msgpack, paho-mqtt-c
+, check
 }:
 
 stdenv.mkDerivation rec {
@@ -9,7 +10,6 @@ stdenv.mkDerivation rec {
   meta = with lib; {
     homepage = "https://gitlab.nic.cz/turris/sentinel/proxy";
     description = "Main MQTT Sentinel client. Proxy that lives on the router and relays messages received from ZMQ to uplink server over MQTT channel.";
-    platforms = with platforms; linux;
     license = licenses.gpl3;
   };
 
@@ -20,9 +20,12 @@ stdenv.mkDerivation rec {
   };
 
   buildInputs = [openssl zlib czmq libconfig msgpack paho-mqtt-c];
-  nativeBuildInputs = [
-    autoconf autoconf-archive automake libtool pkgconfig gperf
-  ];
+  nativeBuildInputs = [bootstrapHook pkg-config gperf];
+  depsBuildBuild = [check];
 
   preConfigure = "./bootstrap";
+
+  doCheck = true;
+  doInstallCheck = true;
+  configureFlags = lib.optional (stdenv.hostPlatform == stdenv.buildPlatform) "--enable-tests";
 }
