@@ -12,6 +12,8 @@ let
 
   turrispkgs = with pkgs; {
 
+    # Crypto
+    libatsha204 = callPackage ./libatsha204 { };
 
     # Overrides to get armv7 to work
     bison = armv7lDisableCheck nixpkgs.bison;
