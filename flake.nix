@@ -1,9 +1,9 @@
 {
   description = "Turris flake";
 
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-21.11";
+  inputs.nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-21.11";
 
-  outputs = { self, flake-utils, nixpkgs }: {
+  outputs = { self, flake-utils, nixpkgs-stable }: {
 
       overlays.default = final: prev: import ./pkgs { nixpkgs = prev; };
       overlay = self.overlays.default; # Backward compatibility
@@ -16,7 +16,7 @@
 
       lib = {
         # The full NixOS system
-        nixturrisSystem = {board, modules ? [], override ? {}}: let
+        nixturrisSystem = {nixpkgs ? nixpkgs-stable, board, modules ? [], override ? {}}: let
           pkgs = if board == "omnia"
             then nixpkgs.legacyPackages.armv7l-linux
             else nixpkgs.legacyPackages.aarch64-linux;
@@ -29,8 +29,9 @@
         } // override);
         # The minimalized system to decrease amount of ram needed for rebuild
         # TODO this does not work right now as it requires just load of work to do
-        nixturrisMinSystem = {modules, ...} @args: 
+        nixturrisMinSystem = {nixpkgs ? nixpkgs-stable, modules, ...} @args: 
         self.lib.nixturrisSystem (args // {
+          nixpkgs = nixpkgs;
           modules = modules ++ [ ./nixos/nixos-modules-minfake.nix ];
           override = {
             baseModules = import ./nixos/nixos-modules.nix nixpkgs;
@@ -42,23 +43,23 @@
       system: {
         packages = let
 
-          createMedkit = board: (self.lib.nixturrisSystem {
+          createTarball = board: (self.lib.nixturrisSystem {
               board = board;
-              modules = [ (import ./medkit.nix board) ];
+              modules = [ (import ./tarball.nix board) ];
             }).config.system.build.tarball;
 
         in {
 
-          medkit-mox = createMedkit "mox";
-          medkit-omnia = createMedkit "omnia";
+          tarball-mox = createTarball "mox";
+          tarball-omnia = createTarball "omnia";
 
         } // flake-utils.lib.filterPackages system (flake-utils.lib.flattenTree (
-          import ./pkgs { nixpkgs = nixpkgs.legacyPackages."${system}"; }
+          import ./pkgs { nixpkgs = nixpkgs-stable.legacyPackages."${system}"; }
         ));
 
         # The legacyPackages imported as overlay allows us to use pkgsCross to
         # cross-compile those packages.
-        legacyPackages = import nixpkgs {
+        legacyPackages = import nixpkgs-stable {
           inherit system;
           overlays = [ self.overlay ];
           crossOverlays = [ self.overlay ];
