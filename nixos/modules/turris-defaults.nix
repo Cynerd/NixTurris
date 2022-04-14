@@ -33,11 +33,13 @@ in {
     boot.loader.grub.enable = false;
     boot.loader.generic-extlinux-compatible.enable = true;
     # Use early print to the serial console
-    # TODO this is only for Mox
     boot.kernelParams = [
-      "earlyprintk" "console=ttyMV0,115200" "earlycon=ar3700_uart,0xd0012000"
       "boot.shell_on_fail"
-      "pcie_aspm=off"
+    ] ++ optionals (config.turris.board == "mox") [
+      "earlycon=ar3700_uart,0xd0012000" "console=ttyMV0,115200"
+      "pcie_aspm=off" # Fix for crashes due to SError Interrupt on ath10k load
+    ] ++ optional (config.turris.board == "omnia") [
+      "earlyprintk" "console=ttyS0,115200"
     ];
 
     # Use the latest kernel
