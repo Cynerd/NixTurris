@@ -33,9 +33,11 @@ in {
     boot.loader.grub.enable = false;
     boot.loader.generic-extlinux-compatible.enable = true;
     # Use early print to the serial console
+    # TODO this is only for Mox
     boot.kernelParams = [
       "earlyprintk" "console=ttyMV0,115200" "earlycon=ar3700_uart,0xd0012000"
       "boot.shell_on_fail"
+      "pcie_aspm=off"
     ];
 
     # Use the latest kernel
