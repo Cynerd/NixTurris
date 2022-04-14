@@ -63,7 +63,7 @@ should be able to build tarball by navigating to this directory.
 
 ```
 ~$ nix registry add nixturris git+https://git.cynerd.cz/nixturris
-~$ nix build nixturris#tarball-mox
+~$ nix build nixturris#tarballMox
 ```
 
 The last step is to unpack the tarball to the SD card.

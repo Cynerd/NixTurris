@@ -65,16 +65,16 @@
       system: {
         packages = let
 
-          createTarball = board: (self.lib.nixturrisSystem {
-              system = system;
-              board = board;
-              modules = [ (import ./tarball.nix board) ];
-            }).config.system.build.tarball;
+          createTarball = {...} @args: (self.lib.nixturrisSystem ({
+              modules = [ (import ./tarball.nix args.board) ];
+            } // args)).config.system.build.tarball;
 
         in {
 
-          tarball-mox = createTarball "mox";
-          tarball-omnia = createTarball "omnia";
+          tarballMox = createTarball { board = "mox"; };
+          tarballOmnia = createTarball { board = "omnia"; };
+          crossTarballMox = createTarball { board = "mox"; system = system; };
+          crossTarballOmnia = createTarball { board = "omnia"; system = system; };
 
         } // flake-utils.lib.filterPackages system (flake-utils.lib.flattenTree (
           import ./pkgs { nixpkgs = nixpkgs-stable.legacyPackages."${system}"; }
