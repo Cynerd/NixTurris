@@ -30,8 +30,8 @@ in {
 
   config = mkIf cnf.enable {
     # We do not need Grub as U-Boot supports boot using extlinux like file
-    boot.loader.grub.enable = false;
-    boot.loader.generic-extlinux-compatible.enable = true;
+    boot.loader.grub.enable = mkDefault false;
+    boot.loader.generic-extlinux-compatible.enable = mkDefault true;
     # Use early print to the serial console
     boot.kernelParams = [
       "boot.shell_on_fail"
@@ -43,7 +43,7 @@ in {
     ];
 
     # Use the latest kernel
-    boot.kernelPackages = pkgs.linuxPackages_latest;
+    boot.kernelPackages = mkDefault pkgs.linuxPackages_latest;
 
     # The supported deployment is on BTRFS
     boot.supportedFilesystems = [ "btrfs" ];
