@@ -46,4 +46,8 @@
     };
   });
 
+  nixturrisTarballSystem = {...} @args: (nixturrisSystem ({
+      modules = [ (import ../tarball.nix args.board) ];
+    } // args));
+
 }

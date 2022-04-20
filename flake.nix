@@ -16,21 +16,18 @@
 
       lib = import ./lib { self = self; nixpkgs-stable = nixpkgs-stable; };
 
+      nixosConfigurations = {
+        tarballMox = self.lib.nixturrisTarballSystem { board = "mox"; };
+        tarballOmnia = self.lib.nixturrisTarballSystem { board = "omnia"; };
+      };
+
     } // flake-utils.lib.eachSystem (flake-utils.lib.defaultSystems ++ ["armv7l-linux"]) (
       system: {
-        packages = let
-
-          createTarball = {...} @args: (self.lib.nixturrisSystem ({
-              modules = [ (import ./tarball.nix args.board) ];
-            } // args)).config.system.build.tarball;
-
-        in {
-
-          tarballMox = createTarball { board = "mox"; };
-          tarballOmnia = createTarball { board = "omnia"; };
-          crossTarballMox = createTarball { board = "mox"; system = system; };
-          crossTarballOmnia = createTarball { board = "omnia"; system = system; };
-
+        packages = {
+          tarballMox = self.nixosConfigurations.tarballMox.config.system.build.tarball;
+          tarballOmnia = self.nixosConfigurations.tarballOmnia.config.system.build.tarball;
+          crossTarballMox = (self.lib.nixturrisTarballSystem { board = "mox"; system = system; }).config.system.build.tarball;
+          crossTarballOmnia = (self.lib.nixturrisTarballSystem { board = "omnia"; system = system; }).config.system.build.tarball;
         } // flake-utils.lib.filterPackages system (flake-utils.lib.flattenTree (
           import ./pkgs { nixpkgs = nixpkgs-stable.legacyPackages."${system}"; }
         ));

@@ -38,7 +38,7 @@ in {
     ] ++ optionals (config.turris.board == "mox") [
       "earlycon=ar3700_uart,0xd0012000" "console=ttyMV0,115200"
       "pcie_aspm=off" # Fix for crashes due to SError Interrupt on ath10k load
-    ] ++ optional (config.turris.board == "omnia") [
+    ] ++ optionals (config.turris.board == "omnia") [
       "earlyprintk" "console=ttyS0,115200"
     ];
 
