@@ -3,7 +3,7 @@
 
   inputs.nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-21.11";
 
-  outputs = { self, flake-utils, nixpkgs-stable }: {
+  outputs = { self, flake-utils, nixpkgs, nixpkgs-stable }: {
 
       overlays.default = final: prev: import ./pkgs { nixpkgs = prev; };
       overlay = self.overlays.default; # Backward compatibility
@@ -14,27 +14,38 @@
         nixpkgs.overlays = [ self.overlay ];
       };
 
-      lib = import ./lib { self = self; nixpkgs-stable = nixpkgs-stable; };
+      lib = import ./lib self;
 
       nixosConfigurations = {
-        tarballMox = self.lib.nixturrisTarballSystem { board = "mox"; };
-        tarballOmnia = self.lib.nixturrisTarballSystem { board = "omnia"; };
+        tarballMox = self.lib.nixturrisTarballSystem { board = "mox"; nixpkgs = nixpkgs; };
+        tarballOmnia = self.lib.nixturrisTarballSystem { board = "omnia"; nixpkgs = nixpkgs; };
+        stableTarballMox = self.lib.nixturrisTarballSystem { board = "mox"; nixpkgs = nixpkgs-stable; };
+        stableTarballOmnia = self.lib.nixturrisTarballSystem { board = "omnia"; nixpkgs = nixpkgs-stable; };
       };
 
     } // flake-utils.lib.eachSystem (flake-utils.lib.defaultSystems ++ ["armv7l-linux"]) (
       system: {
-        packages = {
-          tarballMox = self.nixosConfigurations.tarballMox.config.system.build.tarball;
-          tarballOmnia = self.nixosConfigurations.tarballOmnia.config.system.build.tarball;
-          crossTarballMox = (self.lib.nixturrisTarballSystem { board = "mox"; system = system; }).config.system.build.tarball;
-          crossTarballOmnia = (self.lib.nixturrisTarballSystem { board = "omnia"; system = system; }).config.system.build.tarball;
+        packages = let
+          tarball = nixos: nixos.config.system.build.tarball;
+        in {
+
+          tarballMox = tarball self.nixosConfigurations.tarballMox;
+          tarballOmnia = tarball self.nixosConfigurations.tarballOmnia;
+          stableTarballMox = tarball self.nixosConfigurations.stableTarballMox;
+          stableTarballOmnia = tarball self.nixosConfigurations.stableTarballOmnia;
+
+          crossTarballMox = tarball (self.lib.nixturrisTarballSystem { board = "mox"; nixpkgs = nixpkgs; system = system; });
+          crossTarballOmnia = tarball (self.lib.nixturrisTarballSystem { board = "omnia"; nixpkgs = nixpkgs; system = system; });
+          stableCrossTarballMox = tarball (self.lib.nixturrisTarballSystem { board = "mox"; nixpkgs = nixpkgs-stable; system = system; });
+          stableCrossTarballOmnia = tarball (self.lib.nixturrisTarballSystem { board = "omnia"; nixpkgs = nixpkgs-stable; system = system; });
+
         } // flake-utils.lib.filterPackages system (flake-utils.lib.flattenTree (
-          import ./pkgs { nixpkgs = nixpkgs-stable.legacyPackages."${system}"; }
+          import ./pkgs { nixpkgs = nixpkgs.legacyPackages."${system}"; }
         ));
 
         # The legacyPackages imported as overlay allows us to use pkgsCross to
         # cross-compile those packages.
-        legacyPackages = import nixpkgs-stable {
+        legacyPackages = import nixpkgs {
           inherit system;
           overlays = [ self.overlay ];
           crossOverlays = [ self.overlay ];

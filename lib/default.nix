@@ -1,4 +1,4 @@
-{ self, nixpkgs-stable }: rec {
+self: rec {
 
   # Mapping of board name to the appropriate system
   boardSystem = {
@@ -16,8 +16,8 @@
   # NixOS system for specific Turris board
   nixturrisSystem = {
     board,
+    nixpkgs,
     system ? boardSystem.${board}.system,
-    nixpkgs ? nixpkgs-stable,
     modules ? [],
     override ? {}
   }: nixpkgs.lib.nixosSystem ({
@@ -35,8 +35,8 @@
   # The minimalized system to decrease amount of ram needed for rebuild
   # TODO this does not work right now as it requires just load of work to do
   nixturrisMinSystem = {
-    nixpkgs ? nixpkgs-stable,
-    modules,
+    nixpkgs,
+    modules ? [],
     ...
   } @args: self.lib.nixturrisSystem (args // {
     nixpkgs = nixpkgs;

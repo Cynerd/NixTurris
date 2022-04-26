@@ -44,6 +44,10 @@ in {
 
     # Use the latest kernel
     boot.kernelPackages = mkDefault pkgs.linuxPackages_latest;
+    #boot.kernelPackages = mkDefault (if (config.turris.board == "mox") then
+    #  pkgs.linuxPackages_latest
+    #else
+    #  pkgs.linuxPackages_5_15);
 
     # The supported deployment is on BTRFS
     boot.supportedFilesystems = [ "btrfs" ];
@@ -77,7 +81,7 @@ in {
     environment.systemPackages =  with pkgs; [
       htop
     ] ++ optionals (config.turris.board == "mox") [
-      libatsha204
+      mox-otp
     ] ++ optionals (config.turris.board == "omnia") [
       libatsha204
     ];
