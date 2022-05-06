@@ -1,17 +1,17 @@
 {
   description = "Turris flake";
 
-  outputs = { self, flake-utils, nixpkgs }: {
+  outputs = { self, flake-utils, nixpkgs }:
+  with flake-utils.lib;
+  let
+    supportedHostSystems = (
+      # Note: crossTarball* targets are broken on darwin so it gets disabled here
+      with builtins; filter (system: match ".*-darwin" system == null) defaultSystems
+    ) ++ [system.armv7l-linux];
+  in {
 
       overlays.default = final: prev: import ./pkgs { nixpkgs = prev; };
-      overlay = self.overlays.default; # Backward compatibility
-
-      nixosModules = import ./nixos;
-      nixosModule = {
-        imports = builtins.attrValues self.nixosModules;
-        nixpkgs.overlays = [ self.overlay ];
-      };
-
+      nixosModules = import ./nixos self;
       lib = import ./lib self;
 
       nixosConfigurations = {
@@ -19,8 +19,9 @@
         tarballOmnia = self.lib.nixturrisTarballSystem { board = "omnia"; nixpkgs = nixpkgs; };
       };
 
-    } // flake-utils.lib.eachSystem (flake-utils.lib.defaultSystems ++ ["armv7l-linux"]) (
+    } // eachSystem supportedHostSystems (
       system: {
+
         packages = let
           tarball = nixos: nixos.config.system.build.tarball;
         in {
@@ -31,7 +32,7 @@
           crossTarballMox = tarball (self.lib.nixturrisTarballSystem { board = "mox"; nixpkgs = nixpkgs; system = system; });
           crossTarballOmnia = tarball (self.lib.nixturrisTarballSystem { board = "omnia"; nixpkgs = nixpkgs; system = system; });
 
-        } // flake-utils.lib.filterPackages system (flake-utils.lib.flattenTree (
+        } // filterPackages system (flattenTree (
           import ./pkgs { nixpkgs = nixpkgs.legacyPackages."${system}"; }
         ));
 
@@ -39,9 +40,10 @@
         # cross-compile those packages.
         legacyPackages = import nixpkgs {
           inherit system;
-          overlays = [ self.overlay ];
-          crossOverlays = [ self.overlay ];
+          overlays = [ self.overlays.default ];
+          crossOverlays = [ self.overlays.default ];
         };
+
       }
     );
 }

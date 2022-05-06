@@ -12,7 +12,6 @@ self: rec {
     };
   };
 
-
   # NixOS system for specific Turris board
   nixturrisSystem = {
     board,
@@ -23,7 +22,7 @@ self: rec {
   }: nixpkgs.lib.nixosSystem ({
     system = system;
     modules = [
-      self.nixosModule
+      self.nixosModules.default
       ({
         turris.board = board;
       } // nixpkgs.lib.optionalAttrs (system != boardSystem.${board}.system) {

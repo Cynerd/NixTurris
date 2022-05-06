@@ -8,6 +8,7 @@ buildPythonApplication rec {
   meta = with lib; {
     homepage = "https://gitlab.nic.cz/turris/mox-otp";
     description = "Command line tool to query MOX CPU read-only OTP device";
+    platforms = platforms.linux;
     license = licenses.gpl3;
   };
 

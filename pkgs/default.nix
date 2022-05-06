@@ -13,9 +13,11 @@ let
 
   turrispkgs = with pkgs; {
 
-    # Crypto
+    # Crypto and certificates
     libatsha204 = callPackage ./libatsha204 { };
     mox-otp = python3Packages.callPackage ./mox-otp { };
+    #crypto-wrapper = callPackage ./crypto-wrapper { };
+    #certgen = python3Packages.callPackage ./certgen { };
 
     # Overrides to get build to work
     patchelf = armv7lDisableCheck nixpkgs.patchelf;
@@ -34,6 +36,8 @@ let
     llvm = armv7lDisableCheck nixpkgs.llvm;
     llvm_14 = armv7lDisableCheck nixpkgs.llvm_14;
     jemalloc = armv7lDisableCheck nixpkgs.jemalloc;
+    openssh = armv7lDisableCheck nixpkgs.openssh;
+    nlohmann_json = armv7lDisableCheck nixpkgs.nlohmann_json;
 
   };
 
