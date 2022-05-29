@@ -51,6 +51,7 @@ in {
 
     # The supported deployment is on BTRFS
     boot.supportedFilesystems = [ "btrfs" ];
+    boot.initrd.supportedFilesystems = [ "btrfs" ];
 
     # Cover nix memory consumption peaks by compressing the RAM
     zramSwap = {
