@@ -38,6 +38,15 @@ let
     jemalloc = armv7lDisableCheck nixpkgs.jemalloc;
     openssh = armv7lDisableCheck nixpkgs.openssh;
     nlohmann_json = armv7lDisableCheck nixpkgs.nlohmann_json;
+    # Crosscompilation worarounds
+    btrfs-progs = nixpkgs.btrfs-progs.overrideAttrs (oldAttrs: {
+      configureFlags = ["--disable-python"];
+      installFlags = [];
+    });
+    pixz = nixpkgs.pixz.overrideAttrs (oldAttrs: {
+      configureFlags = ["--without-manpage"];
+      patches = [ ./0001-configure.ac-replace-AC_CHECK_FILE.patch ];
+    });
 
   };
 
