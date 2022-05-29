@@ -164,6 +164,18 @@ let
         '';
       };
 
+      wmm_enabled = mkOption {
+        type = types.bool;
+        default = true;
+        description = ''
+          Default WMM parameters (IEEE 802.11 draft; 11-03-0504-03-000e):
+          for 802.11a or 802.11g networks
+          These parameters are sent to WMM clients when they associate.
+          The parameters will be used by WMM clients for frames transmitted to the
+          access point.
+        '';
+      };
+
       ieee80211n = mkOption {
         type = types.bool;
         default = true;
@@ -441,6 +453,7 @@ let
     country_code=${icfg.countryCode}
     ieee80211d=1
     ${optionalString (icfg.ieee80211h) "ieee80211h=1"}
+    wmm_enabled=${boolean icfg.wmm_enabled}
     ${optionalString icfg.ieee80211n ''
       ieee80211n=1
       ht_capab=${mapCapab icfg.ht_capab}
