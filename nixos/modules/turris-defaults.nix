@@ -31,6 +31,7 @@ in {
   config = mkIf cnf.enable {
     # We do not need Grub as U-Boot supports boot using extlinux like file
     boot.loader.grub.enable = mkDefault false;
+    boot.loader.systemd-boot.enable = mkDefault false;
     boot.loader.generic-extlinux-compatible.enable = mkDefault true;
     # Use early print to the serial console
     boot.kernelParams = [
