@@ -12,7 +12,7 @@
 
       overlays.default = final: prev: import ./pkgs { nixpkgs = prev; };
       nixosModules = import ./nixos self;
-      lib = import ./lib self;
+      lib = import ./lib { inherit self; nixpkgsDefault = nixpkgs; };
 
       nixosConfigurations = {
         tarballMox = self.lib.nixturrisTarballSystem { board = "mox"; nixpkgs = nixpkgs; };

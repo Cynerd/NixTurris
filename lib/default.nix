@@ -1,4 +1,4 @@
-self: rec {
+{ self, nixpkgsDefault }: rec {
 
   # Mapping of board name to the appropriate system
   boardSystem = {
@@ -15,7 +15,7 @@ self: rec {
   # NixOS system for specific Turris board
   nixturrisSystem = {
     board,
-    nixpkgs,
+    nixpkgs ? nixpkgsDefault,
     system ? boardSystem.${board}.system,
     modules ? [],
     override ? {}
