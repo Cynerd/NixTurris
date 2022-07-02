@@ -31,13 +31,15 @@ let
     mdbook = armv7lDisableCheck nixpkgs.mdbook;
     ell = armv7lDisableCheck nixpkgs.ell;
     polkit = armv7lDisableCheck nixpkgs.polkit;
-    udisks2 = armv7lDisableCheck nixpkgs.udisks2;
+    udisks2 = disableCheck nixpkgs.udisks2;
     udisks = udisks2;
     llvm = armv7lDisableCheck nixpkgs.llvm;
     llvm_14 = armv7lDisableCheck nixpkgs.llvm_14;
     jemalloc = armv7lDisableCheck nixpkgs.jemalloc;
     openssh = armv7lDisableCheck nixpkgs.openssh;
     nlohmann_json = armv7lDisableCheck nixpkgs.nlohmann_json;
+    libseccomp = armv7lDisableCheck nixpkgs.libseccomp;
+    openldap = armv7lDisableCheck nixpkgs.openldap;
     # Crosscompilation worarounds
     btrfs-progs = nixpkgs.btrfs-progs.overrideAttrs (oldAttrs: {
       configureFlags = ["--disable-python"];

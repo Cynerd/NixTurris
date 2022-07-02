@@ -29,6 +29,8 @@ in {
   };
 
   config = mkIf cnf.enable {
+    system.stateVersion = mkDefault "22.11";
+
     # We do not need Grub as U-Boot supports boot using extlinux like file
     boot.loader.grub.enable = mkDefault false;
     boot.loader.systemd-boot.enable = mkDefault false;
@@ -45,10 +47,6 @@ in {
 
     # Use the latest kernel
     boot.kernelPackages = mkDefault pkgs.linuxPackages_latest;
-    #boot.kernelPackages = mkDefault (if (config.turris.board == "mox") then
-    #  pkgs.linuxPackages_latest
-    #else
-    #  pkgs.linuxPackages_5_15);
 
     # The supported deployment is on BTRFS
     boot.supportedFilesystems = [ "btrfs" ];
@@ -83,9 +81,9 @@ in {
     environment.systemPackages =  with pkgs; [
       htop
     ] ++ optionals (config.turris.board == "mox") [
-      mox-otp
+      #mox-otp
     ] ++ optionals (config.turris.board == "omnia") [
-      libatsha204
+      #libatsha204
     ];
 
     # No need for installer tools in standard system
