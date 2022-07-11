@@ -1,6 +1,6 @@
 { stdenv, lib, fetchgit
 , pkg-config, perl, patchelf
-,glibc , openssl, unbound
+, glibc , openssl, unbound
 }:
 
 stdenv.mkDerivation rec {
@@ -23,7 +23,12 @@ stdenv.mkDerivation rec {
   buildInputs = [openssl unbound];
   nativeBuildInputs = [pkg-config perl patchelf];
 
-  makeFlags = [ "RELEASE=1" "NO_DOC=1" ];
+  makeFlags = [
+    "RELEASE=1"
+    "NO_DOC=1"
+    "USE_LAYER=USE_LAYER_NI2C"
+    "DEFAULT_NI2C_DEV_PATH=NI2C_DEV_PATH_OMNIA"
+  ];
   configurePhase = ''
     sed -i 's|/usr/bin/perl|${perl}/bin/perl|' build/embed_gen.pl build/normalize_dep_file.pl
     '';
