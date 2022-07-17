@@ -20,11 +20,6 @@ in {
         default = "NixTurris";
         description = "GPT partition label the root system is stored on";
       };
-      swapLabel = mkOption {
-        type = types.str;
-        default = "NixTurrisSwap";
-        description = "GPT partition label for available swap parition";
-      };
     };
   };
 
@@ -57,11 +52,6 @@ in {
       enable = true;
       memoryPercent = 80;
     };
-    # Nix is really memory hungry so we have to sometimes also use swap device.
-    swapDevices = [{
-      device = "/dev/disk/by-partlabel/" + cnf.swapLabel;
-      priority = 0;
-    }];
 
     fileSystems = {
       "/" = {
