@@ -16,18 +16,13 @@
   nixturrisSystem = {
     board,
     nixpkgs ? nixpkgsDefault,
-    system ? boardSystem.${board}.system,
     modules ? [],
     override ? {}
   }: nixpkgs.lib.nixosSystem ({
-    system = system;
+    system = boardSystem.${board}.system;
     modules = [
       self.nixosModules.default
-      ({
-        turris.board = board;
-      } // nixpkgs.lib.optionalAttrs (system != boardSystem.${board}.system) {
-        nixpkgs.crossSystem = boardSystem.${board};
-      })
+      { turris.board = board; }
     ] ++ modules;
   } // override);
 
@@ -44,9 +39,5 @@
       baseModules = import ../nixos/nixos-modules.nix nixpkgs;
     };
   });
-
-  nixturrisTarballSystem = {...} @args: (nixturrisSystem ({
-      modules = [ (import ../tarball.nix args.board) ];
-    } // args));
 
 }

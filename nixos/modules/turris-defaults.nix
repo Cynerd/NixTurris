@@ -83,7 +83,7 @@ in {
     ] ++ optionals (config.turris.board == "mox") [
       #mox-otp
     ] ++ optionals (config.turris.board == "omnia") [
-      #libatsha204
+      libatsha204
     ];
 
     # No need for installer tools in standard system

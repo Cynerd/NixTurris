@@ -15,8 +15,8 @@
       lib = import ./lib { inherit self; nixpkgsDefault = nixpkgs; };
 
       nixosConfigurations = {
-        tarballMox = self.lib.nixturrisTarballSystem { board = "mox"; nixpkgs = nixpkgs; };
-        tarballOmnia = self.lib.nixturrisTarballSystem { board = "omnia"; nixpkgs = nixpkgs; };
+        mox = self.lib.nixturrisSystem { board = "mox"; nixpkgs = nixpkgs; };
+        omnia = self.lib.nixturrisSystem { board = "omnia"; nixpkgs = nixpkgs; };
       };
 
     } // eachSystem supportedHostSystems (
@@ -26,11 +26,11 @@
           tarball = nixos: nixos.config.system.build.tarball;
         in {
 
-          tarballMox = tarball self.nixosConfigurations.tarballMox;
-          tarballOmnia = tarball self.nixosConfigurations.tarballOmnia;
+          tarballMox = tarball self.nixosConfigurations.mox;
+          tarballOmnia = tarball self.nixosConfigurations.omnia;
 
-          crossTarballMox = tarball (self.lib.nixturrisTarballSystem { board = "mox"; nixpkgs = nixpkgs; system = system; });
-          crossTarballOmnia = tarball (self.lib.nixturrisTarballSystem { board = "omnia"; nixpkgs = nixpkgs; system = system; });
+          crossTarballMox = tarball self.nixosConfigurations.mox.config.system.build.cross.${system};
+          crossTarballOmnia = tarball self.nixosConfigurations.omnia.config.system.build.cross.${system};
 
         } // filterPackages system (flattenTree (
           import ./pkgs { nixpkgs = nixpkgs.legacyPackages."${system}"; }
