@@ -48,12 +48,12 @@ in {
     boot.initrd.supportedFilesystems = [ "btrfs" ];
 
     # Cover nix memory consumption peaks by compressing the RAM
-    zramSwap = {
+    zramSwap = mkDefault {
       enable = true;
       memoryPercent = 80;
     };
 
-    fileSystems = {
+    fileSystems = mkDefault {
       "/" = {
         device = "/dev/disk/by-partlabel/" + cnf.rootLabel;
         fsType = "btrfs";

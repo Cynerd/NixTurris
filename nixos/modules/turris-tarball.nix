@@ -63,7 +63,7 @@ in {
             LINUX /run/current-system/kernel
             FDTDIR /run/current-system/dtbs
             INITRD /run/current-system/initrd
-            APPEND init=${config.system.build.toplevel}/init ${builtins.toString config.boot.kernelParams}
+            APPEND init=${tarballVariant.config.system.build.toplevel}/init ${builtins.toString tarballVariant.config.boot.kernelParams}
         '';
         target = "./boot/extlinux/extlinux.conf";
       }
