@@ -43,19 +43,6 @@ let
         }
         '';
       };
-      system.extraSystemBuilderCmds = ''
-      mkdir -p $out/boot/extlinux
-      cat >$out/boot/extlinux/extlinux.conf <<EOF
-      DEFAULT nixos-default
-      TIMEOUT 0
-      LABEL nixos-default
-        MENU LABEL NixOS - Default
-        LINUX /run/current-system/kernel
-        FDTDIR /run/current-system/dtbs
-        INITRD /run/current-system/initrd
-        APPEND init=${config.system.build.toplevel}/init ${builtins.toString config.boot.kernelParams}
-      EOF
-      '';
     }];
   };
 
@@ -65,7 +52,20 @@ in {
     contents = [
       {
         source = "${tarballVariant.config.system.build.toplevel}/.";
-        target = "./";
+        target = "./run/current-system";
+      }
+      {
+        source = pkgs.writeText "tarball-extlinux" ''
+          DEFAULT nixturris-tarball
+          TIMEOUT 0
+          LABEL nixturris-tarball
+            MENU LABEL NixOS Turris - Tarball
+            LINUX /run/current-system/kernel
+            FDTDIR /run/current-system/dtbs
+            INITRD /run/current-system/initrd
+            APPEND init=${config.system.build.toplevel}/init ${builtins.toString config.boot.kernelParams}
+        '';
+        target = "./boot/extlinux/extlinux.conf";
       }
     ];
 
