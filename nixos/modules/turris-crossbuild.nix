@@ -15,7 +15,8 @@ let
 
 in mkIf (config.nixpkgs.crossSystem == null) {
 
-  # TODO for each common platform
-  system.build.cross.x86_64-linux = crossVariant "x86_64-linux";
+  system.build.cross = genAttrs lib.systems.flakeExposed (system:
+    crossVariant system
+  );
 
 }
