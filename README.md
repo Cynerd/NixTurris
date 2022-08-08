@@ -43,13 +43,10 @@ you should do to get the correct layout:
 ```
 ~# parted /dev/mmcblk1
 (parted) mktable gpt
-(parted) mkpart NixTurris 0% -4G
+(parted) mkpart NixTurris 0% 100%
 (parted) set 1 boot on
-(parted) mkpart NixTurrisSwap -4G 100%
-(parted) set 2 swap on
 (parted) quit
 ~# mkfs.btrfs /dev/mmcblk1p1
-~# mkswap /dev/mmcblk1p2
 ```
 
 Next we need the initial system tarball to unpack to the SD card. For this you
@@ -76,3 +73,16 @@ The last step is to unpack the tarball to the SD card.
 ```
 
 Now you can take this micro SD card and insert it to your Mox.
+
+### System fails to boot due to invalid initrd
+
+The issue is caused by initrd start being overwritten by kernel image's tail.
+
+The kernel image in NixOS can be pretty large and default Mox's configuration
+expects kernel of maximum size 48MB. To increase this to 64MB you have to use
+serial console and run:
+
+```
+setenv ramdisk_addr_r 0x9000000
+saveenv
+```

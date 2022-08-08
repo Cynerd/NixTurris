@@ -1,0 +1,13 @@
+diff --git a/src/libatsha204/dnsmagic.c b/src/libatsha204/dnsmagic.c
+index d5f82b4..dc0bb90 100644
+--- a/src/libatsha204/dnsmagic.c
++++ b/src/libatsha204/dnsmagic.c
+@@ -42,7 +42,7 @@
+ /*
+  * Global variable with configuration and some initial config values.
+  */
+-atsha_configuration g_config;
++extern atsha_configuration g_config;
+ 
+ /*
+  * Get decimal number from its string representation

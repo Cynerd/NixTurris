@@ -19,37 +19,6 @@ let
     #crypto-wrapper = callPackage ./crypto-wrapper { };
     #certgen = python3Packages.callPackage ./certgen { };
 
-    # Overrides to get build to work
-    patchelf = armv7lDisableCheck nixpkgs.patchelf;
-    bison = armv7lDisableCheck nixpkgs.bison;
-    findutils = armv7lDisableCheck nixpkgs.findutils;
-    libuv = armv7lDisableCheck nixpkgs.libuv;
-    p11-kit = armv7lDisableCheck nixpkgs.p11-kit;
-    elfutils = armv7lDisableCheck nixpkgs.elfutils;
-    glib = armv7lDisableCheck nixpkgs.glib;
-    rustc = armv7lDisableCheck nixpkgs.rustc;
-    mdbook = armv7lDisableCheck nixpkgs.mdbook;
-    ell = armv7lDisableCheck nixpkgs.ell;
-    polkit = armv7lDisableCheck nixpkgs.polkit;
-    udisks2 = disableCheck nixpkgs.udisks2;
-    udisks = udisks2;
-    llvm = armv7lDisableCheck nixpkgs.llvm;
-    llvm_14 = armv7lDisableCheck nixpkgs.llvm_14;
-    jemalloc = armv7lDisableCheck nixpkgs.jemalloc;
-    openssh = armv7lDisableCheck nixpkgs.openssh;
-    nlohmann_json = armv7lDisableCheck nixpkgs.nlohmann_json;
-    libseccomp = armv7lDisableCheck nixpkgs.libseccomp;
-    openldap = armv7lDisableCheck nixpkgs.openldap;
-    # Crosscompilation worarounds
-    btrfs-progs = nixpkgs.btrfs-progs.overrideAttrs (oldAttrs: {
-      configureFlags = ["--disable-python"];
-      installFlags = [];
-    });
-    pixz = nixpkgs.pixz.overrideAttrs (oldAttrs: {
-      configureFlags = ["--without-manpage"];
-      patches = [ ./0001-configure.ac-replace-AC_CHECK_FILE.patch ];
-    });
-
   };
 
 in turrispkgs

@@ -19,6 +19,9 @@ stdenv.mkDerivation rec {
     fetchSubmodules = true;
     sha256 = "1lhvqdy2sfbvz9y9lwqhxggpr8rwfd66v73gv9s7b7811r6way20";
   };
+  patches = [
+    ./multiple-definitions.patch
+  ];
 
   buildInputs = [openssl unbound];
   nativeBuildInputs = [pkg-config perl patchelf];
