@@ -11,7 +11,7 @@ with lib;
 
 let
 
-  cfg = config.networking.hostapd;
+  cfg = config.networking.wirelessAP;
 
   options_bss = {
 
@@ -434,8 +434,8 @@ let
   };
 
 
-  configFile = interface: let
-    icfg = cfg."${interface}";
+  mkConfig = iface: let
+    icfg = cfg.interfaces."${iface}";
   in ''
     ctrl_interface=/run/hostapd
     ctrl_interface_group=${icfg.group}
@@ -446,7 +446,7 @@ let
     logger_stdout=-1
     logger_stdout_level=${toString icfg.logLevel}
 
-    interface=${interface}
+    interface=${iface}
     driver=${icfg.driver}
     hw_mode=${icfg.hwMode}
     channel=${toString icfg.channel}
@@ -496,11 +496,6 @@ let
     ''}
   '';
 
-  etcConfigs = listToAttrs (map
-    (n: nameValuePair "hostapd/${n}.conf" {text = configFile n;})
-    (attrNames (filterAttrs (n: v: v.enable) cfg))
-  );
-
 in
 
 {
@@ -510,30 +505,59 @@ in
   ###### interface
 
   options = {
-    networking.hostapd = mkOption {
-      type = with types; attrsOf (submodule {options = options_interface;});
-      default = { };
-      example = literalExpression ''
-        { "wlan0" = {
-            hw_mode = "a";
-            channel = 11;
-            ssid = "MyNetwork";
-            wpaPassphrase = "SecretPassword";
-          };
-        }
+    networking.wirelessAP = {
+
+      enable = mkOption {
+        type = types.bool;
+        default = false;
+        description = "Whether to enable hostapd.";
+      };
+
+      environmentFile = mkOption {
+        type = types.nullOr types.path;
+        default = null;
+        example = "/run/secrets/wirelessAP.env";
+        description = ''
+          File consisting of lines of the form <literal>varname=value</literal>
+          to define variables for the wireless access point configuration.
+
+          See section "EnvironmentFile=" in <citerefentry>
+          <refentrytitle>systemd.exec</refentrytitle><manvolnum>5</manvolnum>
+          </citerefentry> for a syntax reference.
+
+          Secrets (PSKs, passwords, etc.) can be provided without adding them to
+          the world-readable Nix store by defining them in the environment file and
+          referring to them in option <option>networking.wirelessAP</option>
+          with the syntax <literal>@varname@</literal>.
         '';
-      description = ''
-        Interface for which to start <command>hostapd</command>.
-        '';
+      };
+
+      interfaces = mkOption {
+        type = with types; attrsOf (submodule {options = options_interface;});
+        default = { };
+        example = literalExpression ''
+          { "wlan0" = {
+              hw_mode = "a";
+              channel = 11;
+              ssid = "MyNetwork";
+              wpaPassphrase = "SecretPassword";
+            };
+          }
+          '';
+        description = ''
+          Interface for which to start <command>hostapd</command>.
+          '';
+      };
+
     };
   };
 
 
   ###### implementation
 
-  config = mkIf (any (val: val.enable) (attrValues cfg)) {
+  config = mkIf (cfg.enable && (any (val: val.enable) (attrValues cfg.interfaces))) {
     assertions = [{
-      assertion = all (val: ! val.enable or val.countryCode != null) (attrValues cfg);
+      assertion = all (val: ! val.enable or val.countryCode != null) (attrValues cfg.interfaces);
       message = "Country code has to be specified to prevent violation of the law.";
     }];
     ## TODO mkRenamedOptionModule
@@ -541,25 +565,42 @@ in
     environment.systemPackages = [ pkgs.hostapd ];
     services.udev.packages = [ pkgs.crda ];
 
-    environment.etc = etcConfigs;
-
     systemd.services.hostapd = let
-      interfaces = map utils.escapeSystemdPath (attrNames (filterAttrs (n: v: v.enable) cfg));
-      links = interfaces ++ (map utils.escapeSystemdPath (concatMap attrNames (catAttrs "bss" (attrValues (filterAttrs (n: v: v.enable) cfg)))));
+      interfaces = map utils.escapeSystemdPath (attrNames (filterAttrs (n: v: v.enable) cfg.interfaces));
+      links = interfaces ++ (map utils.escapeSystemdPath (concatMap attrNames (catAttrs "bss" (attrValues (filterAttrs (n: v: v.enable) cfg.interfaces)))));
       devices = map (ifc: "sys-subsystem-net-devices-${ifc}.device") interfaces;
       services = map (ifc: "network-link-${ifc}.service") links;
     in {
-        description = "hostapd wireless AP";
-        path = [ pkgs.hostapd ];
+        description = "Hostapd wireless AP";
         after = devices;
         bindsTo = devices;
         requiredBy = services;
         wantedBy = [ "multi-user.target" ];
 
-        serviceConfig =
-          { ExecStart = "${pkgs.hostapd}/bin/hostapd ${toString (map (v: "/etc/${v}") (attrNames etcConfigs))}";
-            Restart = "always";
-          };
-      };
+        path = [ pkgs.hostapd ];
+        serviceConfig = {
+          RuntimeDirectory = "hostapd";
+          RuntimeDirectoryMode = "700";
+          EnvironmentFile = mkIf (cfg.environmentFile != null) (builtins.toString cfg.environmentFile);
+          Restart = "always";
+        };
+        script =
+        ''
+          # substitute environment variables
+          ${concatStrings (forEach (attrNames cfg.interfaces) (iface: let
+              configFile = pkgs.writeText "hostapd_${iface}.conf" (mkConfig iface);
+              finalConfig = ''"$RUNTIME_DIRECTORY"/${iface}.conf'';
+            in ''
+              ${pkgs.gawk}/bin/awk '{
+                for(varname in ENVIRON)
+                  gsub("@"varname"@", ENVIRON[varname])
+                print
+              }' "${configFile}" > "${finalConfig}"
+            ''))}
+
+          # run hostapd
+          exec hostapd ${concatStringsSep " " (forEach (attrNames cfg.interfaces) (iface: ''"$RUNTIME_DIRECTORY"/${iface}.conf''))}
+        '';
+    };
   };
 }
