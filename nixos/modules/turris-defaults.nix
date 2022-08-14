@@ -42,6 +42,14 @@ in {
 
     # Use the latest kernel
     boot.kernelPackages = mkDefault pkgs.linuxPackages_latest;
+    boot.kernelPatches = mkIf (config.turris.board == "omnia") [{
+      name = "omnia";
+      patch = null;
+      extraConfig = ''
+        LEDS_CLASS_MULTICOLOR y
+        LEDS_TURRIS_OMNIA y
+        '';
+    }];
 
     # The supported deployment is on BTRFS
     boot.supportedFilesystems = [ "btrfs" ];
