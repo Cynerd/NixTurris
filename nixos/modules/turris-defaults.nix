@@ -33,23 +33,10 @@ in {
     # Use early print to the serial console
     boot.kernelParams = [
       "boot.shell_on_fail"
-    ] ++ optionals (config.turris.board == "mox") [
-      "earlycon=ar3700_uart,0xd0012000" "console=ttyMV0,115200"
-      "pcie_aspm=off" # Fix for crashes due to SError Interrupt on ath10k load
-    ] ++ optionals (config.turris.board == "omnia") [
-      "earlyprintk" "console=ttyS0,115200"
     ];
 
     # Use the latest kernel
     boot.kernelPackages = mkDefault pkgs.linuxPackages_latest;
-    boot.kernelPatches = mkIf (config.turris.board == "omnia") [{
-      name = "omnia";
-      patch = null;
-      extraConfig = ''
-        LEDS_CLASS_MULTICOLOR y
-        LEDS_TURRIS_OMNIA y
-        '';
-    }];
 
     # The supported deployment is on BTRFS
     boot.supportedFilesystems = [ "btrfs" ];
@@ -78,10 +65,6 @@ in {
     # The additional administration packages
     environment.systemPackages =  with pkgs; [
       htop
-    ] ++ optionals (config.turris.board == "mox") [
-      #mox-otp
-    ] ++ optionals (config.turris.board == "omnia") [
-      libatsha204
     ];
 
     # No need for installer tools in standard system

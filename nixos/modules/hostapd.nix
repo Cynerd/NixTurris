@@ -448,6 +448,7 @@ let
 
     interface=${iface}
     driver=${icfg.driver}
+    use_driver_iface_addr=1
     hw_mode=${icfg.hwMode}
     channel=${toString icfg.channel}
     country_code=${icfg.countryCode}
@@ -477,7 +478,6 @@ let
 
     ${concatMapStringsSep "\n" (bss: ''
       bss=${bss}
-      use_driver_iface_addr=1
       ${configBss icfg.bss."${bss}"}'') (attrNames icfg.bss)}
 
     ${icfg.extraConfig}
