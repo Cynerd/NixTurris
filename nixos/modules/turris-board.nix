@@ -17,12 +17,6 @@ with lib;
       message = "Turris board has to be specified";
     }];
 
-    # Enable flakes for nix as we are using that instead of legacy setup
-    nix = {
-      package = pkgs.nixFlakes;
-      extraOptions = "experimental-features = nix-command flakes";
-    };
-
     environment.systemPackages =  with pkgs; [
       # As we override the nix package we have to override nixos-rebuild as well
       (pkgs.nixos-rebuild.override { nix = config.nix.package.out; })

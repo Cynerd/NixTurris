@@ -1,0 +1,46 @@
+From 0ac42f2a36490ee410b7c88720652ded4ec6beff Mon Sep 17 00:00:00 2001
+From: Russell King <rmk+kernel@arm.linux.org.uk>
+Date: Sat, 3 Oct 2015 09:13:05 +0100
+Subject: [PATCH 06/10] cpuidle: mvebu: indicate failure to enter deeper sleep
+ states
+
+The cpuidle ->enter method expects the return value to be the sleep
+state we entered.  Returning negative numbers or other codes is not
+permissible since coupled CPU idle was merged.
+
+At least some of the mvebu_v7_cpu_suspend() implementations return the
+value from cpu_suspend(), which returns zero if the CPU vectors back
+into the kernel via cpu_resume() (the success case), or the non-zero
+return value of the suspend actor, or one (failure cases).
+
+We do not want to be returning the failure case value back to CPU idle
+as that indicates that we successfully entered one of the deeper idle
+states.  Always return zero instead, indicating that we slept for the
+shortest amount of time.
+
+Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
+---
+ drivers/cpuidle/cpuidle-mvebu-v7.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/cpuidle/cpuidle-mvebu-v7.c b/drivers/cpuidle/cpuidle-mvebu-v7.c
+index 01a856971f05..18ded9e7cb34 100644
+--- a/drivers/cpuidle/cpuidle-mvebu-v7.c
++++ b/drivers/cpuidle/cpuidle-mvebu-v7.c
+@@ -39,8 +39,12 @@ static int mvebu_v7_enter_idle(struct cpuidle_device *dev,
+ 	ret = mvebu_v7_cpu_suspend(deepidle);
+ 	cpu_pm_exit();
+ 
++	/*
++	 * If we failed to enter the desired state, indicate that we
++	 * slept lightly.
++	 */
+ 	if (ret)
+-		return ret;
++		return 0;
+ 
+ 	return index;
+ }
+-- 
+2.37.2
+

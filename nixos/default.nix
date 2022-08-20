@@ -10,6 +10,7 @@ self: let
     turris-omnia-support = import ./modules/turris-omnia-support.nix;
     turris-tarball = import ./modules/turris-tarball.nix;
 
+    kernel-patches = import ./modules/kernel-patches.nix;
     armv7l-overlay = import ./modules/armv7l-overlay.nix;
 
     hostapd = import ./modules/hostapd.nix;

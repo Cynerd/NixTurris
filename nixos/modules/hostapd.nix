@@ -478,6 +478,7 @@ let
 
     ${concatMapStringsSep "\n" (bss: ''
       bss=${bss}
+      ssid=${icfg.bss.${bss}.ssid}
       ${configBss icfg.bss."${bss}"}'') (attrNames icfg.bss)}
 
     ${icfg.extraConfig}

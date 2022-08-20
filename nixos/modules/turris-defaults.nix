@@ -64,7 +64,7 @@ in {
 
     # The additional administration packages
     environment.systemPackages =  with pkgs; [
-      htop
+      htop iw
     ];
 
     # No need for installer tools in standard system
