@@ -1,7 +1,7 @@
-From d33a04c156e91d813fc4dae3ffc9f87715b13446 Mon Sep 17 00:00:00 2001
+From a18b8bf331feec7ad09b3d20c5de9fae7a9e210c Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Marek=20Beh=C3=BAn?= <kabel@kernel.org>
 Date: Mon, 4 Jul 2022 13:36:22 +0200
-Subject: [PATCH 01/10] ARM: dts: turris-omnia: enable LED controller node
+Subject: [PATCH 87/96] ARM: dts: turris-omnia: enable LED controller node
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -19,7 +19,7 @@ Signed-off-by: Marek Behún <kabel@kernel.org>
  1 file changed, 2 insertions(+), 5 deletions(-)
 
 diff --git a/arch/arm/boot/dts/armada-385-turris-omnia.dts b/arch/arm/boot/dts/armada-385-turris-omnia.dts
-index f4878df39753..bcced203c612 100644
+index 1583c4b14ae8..d1e0db6e5730 100644
 --- a/arch/arm/boot/dts/armada-385-turris-omnia.dts
 +++ b/arch/arm/boot/dts/armada-385-turris-omnia.dts
 @@ -191,15 +191,13 @@ led-controller@2b {

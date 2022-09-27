@@ -1,0 +1,96 @@
+From 5433bb138a6a3499b05cb8722c8365cf56047aa1 Mon Sep 17 00:00:00 2001
+From: Felix Fietkau <nbd@nbd.name>
+Date: Tue, 27 Sep 2022 16:22:06 +0200
+Subject: [PATCH 63/96] netfilter: optional tcp window check
+
+Signed-off-by: Felix Fietkau <nbd@nbd.name>
+Signed-off-by: Christian 'Ansuel' Marangi <ansuelsmth@gmail.com>
+---
+ include/net/netns/conntrack.h           |  1 +
+ net/netfilter/nf_conntrack_proto_tcp.c  |  8 +++++++-
+ net/netfilter/nf_conntrack_standalone.c | 10 ++++++++++
+ 3 files changed, 18 insertions(+), 1 deletion(-)
+
+diff --git a/include/net/netns/conntrack.h b/include/net/netns/conntrack.h
+index c396a3862e80..82598d767cc3 100644
+--- a/include/net/netns/conntrack.h
++++ b/include/net/netns/conntrack.h
+@@ -26,6 +26,7 @@ struct nf_tcp_net {
+ 	unsigned int timeouts[TCP_CONNTRACK_TIMEOUT_MAX];
+ 	u8 tcp_loose;
+ 	u8 tcp_be_liberal;
++	u8 tcp_no_window_check;
+ 	u8 tcp_max_retrans;
+ 	u8 tcp_ignore_invalid_rst;
+ #if IS_ENABLED(CONFIG_NF_FLOW_TABLE)
+diff --git a/net/netfilter/nf_conntrack_proto_tcp.c b/net/netfilter/nf_conntrack_proto_tcp.c
+index a634c72b1ffc..8bbc8010170d 100644
+--- a/net/netfilter/nf_conntrack_proto_tcp.c
++++ b/net/netfilter/nf_conntrack_proto_tcp.c
+@@ -490,6 +490,9 @@ static bool tcp_in_window(struct nf_conn *ct,
+ 	s32 receiver_offset;
+ 	bool res, in_recv_win;
+ 
++	if (tn->tcp_no_window_check)
++		return true;
++
+ 	/*
+ 	 * Get the required data from the packet.
+ 	 */
+@@ -1161,7 +1164,7 @@ int nf_conntrack_tcp_packet(struct nf_conn *ct,
+ 		 IP_CT_TCP_FLAG_DATA_UNACKNOWLEDGED &&
+ 		 timeouts[new_state] > timeouts[TCP_CONNTRACK_UNACK])
+ 		timeout = timeouts[TCP_CONNTRACK_UNACK];
+-	else if (ct->proto.tcp.last_win == 0 &&
++	else if (!tn->tcp_no_window_check && ct->proto.tcp.last_win == 0 &&
+ 		 timeouts[new_state] > timeouts[TCP_CONNTRACK_RETRANS])
+ 		timeout = timeouts[TCP_CONNTRACK_RETRANS];
+ 	else
+@@ -1477,6 +1480,9 @@ void nf_conntrack_tcp_init_net(struct net *net)
+ 	 */
+ 	tn->tcp_be_liberal = 0;
+ 
++	/* Skip Windows Check */
++	tn->tcp_no_window_check = 0;
++
+ 	/* If it's non-zero, we turn off RST sequence number check */
+ 	tn->tcp_ignore_invalid_rst = 0;
+ 
+diff --git a/net/netfilter/nf_conntrack_standalone.c b/net/netfilter/nf_conntrack_standalone.c
+index 8d3be4cc340e..73a1b6c1737e 100644
+--- a/net/netfilter/nf_conntrack_standalone.c
++++ b/net/netfilter/nf_conntrack_standalone.c
+@@ -636,6 +636,7 @@ enum nf_ct_sysctl_index {
+ #endif
+ 	NF_SYSCTL_CT_PROTO_TCP_LOOSE,
+ 	NF_SYSCTL_CT_PROTO_TCP_LIBERAL,
++	NF_SYSCTL_CT_PROTO_TCP_NO_WINDOW_CHECK,
+ 	NF_SYSCTL_CT_PROTO_TCP_IGNORE_INVALID_RST,
+ 	NF_SYSCTL_CT_PROTO_TCP_MAX_RETRANS,
+ 	NF_SYSCTL_CT_PROTO_TIMEOUT_UDP,
+@@ -852,6 +853,14 @@ static struct ctl_table nf_ct_sysctl_table[] = {
+ 		.extra1 	= SYSCTL_ZERO,
+ 		.extra2 	= SYSCTL_ONE,
+ 	},
++	[NF_SYSCTL_CT_PROTO_TCP_NO_WINDOW_CHECK] = {
++		.procname       = "nf_conntrack_tcp_no_window_check",
++		.maxlen         = sizeof(u8),
++		.mode           = 0644,
++		.proc_handler	= proc_dou8vec_minmax,
++		.extra1 	= SYSCTL_ZERO,
++		.extra2 	= SYSCTL_ONE,
++	},
+ 	[NF_SYSCTL_CT_PROTO_TCP_IGNORE_INVALID_RST] = {
+ 		.procname	= "nf_conntrack_tcp_ignore_invalid_rst",
+ 		.maxlen		= sizeof(u8),
+@@ -1068,6 +1077,7 @@ static void nf_conntrack_standalone_init_tcp_sysctl(struct net *net,
+ 
+ 	XASSIGN(LOOSE, &tn->tcp_loose);
+ 	XASSIGN(LIBERAL, &tn->tcp_be_liberal);
++	XASSIGN(NO_WINDOW_CHECK, &tn->tcp_no_window_check);
+ 	XASSIGN(MAX_RETRANS, &tn->tcp_max_retrans);
+ 	XASSIGN(IGNORE_INVALID_RST, &tn->tcp_ignore_invalid_rst);
+ #undef XASSIGN
+-- 
+2.37.2
+

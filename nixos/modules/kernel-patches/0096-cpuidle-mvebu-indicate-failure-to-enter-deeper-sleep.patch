@@ -1,7 +1,7 @@
-From 0ac42f2a36490ee410b7c88720652ded4ec6beff Mon Sep 17 00:00:00 2001
+From a8be83aa342b173df49ca938f49c9cd8f9433643 Mon Sep 17 00:00:00 2001
 From: Russell King <rmk+kernel@arm.linux.org.uk>
 Date: Sat, 3 Oct 2015 09:13:05 +0100
-Subject: [PATCH 06/10] cpuidle: mvebu: indicate failure to enter deeper sleep
+Subject: [PATCH 96/96] cpuidle: mvebu: indicate failure to enter deeper sleep
  states
 
 The cpuidle ->enter method expects the return value to be the sleep

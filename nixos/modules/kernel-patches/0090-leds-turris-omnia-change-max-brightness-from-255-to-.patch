@@ -1,7 +1,7 @@
-From 74951d542c10fbb181454c31d28075170528a14f Mon Sep 17 00:00:00 2001
+From e9d9ea6ea5f698f18a9ec7037a9e4fa80dd5e429 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Marek=20Beh=C3=BAn?= <kabel@kernel.org>
 Date: Mon, 4 Jul 2022 12:59:55 +0200
-Subject: [PATCH 04/10] leds: turris-omnia: change max brightness from 255 to 1
+Subject: [PATCH 90/96] leds: turris-omnia: change max brightness from 255 to 1
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit

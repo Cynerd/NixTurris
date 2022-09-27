@@ -1,0 +1,62 @@
+From 60d85ef707d77be1a2a1233630c053807c54b596 Mon Sep 17 00:00:00 2001
+From: Jonas Gorski <jogo@openwrt.org>
+Date: Tue, 27 Sep 2022 16:22:06 +0200
+Subject: [PATCH 69/96] net: provide defines for _POLICY_FAILED until all code
+ is updated
+
+Upstream introduced ICMPV6_POLICY_FAIL for code 5 of destination
+unreachable, conflicting with our name.
+
+Add appropriate defines to allow our code to build with the new
+name until we have updated our local patches for older kernels
+and userspace packages.
+
+Signed-off-by: Jonas Gorski <jogo@openwrt.org>
+---
+ include/uapi/linux/fib_rules.h | 2 ++
+ include/uapi/linux/icmpv6.h    | 2 ++
+ include/uapi/linux/rtnetlink.h | 2 ++
+ 3 files changed, 6 insertions(+)
+
+diff --git a/include/uapi/linux/fib_rules.h b/include/uapi/linux/fib_rules.h
+index fdc18621ab75..9be1de81ab95 100644
+--- a/include/uapi/linux/fib_rules.h
++++ b/include/uapi/linux/fib_rules.h
+@@ -89,6 +89,8 @@ enum {
+ 	__FR_ACT_MAX,
+ };
+ 
++#define FR_ACT_FAILED_POLICY FR_ACT_POLICY_FAILED
++
+ #define FR_ACT_MAX (__FR_ACT_MAX - 1)
+ 
+ #endif
+diff --git a/include/uapi/linux/icmpv6.h b/include/uapi/linux/icmpv6.h
+index ecaece3af38d..f21cb3786bc2 100644
+--- a/include/uapi/linux/icmpv6.h
++++ b/include/uapi/linux/icmpv6.h
+@@ -126,6 +126,8 @@ struct icmp6hdr {
+ #define ICMPV6_POLICY_FAIL		5
+ #define ICMPV6_REJECT_ROUTE		6
+ 
++#define ICMPV6_FAILED_POLICY		ICMPV6_POLICY_FAIL
++
+ /*
+  *	Codes for Time Exceeded
+  */
+diff --git a/include/uapi/linux/rtnetlink.h b/include/uapi/linux/rtnetlink.h
+index b8e58371c0ef..2b82311f8035 100644
+--- a/include/uapi/linux/rtnetlink.h
++++ b/include/uapi/linux/rtnetlink.h
+@@ -269,6 +269,8 @@ enum {
+ 	__RTN_MAX
+ };
+ 
++#define RTN_FAILED_POLICY RTN_POLICY_FAILED
++
+ #define RTN_MAX (__RTN_MAX - 1)
+ 
+ 
+-- 
+2.37.2
+

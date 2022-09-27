@@ -1,0 +1,81 @@
+From c5e478e7bb7bba5de4f9859d93a7422916aaea28 Mon Sep 17 00:00:00 2001
+From: Imre Kaloz <kaloz@openwrt.org>
+Date: Tue, 27 Sep 2022 16:22:32 +0200
+Subject: [PATCH 83/96] init: add CONFIG_MANGLE_BOOTARGS and disable it by
+ default
+
+Enabling this option renames the bootloader supplied root=
+and rootfstype= variables, which might have to be know but
+would break the automatisms OpenWrt uses.
+
+Signed-off-by: Imre Kaloz <kaloz@openwrt.org>
+---
+ init/Kconfig |  9 +++++++++
+ init/main.c  | 24 ++++++++++++++++++++++++
+ 2 files changed, 33 insertions(+)
+
+diff --git a/init/Kconfig b/init/Kconfig
+index 4d5f1ee66139..04e232e38fe4 100644
+--- a/init/Kconfig
++++ b/init/Kconfig
+@@ -1818,6 +1818,15 @@ config EMBEDDED
+ 	  an embedded system so certain expert options are available
+ 	  for configuration.
+ 
++config MANGLE_BOOTARGS
++	bool "Rename offending bootargs"
++	depends on EXPERT
++	help
++	  Sometimes the bootloader passed bogus root= and rootfstype=
++	  parameters to the kernel, and while you want to ignore them,
++	  you need to know the values f.e. to support dual firmware
++	  layouts on the flash.
++
+ config HAVE_PERF_EVENTS
+ 	bool
+ 	help
+diff --git a/init/main.c b/init/main.c
+index 1fe7942f5d4a..12b821626826 100644
+--- a/init/main.c
++++ b/init/main.c
+@@ -607,6 +607,29 @@ static inline void setup_nr_cpu_ids(void) { }
+ static inline void smp_prepare_cpus(unsigned int maxcpus) { }
+ #endif
+ 
++#ifdef CONFIG_MANGLE_BOOTARGS
++static void __init mangle_bootargs(char *command_line)
++{
++	char *rootdev;
++	char *rootfs;
++
++	rootdev = strstr(command_line, "root=/dev/mtdblock");
++
++	if (rootdev)
++		strncpy(rootdev, "mangled_rootblock=", 18);
++
++	rootfs = strstr(command_line, "rootfstype");
++
++	if (rootfs)
++		strncpy(rootfs, "mangled_fs", 10);
++
++}
++#else
++static void __init mangle_bootargs(char *command_line)
++{
++}
++#endif
++
+ /*
+  * We need to store the untouched command line for future reference.
+  * We also need to store the touched command line since the parameter
+@@ -950,6 +973,7 @@ asmlinkage __visible void __init __no_sanitize_address start_kernel(void)
+ 	pr_notice("%s", linux_banner);
+ 	early_security_init();
+ 	setup_arch(&command_line);
++	mangle_bootargs(command_line);
+ 	setup_boot_config();
+ 	setup_command_line(command_line);
+ 	setup_nr_cpu_ids();
+-- 
+2.37.2
+

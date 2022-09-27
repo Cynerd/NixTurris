@@ -1,0 +1,44 @@
+From 3c6148dc2653a7026a1e8295b1eccb98fdd1c3ac Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Sat, 9 Jul 2022 16:55:54 +0200
+Subject: [PATCH 18/96] PCI: aardvark: Dispose INTx irqs prior to removing INTx
+ domain
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Documentation for irq_domain_remove() says that all mapping within the
+domain must be disposed prior to domain remove.
+
+Currently INTx irqs are not disposed in pci-aardvark.c device unbind callback
+which cause that kernel crashes after unloading driver and trying to read
+/sys/kernel/debug/irq/irqs/<num> or /proc/interrupts.
+
+Fixes: 526a76991b7b ("PCI: aardvark: Implement driver 'remove' function and allow to build it as module")
+Signed-off-by: Pali Rohár <pali@kernel.org>
+---
+ drivers/pci/controller/pci-aardvark.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/drivers/pci/controller/pci-aardvark.c b/drivers/pci/controller/pci-aardvark.c
+index dd1b29af0470..a97502b2aef1 100644
+--- a/drivers/pci/controller/pci-aardvark.c
++++ b/drivers/pci/controller/pci-aardvark.c
+@@ -1452,6 +1452,14 @@ static int advk_pcie_init_irq_domain(struct advk_pcie *pcie)
+ 
+ static void advk_pcie_remove_irq_domain(struct advk_pcie *pcie)
+ {
++	int virq, i;
++
++	for (i = 0; i < PCI_NUM_INTX; i++) {
++		virq = irq_find_mapping(pcie->irq_domain, i);
++		if (virq > 0)
++			irq_dispose_mapping(virq);
++	}
++
+ 	irq_domain_remove(pcie->irq_domain);
+ }
+ 
+-- 
+2.37.2
+

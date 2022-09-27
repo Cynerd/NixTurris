@@ -1,7 +1,7 @@
-From 6ad5109b744e8f10bb14f948b75c38b639f97989 Mon Sep 17 00:00:00 2001
+From 647dfa4c8eb2b4186a46dbc8791b116e826bbcb5 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Marek=20Beh=C3=BAn?= <kabel@kernel.org>
 Date: Mon, 4 Jul 2022 12:59:54 +0200
-Subject: [PATCH 03/10] leds: turris-omnia: initialize multi-intensity to full
+Subject: [PATCH 89/96] leds: turris-omnia: initialize multi-intensity to full
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit

@@ -1,0 +1,31 @@
+From a76012fae1d37495766ba8bde926aaa3e861d03a Mon Sep 17 00:00:00 2001
+From: Pawel Dembicki <paweldembicki@gmail.com>
+Date: Sun, 18 Feb 2018 17:08:04 +0100
+Subject: [PATCH 80/96] w1: gpio: fix problem with platfom data in w1-gpio
+
+In devices, where fdt is used, is impossible to apply platform data
+without proper fdt node.
+
+This patch allow to use platform data in devices with fdt.
+
+Signed-off-by: Pawel Dembicki <paweldembicki@gmail.com>
+---
+ drivers/w1/masters/w1-gpio.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/w1/masters/w1-gpio.c b/drivers/w1/masters/w1-gpio.c
+index d4632aace402..dc9eb99bf48d 100644
+--- a/drivers/w1/masters/w1-gpio.c
++++ b/drivers/w1/masters/w1-gpio.c
+@@ -76,7 +76,7 @@ static int w1_gpio_probe(struct platform_device *pdev)
+ 	enum gpiod_flags gflags = GPIOD_OUT_LOW_OPEN_DRAIN;
+ 	int err;
+ 
+-	if (of_have_populated_dt()) {
++	if (of_have_populated_dt() && !dev_get_platdata(&pdev->dev)) {
+ 		pdata = devm_kzalloc(&pdev->dev, sizeof(*pdata), GFP_KERNEL);
+ 		if (!pdata)
+ 			return -ENOMEM;
+-- 
+2.37.2
+

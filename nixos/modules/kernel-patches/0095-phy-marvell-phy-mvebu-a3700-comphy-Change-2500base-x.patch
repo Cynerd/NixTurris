@@ -1,7 +1,7 @@
-From dba4f89292a08c3b1ab1bcdb87a0e9b9eb3af0ad Mon Sep 17 00:00:00 2001
+From e5aa46ceca003444bd2e7a5f4fd43d5e61499515 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Marek=20Beh=C3=BAn?= <kabel@kernel.org>
 Date: Wed, 17 Aug 2022 14:35:59 +0200
-Subject: [PATCH 09/10] phy: marvell: phy-mvebu-a3700-comphy: Change 2500base-x
+Subject: [PATCH 95/96] phy: marvell: phy-mvebu-a3700-comphy: Change 2500base-x
  transmit amplitude
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8

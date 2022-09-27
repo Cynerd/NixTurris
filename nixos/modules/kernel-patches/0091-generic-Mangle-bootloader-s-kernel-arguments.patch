@@ -1,7 +1,7 @@
-From 7f478ddf690dfccd8aea406a9697e1448920bf0f Mon Sep 17 00:00:00 2001
+From e3c4d478259db4123ebb809d23371091354b906f Mon Sep 17 00:00:00 2001
 From: Adrian Panella <ianchi74@outlook.com>
 Date: Thu, 9 Mar 2017 09:37:17 +0100
-Subject: [PATCH 05/10] generic: Mangle bootloader's kernel arguments
+Subject: [PATCH 91/96] generic: Mangle bootloader's kernel arguments
 
 The command-line arguments provided by the boot loader will be
 appended to a new device tree property: bootloader-args.
@@ -179,7 +179,7 @@ index 1feb6b0f7a1f..fb8cd4f07e60 100644
  	return fdt_pack(fdt);
  }
 diff --git a/init/main.c b/init/main.c
-index 1fe7942f5d4a..fa08c129d3e1 100644
+index 12b821626826..45a73e8c7082 100644
 --- a/init/main.c
 +++ b/init/main.c
 @@ -113,6 +113,10 @@
@@ -193,7 +193,7 @@ index 1fe7942f5d4a..fa08c129d3e1 100644
  static int kernel_init(void *);
  
  extern void init_IRQ(void);
-@@ -961,6 +965,18 @@ asmlinkage __visible void __init __no_sanitize_address start_kernel(void)
+@@ -985,6 +989,18 @@ asmlinkage __visible void __init __no_sanitize_address start_kernel(void)
  	page_alloc_init();
  
  	pr_notice("Kernel command line: %s\n", saved_command_line);

@@ -1,7 +1,7 @@
-From 2760691208ad6ce37503007c0f3596532fd813e3 Mon Sep 17 00:00:00 2001
+From d7234c39e0977c8b6a093f88997bd3ed954ae045 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Marek=20Beh=C3=BAn?= <kabel@kernel.org>
 Date: Mon, 4 Jul 2022 12:59:53 +0200
-Subject: [PATCH 02/10] leds: turris-omnia: support HW controlled mode via
+Subject: [PATCH 88/96] leds: turris-omnia: support HW controlled mode via
  private trigger
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
