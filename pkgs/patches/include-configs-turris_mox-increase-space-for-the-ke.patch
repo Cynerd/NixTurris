@@ -1,0 +1,25 @@
+From 0a1ccf4cf10c06bac6d8221d0557a67a38f647a6 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Karel=20Ko=C4=8D=C3=AD?= <cynerd@email.cz>
+Date: Mon, 3 Oct 2022 20:02:10 +0200
+Subject: [PATCH] include/configs/turris_mox: increase space for the kernel
+
+---
+ include/configs/turris_mox.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/configs/turris_mox.h b/include/configs/turris_mox.h
+index 6640ee495d..bc96b90138 100644
+--- a/include/configs/turris_mox.h
++++ b/include/configs/turris_mox.h
+@@ -46,7 +46,7 @@
+ 	"pxefile_addr_r=0x4e00000\0"				\
+ 	"fdt_addr_r=0x4f00000\0"				\
+ 	"kernel_addr_r=0x5000000\0"				\
+-	"ramdisk_addr_r=0x8000000\0"				\
++	"ramdisk_addr_r=0x9000000\0"				\
+ 	"fdtfile=marvell/" CONFIG_DEFAULT_DEVICE_TREE ".dtb\0"	\
+ 	"bootcmd_rescue=" TURRIS_MOX_BOOTCMD_RESCUE "\0"	\
+ 	BOOTENV
+-- 
+2.37.2
+
