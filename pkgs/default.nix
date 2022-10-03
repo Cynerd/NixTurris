@@ -17,7 +17,6 @@ let
     libatsha204 = callPackage ./libatsha204 { };
     mox-otp = python3Packages.callPackage ./mox-otp { };
     crypto-wrapper = callPackage ./crypto-wrapper { };
-    #certgen = python3Packages.callPackage ./certgen { };
 
     # NOR Firmwares
     armTrustedFirmwareTurrisMox = buildArmTrustedFirmware rec {
