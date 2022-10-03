@@ -11,7 +11,7 @@ let
 
 in stdenv.mkDerivation rec {
   pname = "crypto-wrapper";
-  version = "0.4";
+  version = "0.4.1";
   meta = with lib; {
     homepage = "https://gitlab.nic.cz/turris/crypto-wrapper";
     description = "Simple script abstracting access to the Turris crypto backend.";
@@ -22,15 +22,18 @@ in stdenv.mkDerivation rec {
   src = fetchgit {
     url = "https://gitlab.nic.cz/turris/crypto-wrapper.git";
     rev = "v" + version;
-    sha256 = "1ly37cajkmgqmlj230h5az9m2m1rgvf4r0bf94yipp80wl0z215s";
+    sha256 = "0p6mj8swj6zzd49aas3b1mb7m6xrvrr534bjw97ggq62vx8r2nci";
   };
+  patches = [./0001-Do-not-rely-on-sysinfo-file-that-is-not-available-ou.patch];
 
   nativeBuildInputs = [ makeWrapper ];
 
 
   installPhase = ''
     mkdir -p $out/bin
-    makeWrapper crypto-wrapper.sh $out/bin/crypto-wrapper  \
-      --prefix PATH : ${lib.makeBinPath bins}
+    cp crypto-wrapper.sh $out/bin/crypto-wrapper
+    wrapProgram $out/bin/crypto-wrapper  \
+      --prefix PATH : ${lib.makeBinPath bins} \
+      --inherit-argv0
     '';
 }

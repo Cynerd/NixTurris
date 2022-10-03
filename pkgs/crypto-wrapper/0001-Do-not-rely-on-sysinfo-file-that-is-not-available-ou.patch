@@ -1,0 +1,73 @@
+From 20e8f70af32e23c59f54a1f712b7c517b6e0a9be Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Karel=20Ko=C4=8D=C3=AD?= <cynerd@email.cz>
+Date: Mon, 3 Oct 2022 22:27:17 +0200
+Subject: [PATCH] Do not rely on sysinfo file that is not available outside of
+ OpenWrt
+
+This instead uses just architecture to try to detect the correct OTP
+type.
+---
+ crypto-wrapper.sh | 28 +++++++---------------------
+ 1 file changed, 7 insertions(+), 21 deletions(-)
+
+diff --git a/crypto-wrapper.sh b/crypto-wrapper.sh
+index 3a5deb4..4828f1b 100755
+--- a/crypto-wrapper.sh
++++ b/crypto-wrapper.sh
+@@ -12,7 +12,6 @@ SCRIPTNAME=${0##*/}
+ HASH_TYPE='sha256'
+ CRYPTO_WRAPPER_ROOT_PREFIX='/tmp/crypto_wrapper'
+ 
+-SYSINFO_MODEL_FILE='/tmp/sysinfo/model'
+ TYPE_ATSHA='atsha'
+ TYPE_OTP='otp'
+ 
+@@ -338,38 +337,25 @@ cached_otp_sign() {
+ 
+ # --------------------------------------------------------------------
+ get_device_type(){
+-    local model
+-
+-    [ -f "$SYSINFO_MODEL_FILE" ] || {
+-        error "Unknown device model; sysinfo file ($SYSINFO_MODEL_FILE) is missing"
+-        return 2
+-    }
+-
+-    model=$(cat "$SYSINFO_MODEL_FILE")
+-    case "$model" in
+-        # WARNING:
+-        #   Turris string is also included in other models
+-        #   This case must not include wildcards
+-        Turris|Turris\ 1.?)
++    local arch
++    arch="$(uname -m)"
++    case "$arch" in
++        ppc)
+             debug "Device recognized as Turris 1.x"
+             echo "$TYPE_ATSHA"
+             ;;
+-
+-        *Omnia*)
++        amrv7l)
+             debug "Device recognized as Omnia"
+             echo "$TYPE_ATSHA"
+             ;;
+-
+-        *Mox*)
++        aarch64)
+             debug "Device recognized as MOX"
+             echo "$TYPE_OTP"
+             ;;
+-
+         *)
+-            error "Unknown device model: '$model'"
++            error "Unknown device architecture: '$arch'"
+             return 2
+             ;;
+-
+     esac
+ }
+ 
+-- 
+2.37.3
+
