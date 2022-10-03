@@ -1,9 +1,15 @@
 { stdenv, lib, fetchgit
-, bash
+, bash, openssl
 , makeWrapper
+, libatsha204, mox-otp
 }:
+let
 
-stdenv.mkDerivation rec {
+  bins = [openssl]
+    ++ lib.optional (stdenv.system == "aarch64-linux") mox-otp
+    ++ lib.optional (stdenv.system == "armv7l-linux") libatsha204;
+
+in stdenv.mkDerivation rec {
   pname = "crypto-wrapper";
   version = "0.4";
   meta = with lib; {
@@ -19,10 +25,12 @@ stdenv.mkDerivation rec {
     sha256 = "1ly37cajkmgqmlj230h5az9m2m1rgvf4r0bf94yipp80wl0z215s";
   };
 
+  nativeBuildInputs = [ makeWrapper ];
+
+
   installPhase = ''
     mkdir -p $out/bin
-    cp crypto-wrapper.sh $out/bin/crypto-wrapper
-    wrapProgram $out/bin/crypto-wrapper  \
-      --prefix PATH : ${lib.makeBinPath [ bash openssl coreutils ]}
+    makeWrapper crypto-wrapper.sh $out/bin/crypto-wrapper  \
+      --prefix PATH : ${lib.makeBinPath bins}
     '';
 }
