@@ -4,13 +4,6 @@ let
   pkgs = nixpkgs // turrispkgs;
   callPackage = nixlib.callPackageWith pkgs;
 
-  disableCheck = pkg: pkg.overrideAttrs (oldAttrs: {
-    doCheck = false;
-    doInstallCheck = false;
-  });
-  armv7lDisableCheck = pkg: if nixpkgs.system != "armv7l-linux" then pkg else disableCheck pkg;
-  aarch64DisableCheck = pkg: if nixpkgs.system != "aarch64-linux" then pkg else disableCheck pkg;
-
   turrispkgs = with pkgs; {
 
     # Crypto and certificates
