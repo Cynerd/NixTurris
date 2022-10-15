@@ -1,0 +1,30 @@
+From b8db9ac56b79c68e4501491b259b19487eccd7db Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Thu, 25 Nov 2021 13:51:15 +0100
+Subject: [PATCH 13/90] =?UTF-8?q?MAINTAINERS:=20Add=20Pali=20Roh=C3=A1r=20?=
+ =?UTF-8?q?as=20pci-mvebu.c=20maintainer?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Pali Rohár <pali@kernel.org>
+Acked-by: Thomas Petazzoni <thomas.petazzoni@bootlin.com>
+---
+ MAINTAINERS | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/MAINTAINERS b/MAINTAINERS
+index edc32575828b..5bb588d01805 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -14396,6 +14396,7 @@ F:	drivers/pci/controller/mobiveil/pcie-mobiveil*
+ 
+ PCI DRIVER FOR MVEBU (Marvell Armada 370 and Armada XP SOC support)
+ M:	Thomas Petazzoni <thomas.petazzoni@bootlin.com>
++M:	Pali Rohár <pali@kernel.org>
+ L:	linux-pci@vger.kernel.org
+ L:	linux-arm-kernel@lists.infradead.org (moderated for non-subscribers)
+ S:	Maintained
+-- 
+2.34.1
+

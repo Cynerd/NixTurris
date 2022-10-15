@@ -1,0 +1,63 @@
+From bec69dde1c0cbabc5a35d32af0ff3d6dbb4e4fec Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Mon, 27 Jun 2022 20:17:27 +0200
+Subject: [PATCH 36/90] ARM: dts: dove: Add definitions for PCIe legacy INTx
+ interrupts
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Pali Rohár <pali@kernel.org>
+---
+ arch/arm/boot/dts/dove.dtsi | 28 ++++++++++++++++++++++++----
+ 1 file changed, 24 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm/boot/dts/dove.dtsi b/arch/arm/boot/dts/dove.dtsi
+index 89e0bdaf3a85..96ba47c061a7 100644
+--- a/arch/arm/boot/dts/dove.dtsi
++++ b/arch/arm/boot/dts/dove.dtsi
+@@ -122,8 +122,18 @@ pcie0: pcie@1 {
+ 				bus-range = <0x00 0xff>;
+ 
+ 				#interrupt-cells = <1>;
+-				interrupt-map-mask = <0 0 0 0>;
+-				interrupt-map = <0 0 0 0 &intc 16>;
++				interrupt-names = "intx";
++				interrupts = <16>;
++				interrupt-map-mask = <0 0 0 7>;
++				interrupt-map = <0 0 0 1 &pcie0_intc 0>,
++						<0 0 0 2 &pcie0_intc 1>,
++						<0 0 0 3 &pcie0_intc 2>,
++						<0 0 0 4 &pcie0_intc 3>;
++
++				pcie0_intc: interrupt-controller {
++					interrupt-controller;
++					#interrupt-cells = <1>;
++				};
+ 			};
+ 
+ 			pcie1: pcie@2 {
+@@ -141,8 +151,18 @@ pcie1: pcie@2 {
+ 				bus-range = <0x00 0xff>;
+ 
+ 				#interrupt-cells = <1>;
+-				interrupt-map-mask = <0 0 0 0>;
+-				interrupt-map = <0 0 0 0 &intc 18>;
++				interrupt-names = "intx";
++				interrupts = <18>;
++				interrupt-map-mask = <0 0 0 7>;
++				interrupt-map = <0 0 0 1 &pcie1_intc 0>,
++						<0 0 0 2 &pcie1_intc 1>,
++						<0 0 0 3 &pcie1_intc 2>,
++						<0 0 0 4 &pcie1_intc 3>;
++
++				pcie1_intc: interrupt-controller {
++					interrupt-controller;
++					#interrupt-cells = <1>;
++				};
+ 			};
+ 		};
+ 
+-- 
+2.34.1
+

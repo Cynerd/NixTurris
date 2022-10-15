@@ -1,0 +1,33 @@
+From f0fd1787a0db7b23ec859e50af3b66d9e8cc8c56 Mon Sep 17 00:00:00 2001
+From: Dan Carpenter <dan.carpenter@oracle.com>
+Date: Mon, 7 Feb 2022 11:22:53 +0300
+Subject: [PATCH 5/6] net: dsa: mv88e6xxx: Fix off by in one in
+ mv88e6185_phylink_get_caps()
+
+The <= ARRAY_SIZE() needs to be < ARRAY_SIZE() to prevent an out of
+bounds error.
+
+Fixes: d4ebf12bcec4 ("net: dsa: mv88e6xxx: populate supported_interfaces and mac_capabilities")
+Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+Reviewed-by: Russell King (Oracle) <rmk+kernel@armlinux.org.uk>
+Signed-off-by: David S. Miller <davem@davemloft.net>
+---
+ drivers/net/dsa/mv88e6xxx/chip.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/net/dsa/mv88e6xxx/chip.c b/drivers/net/dsa/mv88e6xxx/chip.c
+index 7172b3e2e323..5bac1d54325e 100644
+--- a/drivers/net/dsa/mv88e6xxx/chip.c
++++ b/drivers/net/dsa/mv88e6xxx/chip.c
+@@ -578,7 +578,7 @@ static void mv88e6185_phylink_get_caps(struct mv88e6xxx_chip *chip, int port,
+ {
+ 	u8 cmode = chip->ports[port].cmode;
+ 
+-	if (cmode <= ARRAY_SIZE(mv88e6185_phy_interface_modes) &&
++	if (cmode < ARRAY_SIZE(mv88e6185_phy_interface_modes) &&
+ 	    mv88e6185_phy_interface_modes[cmode])
+ 		__set_bit(mv88e6185_phy_interface_modes[cmode],
+ 			  config->supported_interfaces);
+-- 
+2.35.1
+

@@ -1,0 +1,50 @@
+From c1c851bad2eb2c04a24f80dca20bfeb69d8263f3 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Mon, 27 Jun 2022 17:02:23 +0200
+Subject: [PATCH 38/90] ARM: dts: armada-xp-98dx3236.dtsi: Add definitions for
+ PCIe legacy INTx interrupts
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Pali Rohár <pali@kernel.org>
+---
+ arch/arm/boot/dts/armada-xp-98dx3236.dtsi | 14 ++++++++++++--
+ 1 file changed, 12 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/boot/dts/armada-xp-98dx3236.dtsi b/arch/arm/boot/dts/armada-xp-98dx3236.dtsi
+index 38a052a0312d..b21ffb819b1d 100644
+--- a/arch/arm/boot/dts/armada-xp-98dx3236.dtsi
++++ b/arch/arm/boot/dts/armada-xp-98dx3236.dtsi
+@@ -76,16 +76,26 @@ pcie1: pcie@1,0 {
+ 				reg = <0x0800 0 0 0 0>;
+ 				#address-cells = <3>;
+ 				#size-cells = <2>;
++				interrupt-names = "intx";
++				interrupts-extended = <&mpic 58>;
+ 				#interrupt-cells = <1>;
+ 				ranges = <0x82000000 0 0 0x82000000 0x1 0 1 0
+ 					  0x81000000 0 0 0x81000000 0x1 0 1 0>;
+ 				bus-range = <0x00 0xff>;
+-				interrupt-map-mask = <0 0 0 0>;
+-				interrupt-map = <0 0 0 0 &mpic 58>;
++				interrupt-map-mask = <0 0 0 7>;
++				interrupt-map = <0 0 0 1 &pcie1_intc 0>,
++						<0 0 0 2 &pcie1_intc 1>,
++						<0 0 0 3 &pcie1_intc 2>,
++						<0 0 0 4 &pcie1_intc 3>;
+ 				marvell,pcie-port = <0>;
+ 				marvell,pcie-lane = <0>;
+ 				clocks = <&gateclk 5>;
+ 				status = "disabled";
++
++				pcie1_intc: interrupt-controller {
++					interrupt-controller;
++					#interrupt-cells = <1>;
++				};
+ 			};
+ 		};
+ 
+-- 
+2.34.1
+

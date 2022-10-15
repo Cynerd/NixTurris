@@ -1,0 +1,43 @@
+From f06d18dc4bdc230d247370c54a9ad9d4676ceb6d Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Mon, 27 Sep 2021 11:40:05 +0200
+Subject: [PATCH 50/90] ARM: dts: turris-omnia: Set PCIe
+ slot-power-limit-milliwatt properties
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+All 3 miniPCIe slots in Turris Omnia are designed for 10 W.
+
+Signed-off-by: Pali Rohár <pali@kernel.org>
+---
+ arch/arm/boot/dts/armada-385-turris-omnia.dts | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/arch/arm/boot/dts/armada-385-turris-omnia.dts b/arch/arm/boot/dts/armada-385-turris-omnia.dts
+index 5bd6a66d2c2b..f240018148f6 100644
+--- a/arch/arm/boot/dts/armada-385-turris-omnia.dts
++++ b/arch/arm/boot/dts/armada-385-turris-omnia.dts
+@@ -71,16 +71,19 @@ pcie {
+ 			pcie@1,0 {
+ 				/* Port 0, Lane 0 */
+ 				status = "okay";
++				slot-power-limit-milliwatt = <10000>;
+ 			};
+ 
+ 			pcie@2,0 {
+ 				/* Port 1, Lane 0 */
+ 				status = "okay";
++				slot-power-limit-milliwatt = <10000>;
+ 			};
+ 
+ 			pcie@3,0 {
+ 				/* Port 2, Lane 0 */
+ 				status = "okay";
++				slot-power-limit-milliwatt = <10000>;
+ 			};
+ 		};
+ 	};
+-- 
+2.34.1
+

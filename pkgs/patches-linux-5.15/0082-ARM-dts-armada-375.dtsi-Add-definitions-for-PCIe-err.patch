@@ -1,0 +1,43 @@
+From 3fca9286a8603517109f21d743bac3bf657b39b0 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Mon, 27 Jun 2022 16:45:29 +0200
+Subject: [PATCH 82/90] ARM: dts: armada-375.dtsi: Add definitions for PCIe
+ error interrupts
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Pali Rohár <pali@kernel.org>
+---
+ arch/arm/boot/dts/armada-375.dtsi | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm/boot/dts/armada-375.dtsi b/arch/arm/boot/dts/armada-375.dtsi
+index 82f0a59d112f..71b01a089c81 100644
+--- a/arch/arm/boot/dts/armada-375.dtsi
++++ b/arch/arm/boot/dts/armada-375.dtsi
+@@ -573,8 +573,8 @@ pcie0: pcie@1,0 {
+ 				reg = <0x0800 0 0 0 0>;
+ 				#address-cells = <3>;
+ 				#size-cells = <2>;
+-				interrupt-names = "intx";
+-				interrupts-extended = <&gic GIC_SPI 29 IRQ_TYPE_LEVEL_HIGH>;
++				interrupt-names = "intx", "error";
++				interrupts-extended = <&gic GIC_SPI 29 IRQ_TYPE_LEVEL_HIGH>, <&soc_err 4>;
+ 				#interrupt-cells = <1>;
+ 				ranges = <0x82000000 0 0 0x82000000 0x1 0 1 0
+ 					  0x81000000 0 0 0x81000000 0x1 0 1 0>;
+@@ -601,8 +601,8 @@ pcie1: pcie@2,0 {
+ 				reg = <0x1000 0 0 0 0>;
+ 				#address-cells = <3>;
+ 				#size-cells = <2>;
+-				interrupt-names = "intx";
+-				interrupts-extended = <&gic GIC_SPI 33 IRQ_TYPE_LEVEL_HIGH>;
++				interrupt-names = "intx", "error";
++				interrupts-extended = <&gic GIC_SPI 33 IRQ_TYPE_LEVEL_HIGH>, <&soc_err 5>;
+ 				#interrupt-cells = <1>;
+ 				ranges = <0x82000000 0 0 0x82000000 0x2 0 1 0
+ 					  0x81000000 0 0 0x81000000 0x2 0 1 0>;
+-- 
+2.34.1
+

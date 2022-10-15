@@ -1,0 +1,47 @@
+From a3502251f0a195b584efc6b29ecac0ac53ac582a Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Sat, 9 Jul 2022 16:12:40 +0200
+Subject: [PATCH 54/90] PCI: mvebu: Dispose INTx irqs prior to removing INTx
+ domain
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Documentation for irq_domain_remove() says that all mapping within the
+domain must be disposed prior to domain remove.
+
+Currently INTx irqs are not disposed in pci-mvebu.c device unbind callback
+which cause that kernel crashes after unloading driver and trying to read
+/sys/kernel/debug/irq/irqs/<num> or /proc/interrupts.
+
+Fixes: ec075262648f ("PCI: mvebu: Implement support for legacy INTx interrupts")
+Reported-by: Hajo Noerenberg <hajo-linux-bugzilla@noerenberg.de>
+Signed-off-by: Pali Rohár <pali@kernel.org>
+---
+ drivers/pci/controller/pci-mvebu.c | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/pci/controller/pci-mvebu.c b/drivers/pci/controller/pci-mvebu.c
+index d8cba09649ba..0122c65b0269 100644
+--- a/drivers/pci/controller/pci-mvebu.c
++++ b/drivers/pci/controller/pci-mvebu.c
+@@ -1713,8 +1713,15 @@ static int mvebu_pcie_remove(struct platform_device *pdev)
+ 		mvebu_writel(port, ~PCIE_INT_ALL_MASK, PCIE_INT_CAUSE_OFF);
+ 
+ 		/* Remove IRQ domains. */
+-		if (port->intx_irq_domain)
++		if (port->intx_irq_domain) {
++			int virq, j;
++			for (j = 0; j < PCI_NUM_INTX; j++) {
++				virq = irq_find_mapping(port->intx_irq_domain, j);
++				if (virq > 0)
++					irq_dispose_mapping(virq);
++			}
+ 			irq_domain_remove(port->intx_irq_domain);
++		}
+ 
+ 		/* Free config space for emulated root bridge. */
+ 		pci_bridge_emul_cleanup(&port->bridge);
+-- 
+2.34.1
+

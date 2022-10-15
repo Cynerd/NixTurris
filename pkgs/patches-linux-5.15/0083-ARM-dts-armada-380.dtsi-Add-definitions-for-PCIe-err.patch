@@ -1,0 +1,57 @@
+From 8bbc60f9c76f529c929def04a9feb39bf05dc355 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Mon, 27 Jun 2022 17:41:39 +0200
+Subject: [PATCH 83/90] ARM: dts: armada-380.dtsi: Add definitions for PCIe
+ error interrupts
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Pali Rohár <pali@kernel.org>
+---
+ arch/arm/boot/dts/armada-380.dtsi | 15 +++++++++------
+ 1 file changed, 9 insertions(+), 6 deletions(-)
+
+diff --git a/arch/arm/boot/dts/armada-380.dtsi b/arch/arm/boot/dts/armada-380.dtsi
+index e94f22b0e9b5..970ac6820db9 100644
+--- a/arch/arm/boot/dts/armada-380.dtsi
++++ b/arch/arm/boot/dts/armada-380.dtsi
+@@ -64,8 +64,9 @@ pcie@1,0 {
+ 				reg = <0x0800 0 0 0 0>;
+ 				#address-cells = <3>;
+ 				#size-cells = <2>;
+-				interrupt-names = "intx";
+-				interrupts-extended = <&gic GIC_SPI 29 IRQ_TYPE_LEVEL_HIGH>;
++				interrupt-names = "intx", "error";
++				interrupts-extended = <&gic GIC_SPI 29 IRQ_TYPE_LEVEL_HIGH>,
++						      <&soc_err 4>;
+ 				#interrupt-cells = <1>;
+ 				ranges = <0x82000000 0 0 0x82000000 0x1 0 1 0
+ 					  0x81000000 0 0 0x81000000 0x1 0 1 0>;
+@@ -93,8 +94,9 @@ pcie@2,0 {
+ 				reg = <0x1000 0 0 0 0>;
+ 				#address-cells = <3>;
+ 				#size-cells = <2>;
+-				interrupt-names = "intx";
+-				interrupts-extended = <&gic GIC_SPI 33 IRQ_TYPE_LEVEL_HIGH>;
++				interrupt-names = "intx", "error";
++				interrupts-extended = <&gic GIC_SPI 33 IRQ_TYPE_LEVEL_HIGH>,
++						      <&soc_err 5>;
+ 				#interrupt-cells = <1>;
+ 				ranges = <0x82000000 0 0 0x82000000 0x2 0 1 0
+ 					  0x81000000 0 0 0x81000000 0x2 0 1 0>;
+@@ -122,8 +124,9 @@ pcie@3,0 {
+ 				reg = <0x1800 0 0 0 0>;
+ 				#address-cells = <3>;
+ 				#size-cells = <2>;
+-				interrupt-names = "intx";
+-				interrupts-extended = <&gic GIC_SPI 70 IRQ_TYPE_LEVEL_HIGH>;
++				interrupt-names = "intx", "error";
++				interrupts-extended = <&gic GIC_SPI 70 IRQ_TYPE_LEVEL_HIGH>,
++						      <&soc_err 15>;
+ 				#interrupt-cells = <1>;
+ 				ranges = <0x82000000 0 0 0x82000000 0x3 0 1 0
+ 					  0x81000000 0 0 0x81000000 0x3 0 1 0>;
+-- 
+2.34.1
+

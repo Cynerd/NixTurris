@@ -1,0 +1,33 @@
+From add0bae184216783b6f6bc67c6d4b48fec781ad5 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Mon, 27 Jun 2022 17:49:36 +0200
+Subject: [PATCH 76/90] ARM: dts: armada-39x.dtsi: Add node for MPIC SoC Error
+ IRQ controller
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Pali Rohár <pali@kernel.org>
+---
+ arch/arm/boot/dts/armada-39x.dtsi | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/arch/arm/boot/dts/armada-39x.dtsi b/arch/arm/boot/dts/armada-39x.dtsi
+index 9d1cac49c022..f21231a1f244 100644
+--- a/arch/arm/boot/dts/armada-39x.dtsi
++++ b/arch/arm/boot/dts/armada-39x.dtsi
+@@ -272,6 +272,11 @@ mpic: interrupt-controller@20a00 {
+ 				interrupt-controller;
+ 				msi-controller;
+ 				interrupts = <GIC_PPI 15 IRQ_TYPE_LEVEL_HIGH>;
++
++				soc_err: interrupt-controller@20 {
++					interrupt-controller;
++					#interrupt-cells = <1>;
++				};
+ 			};
+ 
+ 			timer@20300 {
+-- 
+2.34.1
+

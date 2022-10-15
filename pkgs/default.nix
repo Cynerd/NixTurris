@@ -1,8 +1,11 @@
 { nixpkgs ? <nixpkgs>, nixlib ? nixpkgs.lib }:
 
+with builtins;
+with nixlib;
+
 let
   pkgs = nixpkgs // turrispkgs;
-  callPackage = nixlib.callPackageWith pkgs;
+  callPackage = callPackageWith pkgs;
 
   turrispkgs = with pkgs; {
 
@@ -10,6 +13,14 @@ let
     libatsha204 = callPackage ./libatsha204 { };
     mox-otp = python3Packages.callPackage ./mox-otp { };
     crypto-wrapper = callPackage ./crypto-wrapper { };
+
+    # Turris kernels with patches
+    linux_turris_5_15 = callPackage
+      "${nixpkgs.path}/pkgs/os-specific/linux/kernel/linux-5.15.nix" {
+        kernelPatches = map (p: { name = toString p; patch = ./patches-linux-5.15 + "/${p}"; }) (
+          attrNames (filterAttrs (n: v: v == "regular") (
+            readDir ./patches-linux-5.15)));
+      };
 
     # NOR Firmwares
     armTrustedFirmwareTurrisMox = buildArmTrustedFirmware rec {

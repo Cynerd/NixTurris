@@ -1,0 +1,53 @@
+From 1192a8856544109e30555ca15aed7353297bae79 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Fri, 8 Oct 2021 11:47:35 +0200
+Subject: [PATCH 29/90] PCI: mvebu: Add support for PCI Bridge Subsystem Vendor
+ ID on emulated bridge
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Register with Subsystem Device/Vendor ID is at offset 0x2c. Export is via
+emulated bridge.
+
+After this change Subsystem ID is visible in lspci output at line:
+
+  Capabilities: [40] Subsystem
+
+Signed-off-by: Pali Rohár <pali@kernel.org>
+---
+ drivers/pci/controller/pci-mvebu.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/drivers/pci/controller/pci-mvebu.c b/drivers/pci/controller/pci-mvebu.c
+index 0f2ec0a17874..811af9e6ede5 100644
+--- a/drivers/pci/controller/pci-mvebu.c
++++ b/drivers/pci/controller/pci-mvebu.c
+@@ -32,6 +32,7 @@
+ #define PCIE_DEV_REV_OFF	0x0008
+ #define PCIE_BAR_LO_OFF(n)	(0x0010 + ((n) << 3))
+ #define PCIE_BAR_HI_OFF(n)	(0x0014 + ((n) << 3))
++#define PCIE_SSDEV_ID_OFF	0x002c
+ #define PCIE_CAP_PCIEXP		0x0060
+ #define PCIE_HEADER_LOG_4_OFF	0x0128
+ #define PCIE_BAR_CTRL_OFF(n)	(0x1804 + (((n) - 1) * 4))
+@@ -731,6 +732,7 @@ static int mvebu_pci_bridge_emul_init(struct mvebu_pcie_port *port)
+ 	struct pci_bridge_emul *bridge = &port->bridge;
+ 	u32 dev_id = mvebu_readl(port, PCIE_DEV_ID_OFF);
+ 	u32 dev_rev = mvebu_readl(port, PCIE_DEV_REV_OFF);
++	u32 ssdev_id = mvebu_readl(port, PCIE_SSDEV_ID_OFF);
+ 	u32 pcie_cap = mvebu_readl(port, PCIE_CAP_PCIEXP);
+ 	u8 pcie_cap_ver = ((pcie_cap >> 16) & PCI_EXP_FLAGS_VERS);
+ 
+@@ -752,6 +754,8 @@ static int mvebu_pci_bridge_emul_init(struct mvebu_pcie_port *port)
+ 	 */
+ 	bridge->pcie_conf.cap = cpu_to_le16(pcie_cap_ver);
+ 
++	bridge->subsystem_vendor_id = ssdev_id & 0xffff;
++	bridge->subsystem_id = ssdev_id >> 16;
+ 	bridge->has_pcie = true;
+ 	bridge->data = port;
+ 	bridge->ops = &mvebu_pci_bridge_emul_ops;
+-- 
+2.34.1
+

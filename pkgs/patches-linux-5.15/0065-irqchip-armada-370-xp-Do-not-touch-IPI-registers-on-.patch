@@ -1,0 +1,67 @@
+From bfe14db697196f06c0a7abe7f0d44edac04f0c11 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Thu, 11 Aug 2022 11:35:53 +0200
+Subject: [PATCH 65/90] irqchip/armada-370-xp: Do not touch IPI registers on
+ platforms without IPI
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+IPI is used only when we do not have parent irq. On platforms with parent
+irq are those IPI registers used for additional set of MSI interrupts
+(which are currently unused). So do not touch these registers when IPI is
+not used.
+
+Signed-off-by: Pali Rohár <pali@kernel.org>
+---
+ drivers/irqchip/irq-armada-370-xp.c | 14 ++++++++++++--
+ 1 file changed, 12 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/irqchip/irq-armada-370-xp.c b/drivers/irqchip/irq-armada-370-xp.c
+index 9b28e6269176..397bacf638a2 100644
+--- a/drivers/irqchip/irq-armada-370-xp.c
++++ b/drivers/irqchip/irq-armada-370-xp.c
+@@ -478,6 +478,10 @@ static void armada_xp_mpic_smp_cpu_init(void)
+ 	for (i = 0; i < nr_irqs; i++)
+ 		writel(i, per_cpu_int_base + ARMADA_370_XP_INT_SET_MASK_OFFS);
+ 
++	/* IPI is not used when we do have parent irq */
++	if (parent_irq > 0)
++		return;
++
+ 	/* Disable all IPIs */
+ 	writel(0, per_cpu_int_base + ARMADA_370_XP_IN_DRBEL_MSK_OFFS);
+ 
+@@ -732,7 +736,8 @@ static void armada_370_xp_mpic_resume(void)
+ 	/* Reconfigure doorbells for IPIs and MSIs */
+ 	writel(doorbell_mask_reg,
+ 	       per_cpu_int_base + ARMADA_370_XP_IN_DRBEL_MSK_OFFS);
+-	if (doorbell_mask_reg & IPI_DOORBELL_MASK)
++	/* IPI is used only when we do not have parent irq */
++	if (parent_irq <= 0 && (doorbell_mask_reg & IPI_DOORBELL_MASK))
+ 		writel(0, per_cpu_int_base + ARMADA_370_XP_INT_CLEAR_MASK_OFFS);
+ 	if (doorbell_mask_reg & PCI_MSI_DOORBELL_MASK)
+ 		writel(1, per_cpu_int_base + ARMADA_370_XP_INT_CLEAR_MASK_OFFS);
+@@ -784,13 +789,18 @@ static int __init armada_370_xp_mpic_of_init(struct device_node *node,
+ 	BUG_ON(!armada_370_xp_mpic_domain);
+ 	irq_domain_update_bus_token(armada_370_xp_mpic_domain, DOMAIN_BUS_WIRED);
+ 
++	/*
++	 * parent_irq is used for distinguish between IPI and non-IPI platforms.
++	 * So initialize it before calling any other driver functions.
++	 */
++	parent_irq = irq_of_parse_and_map(node, 0);
++
+ 	/* Setup for the boot CPU */
+ 	armada_xp_mpic_perf_init();
+ 	armada_xp_mpic_smp_cpu_init();
+ 
+ 	armada_370_xp_msi_init(node, main_int_res.start);
+ 
+-	parent_irq = irq_of_parse_and_map(node, 0);
+ 	if (parent_irq <= 0) {
+ 		irq_set_default_host(armada_370_xp_mpic_domain);
+ 		set_handle_irq(armada_370_xp_handle_irq);
+-- 
+2.34.1
+

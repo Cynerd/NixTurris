@@ -1,0 +1,50 @@
+From 65913d4ca9e1f51ddd086b530373da620c934502 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Fri, 17 Sep 2021 13:16:37 +0200
+Subject: [PATCH 23/90] PCI: mvebu: Fix reporting Data Link Layer Link Active
+ on emulated bridge
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Add support for reporting PCI_EXP_LNKSTA_DLLLA bit in Link Control register
+on emulated bridge via PCIE_STAT_OFF reg. Function mvebu_pcie_link_up()
+already parses this register and returns if Data Link is Active or not.
+
+Also correctly indicate DLLLA capability via PCI_EXP_LNKCAP_DLLLARC bit in
+Link Control Capability register which is required for reporting DLLLA bit.
+
+Signed-off-by: Pali Rohár <pali@kernel.org>
+---
+ drivers/pci/controller/pci-mvebu.c | 11 ++++++++---
+ 1 file changed, 8 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/pci/controller/pci-mvebu.c b/drivers/pci/controller/pci-mvebu.c
+index dffa330de174..a075ba26cff1 100644
+--- a/drivers/pci/controller/pci-mvebu.c
++++ b/drivers/pci/controller/pci-mvebu.c
+@@ -548,13 +548,18 @@ mvebu_pci_bridge_emul_pcie_conf_read(struct pci_bridge_emul *bridge,
+ 		/*
+ 		 * PCIe requires that the Clock Power Management capability bit
+ 		 * is hard-wired to zero for downstream ports but HW returns 1.
++		 * Additionally enable Data Link Layer Link Active Reporting
++		 * Capable bit as DL_Active indication is provided too.
+ 		 */
+-		*value = mvebu_readl(port, PCIE_CAP_PCIEXP + PCI_EXP_LNKCAP) &
+-			 ~PCI_EXP_LNKCAP_CLKPM;
++		*value = (mvebu_readl(port, PCIE_CAP_PCIEXP + PCI_EXP_LNKCAP) &
++			  ~PCI_EXP_LNKCAP_CLKPM) | PCI_EXP_LNKCAP_DLLLARC;
+ 		break;
+ 
+ 	case PCI_EXP_LNKCTL:
+-		*value = mvebu_readl(port, PCIE_CAP_PCIEXP + PCI_EXP_LNKCTL);
++		/* DL_Active indication is provided via PCIE_STAT_OFF */
++		*value = mvebu_readl(port, PCIE_CAP_PCIEXP + PCI_EXP_LNKCTL) |
++			 (mvebu_pcie_link_up(port) ?
++			  (PCI_EXP_LNKSTA_DLLLA << 16) : 0);
+ 		break;
+ 
+ 	case PCI_EXP_SLTCTL:
+-- 
+2.34.1
+

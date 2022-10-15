@@ -1,0 +1,34 @@
+From 3ef4b961298bb64ba871616f51a0d869cb7c4555 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Fri, 17 Sep 2021 14:43:39 +0200
+Subject: [PATCH 32/90] dt-bindings: PCI: mvebu: Update information about intx
+ interrupts
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Pali Rohár <pali@kernel.org>
+Acked-by: Rob Herring <robh@kernel.org>
+---
+ Documentation/devicetree/bindings/pci/mvebu-pci.txt | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/Documentation/devicetree/bindings/pci/mvebu-pci.txt b/Documentation/devicetree/bindings/pci/mvebu-pci.txt
+index 24225852bce0..6d022a9d36ee 100644
+--- a/Documentation/devicetree/bindings/pci/mvebu-pci.txt
++++ b/Documentation/devicetree/bindings/pci/mvebu-pci.txt
+@@ -81,6 +81,11 @@ and the following optional properties:
+ - reset-gpios: optional GPIO to PERST#
+ - reset-delay-us: delay in us to wait after reset de-assertion, if not
+   specified will default to 100ms, as required by the PCIe specification.
++- interrupt-names: list of interrupt names, supported are:
++   - "intx" - interrupt line triggered by one of the legacy interrupt
++- interrupts or interrupts-extended: List of the interrupt sources which
++  corresponding to the "interrupt-names". If non-empty then also additional
++  'interrupt-controller' subnode must be defined.
+ 
+ Example:
+ 
+-- 
+2.34.1
+

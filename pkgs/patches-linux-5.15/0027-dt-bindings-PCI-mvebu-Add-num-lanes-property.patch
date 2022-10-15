@@ -1,0 +1,114 @@
+From cca87cdc18be3c7ab387aad99cbc3d2e2a5e16dc Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Wed, 3 Nov 2021 14:32:52 +0100
+Subject: [PATCH 27/90] dt-bindings: PCI: mvebu: Add num-lanes property
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Controller driver needs to correctly configure PCIe link if it contains 1
+or 4 SerDes PCIe lanes. Therefore add a new 'num-lanes' DT property for
+mvebu PCIe controller. Property 'num-lanes' seems to be de-facto standard
+way how number of lanes is specified in other PCIe controllers.
+
+Signed-off-by: Pali Rohár <pali@kernel.org>
+Acked-by: Rob Herring <robh@kernel.org>
+---
+ Documentation/devicetree/bindings/pci/mvebu-pci.txt | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/Documentation/devicetree/bindings/pci/mvebu-pci.txt b/Documentation/devicetree/bindings/pci/mvebu-pci.txt
+index 6173af6885f8..24225852bce0 100644
+--- a/Documentation/devicetree/bindings/pci/mvebu-pci.txt
++++ b/Documentation/devicetree/bindings/pci/mvebu-pci.txt
+@@ -77,6 +77,7 @@ and the following optional properties:
+ - marvell,pcie-lane: the physical PCIe lane number, for ports having
+   multiple lanes. If this property is not found, we assume that the
+   value is 0.
++- num-lanes: number of SerDes PCIe lanes for this link (1 or 4)
+ - reset-gpios: optional GPIO to PERST#
+ - reset-delay-us: delay in us to wait after reset de-assertion, if not
+   specified will default to 100ms, as required by the PCIe specification.
+@@ -141,6 +142,7 @@ pcie-controller {
+ 		interrupt-map = <0 0 0 0 &mpic 58>;
+ 		marvell,pcie-port = <0>;
+ 		marvell,pcie-lane = <0>;
++		num-lanes = <1>;
+ 		/* low-active PERST# reset on GPIO 25 */
+ 		reset-gpios = <&gpio0 25 1>;
+ 		/* wait 20ms for device settle after reset deassertion */
+@@ -161,6 +163,7 @@ pcie-controller {
+ 		interrupt-map = <0 0 0 0 &mpic 59>;
+ 		marvell,pcie-port = <0>;
+ 		marvell,pcie-lane = <1>;
++		num-lanes = <1>;
+ 		clocks = <&gateclk 6>;
+ 	};
+ 
+@@ -177,6 +180,7 @@ pcie-controller {
+ 		interrupt-map = <0 0 0 0 &mpic 60>;
+ 		marvell,pcie-port = <0>;
+ 		marvell,pcie-lane = <2>;
++		num-lanes = <1>;
+ 		clocks = <&gateclk 7>;
+ 	};
+ 
+@@ -193,6 +197,7 @@ pcie-controller {
+ 		interrupt-map = <0 0 0 0 &mpic 61>;
+ 		marvell,pcie-port = <0>;
+ 		marvell,pcie-lane = <3>;
++		num-lanes = <1>;
+ 		clocks = <&gateclk 8>;
+ 	};
+ 
+@@ -209,6 +214,7 @@ pcie-controller {
+ 		interrupt-map = <0 0 0 0 &mpic 62>;
+ 		marvell,pcie-port = <1>;
+ 		marvell,pcie-lane = <0>;
++		num-lanes = <1>;
+ 		clocks = <&gateclk 9>;
+ 	};
+ 
+@@ -225,6 +231,7 @@ pcie-controller {
+ 		interrupt-map = <0 0 0 0 &mpic 63>;
+ 		marvell,pcie-port = <1>;
+ 		marvell,pcie-lane = <1>;
++		num-lanes = <1>;
+ 		clocks = <&gateclk 10>;
+ 	};
+ 
+@@ -241,6 +248,7 @@ pcie-controller {
+ 		interrupt-map = <0 0 0 0 &mpic 64>;
+ 		marvell,pcie-port = <1>;
+ 		marvell,pcie-lane = <2>;
++		num-lanes = <1>;
+ 		clocks = <&gateclk 11>;
+ 	};
+ 
+@@ -257,6 +265,7 @@ pcie-controller {
+ 		interrupt-map = <0 0 0 0 &mpic 65>;
+ 		marvell,pcie-port = <1>;
+ 		marvell,pcie-lane = <3>;
++		num-lanes = <1>;
+ 		clocks = <&gateclk 12>;
+ 	};
+ 
+@@ -273,6 +282,7 @@ pcie-controller {
+ 		interrupt-map = <0 0 0 0 &mpic 99>;
+ 		marvell,pcie-port = <2>;
+ 		marvell,pcie-lane = <0>;
++		num-lanes = <1>;
+ 		clocks = <&gateclk 26>;
+ 	};
+ 
+@@ -289,6 +299,7 @@ pcie-controller {
+ 		interrupt-map = <0 0 0 0 &mpic 103>;
+ 		marvell,pcie-port = <3>;
+ 		marvell,pcie-lane = <0>;
++		num-lanes = <1>;
+ 		clocks = <&gateclk 27>;
+ 	};
+ };
+-- 
+2.34.1
+

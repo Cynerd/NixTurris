@@ -1,0 +1,35 @@
+From f117e4e1d4d4ba03cdf376392dc996e84c04ddb5 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Fri, 17 Sep 2021 13:13:52 +0200
+Subject: [PATCH 09/90] PCI: mvebu: Handle invalid size of read config request
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Function mvebu_pcie_hw_rd_conf() does not handle invalid size. So correctly
+set read value to all-ones and return appropriate error return value
+PCIBIOS_BAD_REGISTER_NUMBER like in mvebu_pcie_hw_wr_conf() function.
+
+Signed-off-by: Pali Rohár <pali@kernel.org>
+Cc: stable@vger.kernel.org
+---
+ drivers/pci/controller/pci-mvebu.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/drivers/pci/controller/pci-mvebu.c b/drivers/pci/controller/pci-mvebu.c
+index b0965067e4ce..5bf1889cfb38 100644
+--- a/drivers/pci/controller/pci-mvebu.c
++++ b/drivers/pci/controller/pci-mvebu.c
+@@ -273,6 +273,9 @@ static int mvebu_pcie_hw_rd_conf(struct mvebu_pcie_port *port,
+ 	case 4:
+ 		*val = readl_relaxed(conf_data);
+ 		break;
++	default:
++		*val = 0xffffffff;
++		return PCIBIOS_BAD_REGISTER_NUMBER;
+ 	}
+ 
+ 	return PCIBIOS_SUCCESSFUL;
+-- 
+2.34.1
+

@@ -1,0 +1,42 @@
+From 4ae6a8f60faf1d918e7421410d04386ee8b06894 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Fri, 17 Sep 2021 14:48:21 +0200
+Subject: [PATCH 20/90] PCI: mvebu: Properly initialize vendor, device and
+ revision of emulated bridge
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+With this change also PCI vendor id is read from mvebu registers.
+
+Signed-off-by: Pali Rohár <pali@kernel.org>
+---
+ drivers/pci/controller/pci-mvebu.c | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/pci/controller/pci-mvebu.c b/drivers/pci/controller/pci-mvebu.c
+index 551f55af5226..94ef00b6d697 100644
+--- a/drivers/pci/controller/pci-mvebu.c
++++ b/drivers/pci/controller/pci-mvebu.c
+@@ -712,13 +712,14 @@ static int mvebu_pci_bridge_emul_init(struct mvebu_pcie_port *port)
+ {
+ 	unsigned int bridge_flags = PCI_BRIDGE_EMUL_NO_PREFMEM_FORWARD;
+ 	struct pci_bridge_emul *bridge = &port->bridge;
++	u32 dev_id = mvebu_readl(port, PCIE_DEV_ID_OFF);
++	u32 dev_rev = mvebu_readl(port, PCIE_DEV_REV_OFF);
+ 	u32 pcie_cap = mvebu_readl(port, PCIE_CAP_PCIEXP);
+ 	u8 pcie_cap_ver = ((pcie_cap >> 16) & PCI_EXP_FLAGS_VERS);
+ 
+-	bridge->conf.vendor = PCI_VENDOR_ID_MARVELL;
+-	bridge->conf.device = mvebu_readl(port, PCIE_DEV_ID_OFF) >> 16;
+-	bridge->conf.class_revision =
+-		mvebu_readl(port, PCIE_DEV_REV_OFF) & 0xff;
++	bridge->conf.vendor = cpu_to_le16(dev_id & 0xffff);
++	bridge->conf.device = cpu_to_le16(dev_id >> 16);
++	bridge->conf.class_revision = cpu_to_le32(dev_rev & 0xff);
+ 
+ 	if (mvebu_has_ioport(port)) {
+ 		/* We support 32 bits I/O addressing */
+-- 
+2.34.1
+

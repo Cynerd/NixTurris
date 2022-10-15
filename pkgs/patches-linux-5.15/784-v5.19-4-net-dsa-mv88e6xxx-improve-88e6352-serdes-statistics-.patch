@@ -1,0 +1,125 @@
+From d84031286e44a08a3512a8e98a6f3a4e37e6c11d Mon Sep 17 00:00:00 2001
+From: "Russell King (Oracle)" <rmk+kernel@armlinux.org.uk>
+Date: Thu, 3 Feb 2022 13:30:52 +0000
+Subject: [PATCH 4/6] net: dsa: mv88e6xxx: improve 88e6352 serdes statistics
+ detection
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+The decision whether to report serdes statistics currently depends on
+the cached C_Mode value for the port, read at probe time or updated by
+configuration. However, port 4 can be in "automedia" mode when it is
+used as a serdes port, meaning it switches between the internal PHY and
+the serdes, changing the read-only C_Mode value depending on which
+first gains link. Consequently, the C_Mode value read at probe does not
+accurately reflect whether the port has the serdes associated with it.
+
+In "net: dsa: mv88e6xxx: add mv88e6352_g2_scratch_port_has_serdes()",
+we added a way to read the hardware configuration to determine which
+port has the serdes associated with it. Use this to determine which
+port reports the serdes statistics.
+
+Reviewed-by: Marek Behún <kabel@kernel.org>
+Signed-off-by: Russell King (Oracle) <rmk+kernel@armlinux.org.uk>
+Reviewed-by: Andrew Lunn <andrew@lunn.ch>
+Signed-off-by: David S. Miller <davem@davemloft.net>
+---
+ drivers/net/dsa/mv88e6xxx/serdes.c | 43 ++++++++++++++++--------------
+ 1 file changed, 23 insertions(+), 20 deletions(-)
+
+diff --git a/drivers/net/dsa/mv88e6xxx/serdes.c b/drivers/net/dsa/mv88e6xxx/serdes.c
+index 6ae7a0ed9e0b..bde2228b674d 100644
+--- a/drivers/net/dsa/mv88e6xxx/serdes.c
++++ b/drivers/net/dsa/mv88e6xxx/serdes.c
+@@ -267,14 +267,6 @@ int mv88e6352_serdes_get_lane(struct mv88e6xxx_chip *chip, int port)
+ 	return lane;
+ }
+ 
+-static bool mv88e6352_port_has_serdes(struct mv88e6xxx_chip *chip, int port)
+-{
+-	if (mv88e6xxx_serdes_get_lane(chip, port) >= 0)
+-		return true;
+-
+-	return false;
+-}
+-
+ struct mv88e6352_serdes_hw_stat {
+ 	char string[ETH_GSTRING_LEN];
+ 	int sizeof_stat;
+@@ -288,20 +280,24 @@ static struct mv88e6352_serdes_hw_stat mv88e6352_serdes_hw_stats[] = {
+ 
+ int mv88e6352_serdes_get_sset_count(struct mv88e6xxx_chip *chip, int port)
+ {
+-	if (mv88e6352_port_has_serdes(chip, port))
+-		return ARRAY_SIZE(mv88e6352_serdes_hw_stats);
++	int err;
+ 
+-	return 0;
++	err = mv88e6352_g2_scratch_port_has_serdes(chip, port);
++	if (err <= 0)
++		return err;
++
++	return ARRAY_SIZE(mv88e6352_serdes_hw_stats);
+ }
+ 
+ int mv88e6352_serdes_get_strings(struct mv88e6xxx_chip *chip,
+ 				 int port, uint8_t *data)
+ {
+ 	struct mv88e6352_serdes_hw_stat *stat;
+-	int i;
++	int err, i;
+ 
+-	if (!mv88e6352_port_has_serdes(chip, port))
+-		return 0;
++	err = mv88e6352_g2_scratch_port_has_serdes(chip, port);
++	if (err <= 0)
++		return err;
+ 
+ 	for (i = 0; i < ARRAY_SIZE(mv88e6352_serdes_hw_stats); i++) {
+ 		stat = &mv88e6352_serdes_hw_stats[i];
+@@ -343,11 +339,12 @@ int mv88e6352_serdes_get_stats(struct mv88e6xxx_chip *chip, int port,
+ {
+ 	struct mv88e6xxx_port *mv88e6xxx_port = &chip->ports[port];
+ 	struct mv88e6352_serdes_hw_stat *stat;
++	int i, err;
+ 	u64 value;
+-	int i;
+ 
+-	if (!mv88e6352_port_has_serdes(chip, port))
+-		return 0;
++	err = mv88e6352_g2_scratch_port_has_serdes(chip, port);
++	if (err <= 0)
++		return err;
+ 
+ 	BUILD_BUG_ON(ARRAY_SIZE(mv88e6352_serdes_hw_stats) >
+ 		     ARRAY_SIZE(mv88e6xxx_port->serdes_stats));
+@@ -414,8 +411,13 @@ unsigned int mv88e6352_serdes_irq_mapping(struct mv88e6xxx_chip *chip, int port)
+ 
+ int mv88e6352_serdes_get_regs_len(struct mv88e6xxx_chip *chip, int port)
+ {
+-	if (!mv88e6352_port_has_serdes(chip, port))
+-		return 0;
++	int err;
++
++	mv88e6xxx_reg_lock(chip);
++	err = mv88e6352_g2_scratch_port_has_serdes(chip, port);
++	mv88e6xxx_reg_unlock(chip);
++	if (err <= 0)
++		return err;
+ 
+ 	return 32 * sizeof(u16);
+ }
+@@ -427,7 +429,8 @@ void mv88e6352_serdes_get_regs(struct mv88e6xxx_chip *chip, int port, void *_p)
+ 	int err;
+ 	int i;
+ 
+-	if (!mv88e6352_port_has_serdes(chip, port))
++	err = mv88e6352_g2_scratch_port_has_serdes(chip, port);
++	if (err <= 0)
+ 		return;
+ 
+ 	for (i = 0 ; i < 32; i++) {
+-- 
+2.35.1
+

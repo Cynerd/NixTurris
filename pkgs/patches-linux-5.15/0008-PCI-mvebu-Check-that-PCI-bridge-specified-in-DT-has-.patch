@@ -1,0 +1,38 @@
+From 978d8acb29959079c59f700fbd9df105147a3c44 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Fri, 17 Sep 2021 11:39:48 +0200
+Subject: [PATCH 08/90] PCI: mvebu: Check that PCI bridge specified in DT has
+ function number zero
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Driver cannot handle PCI bridges at non-zero function address. So add
+appropriate check. Currently all in-tree kernel DTS files set PCI bridge
+function to zero.
+
+Signed-off-by: Pali Rohár <pali@kernel.org>
+Cc: stable@vger.kernel.org
+---
+ drivers/pci/controller/pci-mvebu.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/drivers/pci/controller/pci-mvebu.c b/drivers/pci/controller/pci-mvebu.c
+index e4c6dc73159f..b0965067e4ce 100644
+--- a/drivers/pci/controller/pci-mvebu.c
++++ b/drivers/pci/controller/pci-mvebu.c
+@@ -946,6 +946,11 @@ static int mvebu_pcie_parse_port(struct mvebu_pcie *pcie,
+ 	port->devfn = of_pci_get_devfn(child);
+ 	if (port->devfn < 0)
+ 		goto skip;
++	if (PCI_FUNC(port->devfn) != 0) {
++		dev_err(dev, "%s: invalid function number, must be zero\n",
++			port->name);
++		goto skip;
++	}
+ 
+ 	ret = mvebu_get_tgt_attr(dev->of_node, port->devfn, IORESOURCE_MEM,
+ 				 &port->mem_target, &port->mem_attr);
+-- 
+2.34.1
+

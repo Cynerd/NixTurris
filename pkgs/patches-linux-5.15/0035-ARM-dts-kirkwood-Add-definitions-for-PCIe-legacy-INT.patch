@@ -1,0 +1,161 @@
+From 17c0e92f81db8b06c2fccc47da25bc14af58e03c Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Mon, 27 Jun 2022 20:14:33 +0200
+Subject: [PATCH 35/90] ARM: dts: kirkwood: Add definitions for PCIe legacy
+ INTx interrupts
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Pali Rohár <pali@kernel.org>
+---
+ arch/arm/boot/dts/kirkwood-6192.dtsi     | 14 ++++++++++--
+ arch/arm/boot/dts/kirkwood-6281.dtsi     | 14 ++++++++++--
+ arch/arm/boot/dts/kirkwood-6282.dtsi     | 28 ++++++++++++++++++++----
+ arch/arm/boot/dts/kirkwood-98dx4122.dtsi | 14 ++++++++++--
+ 4 files changed, 60 insertions(+), 10 deletions(-)
+
+diff --git a/arch/arm/boot/dts/kirkwood-6192.dtsi b/arch/arm/boot/dts/kirkwood-6192.dtsi
+index 396bcba08adb..07f4f7f98c0c 100644
+--- a/arch/arm/boot/dts/kirkwood-6192.dtsi
++++ b/arch/arm/boot/dts/kirkwood-6192.dtsi
+@@ -26,12 +26,22 @@ pcie0: pcie@1,0 {
+ 				ranges = <0x82000000 0 0 0x82000000 0x1 0 1 0
+ 					  0x81000000 0 0 0x81000000 0x1 0 1 0>;
+ 				bus-range = <0x00 0xff>;
+-				interrupt-map-mask = <0 0 0 0>;
+-				interrupt-map = <0 0 0 0 &intc 9>;
++				interrupt-names = "intx";
++				interrupts = <9>;
++				interrupt-map-mask = <0 0 0 7>;
++				interrupt-map = <0 0 0 1 &pcie_intc 0>,
++						<0 0 0 2 &pcie_intc 1>,
++						<0 0 0 3 &pcie_intc 2>,
++						<0 0 0 4 &pcie_intc 3>;
+ 				marvell,pcie-port = <0>;
+ 				marvell,pcie-lane = <0>;
+ 				clocks = <&gate_clk 2>;
+ 				status = "disabled";
++
++				pcie_intc: interrupt-controller {
++					interrupt-controller;
++					#interrupt-cells = <1>;
++				};
+ 			};
+ 		};
+ 	};
+diff --git a/arch/arm/boot/dts/kirkwood-6281.dtsi b/arch/arm/boot/dts/kirkwood-6281.dtsi
+index faa05849a40d..d08a9a5ecc26 100644
+--- a/arch/arm/boot/dts/kirkwood-6281.dtsi
++++ b/arch/arm/boot/dts/kirkwood-6281.dtsi
+@@ -26,12 +26,22 @@ pcie0: pcie@1,0 {
+ 				ranges = <0x82000000 0 0 0x82000000 0x1 0 1 0
+ 					  0x81000000 0 0 0x81000000 0x1 0 1 0>;
+ 				bus-range = <0x00 0xff>;
+-				interrupt-map-mask = <0 0 0 0>;
+-				interrupt-map = <0 0 0 0 &intc 9>;
++				interrupt-names = "intx";
++				interrupts = <9>;
++				interrupt-map-mask = <0 0 0 7>;
++				interrupt-map = <0 0 0 1 &pcie_intc 0>,
++						<0 0 0 2 &pcie_intc 1>,
++						<0 0 0 3 &pcie_intc 2>,
++						<0 0 0 4 &pcie_intc 3>;
+ 				marvell,pcie-port = <0>;
+ 				marvell,pcie-lane = <0>;
+ 				clocks = <&gate_clk 2>;
+ 				status = "disabled";
++
++				pcie_intc: interrupt-controller {
++					interrupt-controller;
++					#interrupt-cells = <1>;
++				};
+ 			};
+ 		};
+ 	};
+diff --git a/arch/arm/boot/dts/kirkwood-6282.dtsi b/arch/arm/boot/dts/kirkwood-6282.dtsi
+index e84c54b77dea..2eea5b304f47 100644
+--- a/arch/arm/boot/dts/kirkwood-6282.dtsi
++++ b/arch/arm/boot/dts/kirkwood-6282.dtsi
+@@ -30,12 +30,22 @@ pcie0: pcie@1,0 {
+ 				ranges = <0x82000000 0 0 0x82000000 0x1 0 1 0
+ 					  0x81000000 0 0 0x81000000 0x1 0 1 0>;
+ 				bus-range = <0x00 0xff>;
+-				interrupt-map-mask = <0 0 0 0>;
+-				interrupt-map = <0 0 0 0 &intc 9>;
++				interrupt-names = "intx";
++				interrupts = <9>;
++				interrupt-map-mask = <0 0 0 7>;
++				interrupt-map = <0 0 0 1 &pcie0_intc 0>,
++						<0 0 0 2 &pcie0_intc 1>,
++						<0 0 0 3 &pcie0_intc 2>,
++						<0 0 0 4 &pcie0_intc 3>;
+ 				marvell,pcie-port = <0>;
+ 				marvell,pcie-lane = <0>;
+ 				clocks = <&gate_clk 2>;
+ 				status = "disabled";
++
++				pcie0_intc: interrupt-controller {
++					interrupt-controller;
++					#interrupt-cells = <1>;
++				};
+ 			};
+ 
+ 			pcie1: pcie@2,0 {
+@@ -48,12 +58,22 @@ pcie1: pcie@2,0 {
+ 				ranges = <0x82000000 0 0 0x82000000 0x2 0 1 0
+ 					  0x81000000 0 0 0x81000000 0x2 0 1 0>;
+ 				bus-range = <0x00 0xff>;
+-				interrupt-map-mask = <0 0 0 0>;
+-				interrupt-map = <0 0 0 0 &intc 10>;
++				interrupt-names = "intx";
++				interrupts = <10>;
++				interrupt-map-mask = <0 0 0 7>;
++				interrupt-map = <0 0 0 1 &pcie1_intc 0>,
++						<0 0 0 2 &pcie1_intc 1>,
++						<0 0 0 3 &pcie1_intc 2>,
++						<0 0 0 4 &pcie1_intc 3>;
+ 				marvell,pcie-port = <1>;
+ 				marvell,pcie-lane = <0>;
+ 				clocks = <&gate_clk 18>;
+ 				status = "disabled";
++
++				pcie1_intc: interrupt-controller {
++					interrupt-controller;
++					#interrupt-cells = <1>;
++				};
+ 			};
+ 		};
+ 	};
+diff --git a/arch/arm/boot/dts/kirkwood-98dx4122.dtsi b/arch/arm/boot/dts/kirkwood-98dx4122.dtsi
+index 299c147298c3..070bc13242b8 100644
+--- a/arch/arm/boot/dts/kirkwood-98dx4122.dtsi
++++ b/arch/arm/boot/dts/kirkwood-98dx4122.dtsi
+@@ -26,12 +26,22 @@ pcie0: pcie@1,0 {
+ 				ranges = <0x82000000 0 0 0x82000000 0x1 0 1 0
+ 					  0x81000000 0 0 0x81000000 0x1 0 1 0>;
+ 				bus-range = <0x00 0xff>;
+-				interrupt-map-mask = <0 0 0 0>;
+-				interrupt-map = <0 0 0 0 &intc 9>;
++				interrupt-names = "intx";
++				interrupts = <9>;
++				interrupt-map-mask = <0 0 0 7>;
++				interrupt-map = <0 0 0 1 &pcie_intc 0>,
++						<0 0 0 2 &pcie_intc 1>,
++						<0 0 0 3 &pcie_intc 2>,
++						<0 0 0 4 &pcie_intc 3>;
+ 				marvell,pcie-port = <0>;
+ 				marvell,pcie-lane = <0>;
+ 				clocks = <&gate_clk 2>;
+ 				status = "disabled";
++
++				pcie_intc: interrupt-controller {
++					interrupt-controller;
++					#interrupt-cells = <1>;
++				};
+ 			};
+ 		};
+ 	};
+-- 
+2.34.1
+

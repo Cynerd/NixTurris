@@ -1,0 +1,64 @@
+From 4792da1beeaa5c782b660bc793d331501dc4216b Mon Sep 17 00:00:00 2001
+From: "Russell King (Oracle)" <rmk+kernel@armlinux.org.uk>
+Date: Wed, 27 Oct 2021 10:49:29 +0100
+Subject: [PATCH 4/4] net: mvpp2: clean up mvpp2_phylink_validate()
+
+mvpp2_phylink_validate() no longer needs to check for
+PHY_INTERFACE_MODE_NA as phylink will walk the supported interface
+types to discover the link mode capabilities. Remove these checks.
+
+Signed-off-by: Russell King (Oracle) <rmk+kernel@armlinux.org.uk>
+Signed-off-by: David S. Miller <davem@davemloft.net>
+---
+ drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c | 17 +++++++----------
+ 1 file changed, 7 insertions(+), 10 deletions(-)
+
+diff --git a/drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c b/drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c
+index a354aa8d7b9a..be0dcba4649b 100644
+--- a/drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c
++++ b/drivers/net/ethernet/marvell/mvpp2/mvpp2_main.c
+@@ -6284,14 +6284,12 @@ static void mvpp2_phylink_validate(struct phylink_config *config,
+ 	switch (state->interface) {
+ 	case PHY_INTERFACE_MODE_10GBASER:
+ 	case PHY_INTERFACE_MODE_XAUI:
+-	case PHY_INTERFACE_MODE_NA:
+ 		if (mvpp2_port_supports_xlg(port)) {
+ 			phylink_set_10g_modes(mask);
+ 			phylink_set(mask, 10000baseKR_Full);
+ 		}
+-		if (state->interface != PHY_INTERFACE_MODE_NA)
+-			break;
+-		fallthrough;
++		break;
++
+ 	case PHY_INTERFACE_MODE_RGMII:
+ 	case PHY_INTERFACE_MODE_RGMII_ID:
+ 	case PHY_INTERFACE_MODE_RGMII_RXID:
+@@ -6303,19 +6301,18 @@ static void mvpp2_phylink_validate(struct phylink_config *config,
+ 		phylink_set(mask, 100baseT_Full);
+ 		phylink_set(mask, 1000baseT_Full);
+ 		phylink_set(mask, 1000baseX_Full);
+-		if (state->interface != PHY_INTERFACE_MODE_NA)
+-			break;
+-		fallthrough;
++		break;
++
+ 	case PHY_INTERFACE_MODE_1000BASEX:
+ 		phylink_set(mask, 1000baseT_Full);
+ 		phylink_set(mask, 1000baseX_Full);
+-		if (state->interface != PHY_INTERFACE_MODE_NA)
+-			break;
+-		fallthrough;
++		break;
++
+ 	case PHY_INTERFACE_MODE_2500BASEX:
+ 		phylink_set(mask, 2500baseT_Full);
+ 		phylink_set(mask, 2500baseX_Full);
+ 		break;
++
+ 	default:
+ 		goto empty_set;
+ 	}
+-- 
+2.35.1
+

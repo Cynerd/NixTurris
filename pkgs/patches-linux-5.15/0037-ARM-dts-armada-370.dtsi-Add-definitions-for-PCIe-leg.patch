@@ -1,0 +1,79 @@
+From 19977423f7549278ed5f4fae7f171d96c31f5817 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Mon, 27 Jun 2022 16:24:58 +0200
+Subject: [PATCH 37/90] ARM: dts: armada-370.dtsi: Add definitions for PCIe
+ legacy INTx interrupts
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Pali Rohár <pali@kernel.org>
+---
+ arch/arm/boot/dts/armada-370.dtsi | 28 ++++++++++++++++++++++++----
+ 1 file changed, 24 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm/boot/dts/armada-370.dtsi b/arch/arm/boot/dts/armada-370.dtsi
+index 46e6d3ed8f35..9dc928859ad3 100644
+--- a/arch/arm/boot/dts/armada-370.dtsi
++++ b/arch/arm/boot/dts/armada-370.dtsi
+@@ -60,16 +60,26 @@ pcie0: pcie@1,0 {
+ 				reg = <0x0800 0 0 0 0>;
+ 				#address-cells = <3>;
+ 				#size-cells = <2>;
++				interrupt-names = "intx";
++				interrupts-extended = <&mpic 58>;
+ 				#interrupt-cells = <1>;
+                                 ranges = <0x82000000 0 0 0x82000000 0x1 0 1 0
+                                           0x81000000 0 0 0x81000000 0x1 0 1 0>;
+ 				bus-range = <0x00 0xff>;
+-				interrupt-map-mask = <0 0 0 0>;
+-				interrupt-map = <0 0 0 0 &mpic 58>;
++				interrupt-map-mask = <0 0 0 7>;
++				interrupt-map = <0 0 0 1 &pcie0_intc 0>,
++						<0 0 0 2 &pcie0_intc 1>,
++						<0 0 0 3 &pcie0_intc 2>,
++						<0 0 0 4 &pcie0_intc 3>;
+ 				marvell,pcie-port = <0>;
+ 				marvell,pcie-lane = <0>;
+ 				clocks = <&gateclk 5>;
+ 				status = "disabled";
++
++				pcie0_intc: interrupt-controller {
++					interrupt-controller;
++					#interrupt-cells = <1>;
++				};
+ 			};
+ 
+ 			pcie2: pcie@2,0 {
+@@ -78,16 +88,26 @@ pcie2: pcie@2,0 {
+ 				reg = <0x1000 0 0 0 0>;
+ 				#address-cells = <3>;
+ 				#size-cells = <2>;
++				interrupt-names = "intx";
++				interrupts-extended = <&mpic 62>;
+ 				#interrupt-cells = <1>;
+                                 ranges = <0x82000000 0 0 0x82000000 0x2 0 1 0
+                                           0x81000000 0 0 0x81000000 0x2 0 1 0>;
+ 				bus-range = <0x00 0xff>;
+-				interrupt-map-mask = <0 0 0 0>;
+-				interrupt-map = <0 0 0 0 &mpic 62>;
++				interrupt-map-mask = <0 0 0 7>;
++				interrupt-map = <0 0 0 1 &pcie2_intc 0>,
++						<0 0 0 2 &pcie2_intc 1>,
++						<0 0 0 3 &pcie2_intc 2>,
++						<0 0 0 4 &pcie2_intc 3>;
+ 				marvell,pcie-port = <1>;
+ 				marvell,pcie-lane = <0>;
+ 				clocks = <&gateclk 9>;
+ 				status = "disabled";
++
++				pcie2_intc: interrupt-controller {
++					interrupt-controller;
++					#interrupt-cells = <1>;
++				};
+ 			};
+ 		};
+ 
+-- 
+2.34.1
+

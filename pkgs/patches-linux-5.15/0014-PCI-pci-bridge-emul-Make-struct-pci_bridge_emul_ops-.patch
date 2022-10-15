@@ -1,0 +1,61 @@
+From 002ef7f63fb628d49f079a02ab0d8f3e08efb94a Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Tue, 16 Nov 2021 10:54:50 +0100
+Subject: [PATCH 14/90] PCI: pci-bridge-emul: Make struct pci_bridge_emul_ops
+ as const
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+It is read-only constant structure, so properly mark it with const keyword.
+
+Signed-off-by: Pali Rohár <pali@kernel.org>
+Acked-by: Thomas Petazzoni <thomas.petazzoni@bootlin.com>
+---
+ drivers/pci/controller/pci-aardvark.c | 2 +-
+ drivers/pci/controller/pci-mvebu.c    | 2 +-
+ drivers/pci/pci-bridge-emul.h         | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/pci/controller/pci-aardvark.c b/drivers/pci/controller/pci-aardvark.c
+index 7cc2c54daad0..3fe4d3329267 100644
+--- a/drivers/pci/controller/pci-aardvark.c
++++ b/drivers/pci/controller/pci-aardvark.c
+@@ -944,7 +944,7 @@ advk_pci_bridge_emul_pcie_conf_write(struct pci_bridge_emul *bridge,
+ 	}
+ }
+ 
+-static struct pci_bridge_emul_ops advk_pci_bridge_emul_ops = {
++static const struct pci_bridge_emul_ops advk_pci_bridge_emul_ops = {
+ 	.read_base = advk_pci_bridge_emul_base_conf_read,
+ 	.write_base = advk_pci_bridge_emul_base_conf_write,
+ 	.read_pcie = advk_pci_bridge_emul_pcie_conf_read,
+diff --git a/drivers/pci/controller/pci-mvebu.c b/drivers/pci/controller/pci-mvebu.c
+index 68aa94a258ff..2ecc1ab12249 100644
+--- a/drivers/pci/controller/pci-mvebu.c
++++ b/drivers/pci/controller/pci-mvebu.c
+@@ -709,7 +709,7 @@ mvebu_pci_bridge_emul_pcie_conf_write(struct pci_bridge_emul *bridge,
+ 	}
+ }
+ 
+-static struct pci_bridge_emul_ops mvebu_pci_bridge_emul_ops = {
++static const struct pci_bridge_emul_ops mvebu_pci_bridge_emul_ops = {
+ 	.read_base = mvebu_pci_bridge_emul_base_conf_read,
+ 	.write_base = mvebu_pci_bridge_emul_base_conf_write,
+ 	.read_pcie = mvebu_pci_bridge_emul_pcie_conf_read,
+diff --git a/drivers/pci/pci-bridge-emul.h b/drivers/pci/pci-bridge-emul.h
+index 49bbd37ee318..0690b6369755 100644
+--- a/drivers/pci/pci-bridge-emul.h
++++ b/drivers/pci/pci-bridge-emul.h
+@@ -112,7 +112,7 @@ struct pci_bridge_reg_behavior;
+ struct pci_bridge_emul {
+ 	struct pci_bridge_emul_conf conf;
+ 	struct pci_bridge_emul_pcie_conf pcie_conf;
+-	struct pci_bridge_emul_ops *ops;
++	const struct pci_bridge_emul_ops *ops;
+ 	struct pci_bridge_reg_behavior *pci_regs_behavior;
+ 	struct pci_bridge_reg_behavior *pcie_cap_regs_behavior;
+ 	void *data;
+-- 
+2.34.1
+

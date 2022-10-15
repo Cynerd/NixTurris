@@ -1,0 +1,33 @@
+From e43fb41649eb974e62b64debc234cba8aed4f978 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Mon, 27 Jun 2022 16:25:39 +0200
+Subject: [PATCH 73/90] ARM: dts: armada-370-xp.dtsi: Add node for MPIC SoC
+ Error IRQ controller
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Pali Rohár <pali@kernel.org>
+---
+ arch/arm/boot/dts/armada-370-xp.dtsi | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/arch/arm/boot/dts/armada-370-xp.dtsi b/arch/arm/boot/dts/armada-370-xp.dtsi
+index 0b8c2a64b36f..7aedacff2c00 100644
+--- a/arch/arm/boot/dts/armada-370-xp.dtsi
++++ b/arch/arm/boot/dts/armada-370-xp.dtsi
+@@ -171,6 +171,11 @@ mpic: interrupt-controller@20a00 {
+ 				#size-cells = <1>;
+ 				interrupt-controller;
+ 				msi-controller;
++
++				soc_err: interrupt-controller@20 {
++					interrupt-controller;
++					#interrupt-cells = <1>;
++				};
+ 			};
+ 
+ 			coherencyfab: coherency-fabric@20200 {
+-- 
+2.34.1
+

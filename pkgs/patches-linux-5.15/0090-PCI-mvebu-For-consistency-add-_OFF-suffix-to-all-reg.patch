@@ -1,0 +1,167 @@
+From 905b0eda8ec724de75d825b1d3625c27beb0bc6d Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Fri, 17 Sep 2021 14:55:03 +0200
+Subject: [PATCH 90/90] PCI: mvebu: For consistency add _OFF suffix to all
+ registers
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Pali Rohár <pali@kernel.org>
+---
+ drivers/pci/controller/pci-mvebu.c | 40 +++++++++++++++---------------
+ 1 file changed, 20 insertions(+), 20 deletions(-)
+
+diff --git a/drivers/pci/controller/pci-mvebu.c b/drivers/pci/controller/pci-mvebu.c
+index 87f1c2aa5010..b04b9bbe9217 100644
+--- a/drivers/pci/controller/pci-mvebu.c
++++ b/drivers/pci/controller/pci-mvebu.c
+@@ -34,7 +34,7 @@
+ #define PCIE_BAR_LO_OFF(n)	(0x0010 + ((n) << 3))
+ #define PCIE_BAR_HI_OFF(n)	(0x0014 + ((n) << 3))
+ #define PCIE_SSDEV_ID_OFF	0x002c
+-#define PCIE_CAP_PCIEXP		0x0060
++#define PCIE_CAP_PCIEXP_OFF	0x0060
+ #define PCIE_CAP_PCIERR_OFF	0x0100
+ #define PCIE_BAR_CTRL_OFF(n)	(0x1804 + (((n) - 1) * 4))
+ #define PCIE_WIN04_CTRL_OFF(n)	(0x1820 + ((n) << 4))
+@@ -83,8 +83,8 @@
+ #define  PCIE_SSPL_SCALE_SHIFT		8
+ #define  PCIE_SSPL_SCALE_MASK		GENMASK(9, 8)
+ #define  PCIE_SSPL_ENABLE		BIT(16)
+-#define PCIE_RC_RTSTA		0x1a14
+-#define PCIE_DEBUG_CTRL         0x1a60
++#define PCIE_RC_RTSTA_OFF	0x1a14
++#define PCIE_DEBUG_CTRL_OFF	0x1a60
+ #define  PCIE_DEBUG_SOFT_RESET		BIT(20)
+ 
+ struct mvebu_pcie_port;
+@@ -296,10 +296,10 @@ static void mvebu_pcie_setup_hw(struct mvebu_pcie_port *port)
+ 	 * be set to number of SerDes PCIe lanes (1 or 4). If this register is
+ 	 * not set correctly then link with endpoint card is not established.
+ 	 */
+-	lnkcap = mvebu_readl(port, PCIE_CAP_PCIEXP + PCI_EXP_LNKCAP);
++	lnkcap = mvebu_readl(port, PCIE_CAP_PCIEXP_OFF + PCI_EXP_LNKCAP);
+ 	lnkcap &= ~PCI_EXP_LNKCAP_MLW;
+ 	lnkcap |= (port->is_x4 ? 4 : 1) << 4;
+-	mvebu_writel(port, lnkcap, PCIE_CAP_PCIEXP + PCI_EXP_LNKCAP);
++	mvebu_writel(port, lnkcap, PCIE_CAP_PCIEXP_OFF + PCI_EXP_LNKCAP);
+ 
+ 	/* Disable Root Bridge I/O space, memory space and bus mastering. */
+ 	cmd = mvebu_readl(port, PCIE_CMD_OFF);
+@@ -695,11 +695,11 @@ mvebu_pci_bridge_emul_pcie_conf_read(struct pci_bridge_emul *bridge,
+ 
+ 	switch (reg) {
+ 	case PCI_EXP_DEVCAP:
+-		*value = mvebu_readl(port, PCIE_CAP_PCIEXP + PCI_EXP_DEVCAP);
++		*value = mvebu_readl(port, PCIE_CAP_PCIEXP_OFF + PCI_EXP_DEVCAP);
+ 		break;
+ 
+ 	case PCI_EXP_DEVCTL:
+-		*value = mvebu_readl(port, PCIE_CAP_PCIEXP + PCI_EXP_DEVCTL);
++		*value = mvebu_readl(port, PCIE_CAP_PCIEXP_OFF + PCI_EXP_DEVCTL);
+ 		break;
+ 
+ 	case PCI_EXP_LNKCAP:
+@@ -709,13 +709,13 @@ mvebu_pci_bridge_emul_pcie_conf_read(struct pci_bridge_emul *bridge,
+ 		 * Additionally enable Data Link Layer Link Active Reporting
+ 		 * Capable bit as DL_Active indication is provided too.
+ 		 */
+-		*value = (mvebu_readl(port, PCIE_CAP_PCIEXP + PCI_EXP_LNKCAP) &
++		*value = (mvebu_readl(port, PCIE_CAP_PCIEXP_OFF + PCI_EXP_LNKCAP) &
+ 			  ~PCI_EXP_LNKCAP_CLKPM) | PCI_EXP_LNKCAP_DLLLARC;
+ 		break;
+ 
+ 	case PCI_EXP_LNKCTL:
+ 		/* DL_Active indication is provided via PCIE_STAT_OFF */
+-		*value = mvebu_readl(port, PCIE_CAP_PCIEXP + PCI_EXP_LNKCTL) |
++		*value = mvebu_readl(port, PCIE_CAP_PCIEXP_OFF + PCI_EXP_LNKCTL) |
+ 			 (mvebu_pcie_link_up(port) ?
+ 			  (PCI_EXP_LNKSTA_DLLLA << 16) : 0);
+ 		break;
+@@ -753,19 +753,19 @@ mvebu_pci_bridge_emul_pcie_conf_read(struct pci_bridge_emul *bridge,
+ 		break;
+ 
+ 	case PCI_EXP_RTSTA:
+-		*value = mvebu_readl(port, PCIE_RC_RTSTA);
++		*value = mvebu_readl(port, PCIE_RC_RTSTA_OFF);
+ 		break;
+ 
+ 	case PCI_EXP_DEVCAP2:
+-		*value = mvebu_readl(port, PCIE_CAP_PCIEXP + PCI_EXP_DEVCAP2);
++		*value = mvebu_readl(port, PCIE_CAP_PCIEXP_OFF + PCI_EXP_DEVCAP2);
+ 		break;
+ 
+ 	case PCI_EXP_DEVCTL2:
+-		*value = mvebu_readl(port, PCIE_CAP_PCIEXP + PCI_EXP_DEVCTL2);
++		*value = mvebu_readl(port, PCIE_CAP_PCIEXP_OFF + PCI_EXP_DEVCTL2);
+ 		break;
+ 
+ 	case PCI_EXP_LNKCTL2:
+-		*value = mvebu_readl(port, PCIE_CAP_PCIEXP + PCI_EXP_LNKCTL2);
++		*value = mvebu_readl(port, PCIE_CAP_PCIEXP_OFF + PCI_EXP_LNKCTL2);
+ 		break;
+ 
+ 	default:
+@@ -907,7 +907,7 @@ mvebu_pci_bridge_emul_pcie_conf_write(struct pci_bridge_emul *bridge,
+ 
+ 	switch (reg) {
+ 	case PCI_EXP_DEVCTL:
+-		mvebu_writel(port, new, PCIE_CAP_PCIEXP + PCI_EXP_DEVCTL);
++		mvebu_writel(port, new, PCIE_CAP_PCIEXP_OFF + PCI_EXP_DEVCTL);
+ 		break;
+ 
+ 	case PCI_EXP_LNKCTL:
+@@ -918,7 +918,7 @@ mvebu_pci_bridge_emul_pcie_conf_write(struct pci_bridge_emul *bridge,
+ 		 */
+ 		new &= ~PCI_EXP_LNKCTL_CLKREQ_EN;
+ 
+-		mvebu_writel(port, new, PCIE_CAP_PCIEXP + PCI_EXP_LNKCTL);
++		mvebu_writel(port, new, PCIE_CAP_PCIEXP_OFF + PCI_EXP_LNKCTL);
+ 		/*
+ 		 * When dropping to Detect via Hot Reset, Disable Link
+ 		 * or Loopback states, the Link Failure interrupt is not
+@@ -958,7 +958,7 @@ mvebu_pci_bridge_emul_pcie_conf_write(struct pci_bridge_emul *bridge,
+ 
+ 	case PCI_EXP_RTSTA:
+ 		/*
+-		 * PME Status bit in Root Status Register (PCIE_RC_RTSTA)
++		 * PME Status bit in Root Status Register (PCIE_RC_RTSTA_OFF)
+ 		 * is read-only and can be cleared only by writing 0b to the
+ 		 * Interrupt Cause RW0C register (PCIE_INT_CAUSE_OFF). So
+ 		 * clear PME via Interrupt Cause and also set port->pme_pending
+@@ -983,11 +983,11 @@ mvebu_pci_bridge_emul_pcie_conf_write(struct pci_bridge_emul *bridge,
+ 		break;
+ 
+ 	case PCI_EXP_DEVCTL2:
+-		mvebu_writel(port, new, PCIE_CAP_PCIEXP + PCI_EXP_DEVCTL2);
++		mvebu_writel(port, new, PCIE_CAP_PCIEXP_OFF + PCI_EXP_DEVCTL2);
+ 		break;
+ 
+ 	case PCI_EXP_LNKCTL2:
+-		mvebu_writel(port, new, PCIE_CAP_PCIEXP + PCI_EXP_LNKCTL2);
++		mvebu_writel(port, new, PCIE_CAP_PCIEXP_OFF + PCI_EXP_LNKCTL2);
+ 		break;
+ 
+ 	default:
+@@ -1047,7 +1047,7 @@ static int mvebu_pci_bridge_emul_init(struct mvebu_pcie_port *port)
+ 	u32 dev_id = mvebu_readl(port, PCIE_DEV_ID_OFF);
+ 	u32 dev_rev = mvebu_readl(port, PCIE_DEV_REV_OFF);
+ 	u32 ssdev_id = mvebu_readl(port, PCIE_SSDEV_ID_OFF);
+-	u32 pcie_cap = mvebu_readl(port, PCIE_CAP_PCIEXP);
++	u32 pcie_cap = mvebu_readl(port, PCIE_CAP_PCIEXP_OFF);
+ 	u8 pcie_cap_ver = ((pcie_cap >> 16) & PCI_EXP_FLAGS_VERS);
+ 
+ 	bridge->conf.vendor = cpu_to_le16(dev_id & 0xffff);
+@@ -1108,7 +1108,7 @@ static int mvebu_pci_bridge_emul_init(struct mvebu_pcie_port *port)
+ 	bridge->subsystem_vendor_id = ssdev_id & 0xffff;
+ 	bridge->subsystem_id = ssdev_id >> 16;
+ 	bridge->has_pcie = true;
+-	bridge->pcie_start = PCIE_CAP_PCIEXP;
++	bridge->pcie_start = PCIE_CAP_PCIEXP_OFF;
+ 	bridge->data = port;
+ 	bridge->ops = &mvebu_pci_bridge_emul_ops;
+ 
+-- 
+2.34.1
+

@@ -1,0 +1,54 @@
+From 848b0bb310d53bfdf4492605ea23f85f5534d7d3 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Tue, 16 Nov 2021 10:51:43 +0100
+Subject: [PATCH 07/90] PCI: mvebu: Check for valid ports
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Some mvebu ports do not have to be initialized. So skip these uninitialized
+mvebu ports in every port iteration function to prevent access to unmapped
+memory or dereferencing NULL pointers. Uninitialized mvebu port has base
+address set to NULL.
+
+Signed-off-by: Pali Rohár <pali@kernel.org>
+Cc: stable@vger.kernel.org
+---
+ drivers/pci/controller/pci-mvebu.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/drivers/pci/controller/pci-mvebu.c b/drivers/pci/controller/pci-mvebu.c
+index 504eb9b94c0f..e4c6dc73159f 100644
+--- a/drivers/pci/controller/pci-mvebu.c
++++ b/drivers/pci/controller/pci-mvebu.c
+@@ -707,6 +707,9 @@ static struct mvebu_pcie_port *mvebu_pcie_find_port(struct mvebu_pcie *pcie,
+ 	for (i = 0; i < pcie->nports; i++) {
+ 		struct mvebu_pcie_port *port = &pcie->ports[i];
+ 
++		if (!port->base)
++			continue;
++
+ 		if (bus->number == 0 && port->devfn == devfn)
+ 			return port;
+ 		if (bus->number != 0 &&
+@@ -882,6 +885,8 @@ static int mvebu_pcie_suspend(struct device *dev)
+ 	pcie = dev_get_drvdata(dev);
+ 	for (i = 0; i < pcie->nports; i++) {
+ 		struct mvebu_pcie_port *port = pcie->ports + i;
++		if (!port->base)
++			continue;
+ 		port->saved_pcie_stat = mvebu_readl(port, PCIE_STAT_OFF);
+ 	}
+ 
+@@ -896,6 +901,8 @@ static int mvebu_pcie_resume(struct device *dev)
+ 	pcie = dev_get_drvdata(dev);
+ 	for (i = 0; i < pcie->nports; i++) {
+ 		struct mvebu_pcie_port *port = pcie->ports + i;
++		if (!port->base)
++			continue;
+ 		mvebu_writel(port, port->saved_pcie_stat, PCIE_STAT_OFF);
+ 		mvebu_pcie_setup_hw(port);
+ 	}
+-- 
+2.34.1
+

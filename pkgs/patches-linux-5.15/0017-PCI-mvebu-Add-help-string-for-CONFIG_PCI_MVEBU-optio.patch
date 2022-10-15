@@ -1,0 +1,34 @@
+From 3eaa66f27317eff5741cc91279e19e00c22f5643 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Sun, 31 Oct 2021 22:57:40 +0100
+Subject: [PATCH 17/90] PCI: mvebu: Add help string for CONFIG_PCI_MVEBU option
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+There is no description for CONFIG_PCI_MVEBU option. Add it.
+
+Signed-off-by: Pali Rohár <pali@kernel.org>
+Acked-by: Thomas Petazzoni <thomas.petazzoni@bootlin.com>
+---
+ drivers/pci/controller/Kconfig | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/drivers/pci/controller/Kconfig b/drivers/pci/controller/Kconfig
+index a4c99ebff85e..46fa9bbff177 100644
+--- a/drivers/pci/controller/Kconfig
++++ b/drivers/pci/controller/Kconfig
+@@ -10,6 +10,10 @@ config PCI_MVEBU
+ 	depends on ARM
+ 	depends on OF
+ 	select PCI_BRIDGE_EMUL
++	help
++	 Add support for Marvell EBU PCIe controller. This PCIe controller
++	 is used on 32-bit Marvell ARM SoCs: Dove, Kirkwood, Armada 370,
++	 Armada XP, Armada 375, Armada 38x and Armada 39x.
+ 
+ config PCI_AARDVARK
+ 	tristate "Aardvark PCIe controller"
+-- 
+2.34.1
+

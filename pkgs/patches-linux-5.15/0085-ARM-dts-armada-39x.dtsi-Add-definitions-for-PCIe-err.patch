@@ -1,0 +1,69 @@
+From 3eb30a9715bc5754c09341c20d296d968d7885a0 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Mon, 27 Jun 2022 17:50:54 +0200
+Subject: [PATCH 85/90] ARM: dts: armada-39x.dtsi: Add definitions for PCIe
+ error interrupts
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Pali Rohár <pali@kernel.org>
+---
+ arch/arm/boot/dts/armada-39x.dtsi | 20 ++++++++++++--------
+ 1 file changed, 12 insertions(+), 8 deletions(-)
+
+diff --git a/arch/arm/boot/dts/armada-39x.dtsi b/arch/arm/boot/dts/armada-39x.dtsi
+index f21231a1f244..f58bd456e5ad 100644
+--- a/arch/arm/boot/dts/armada-39x.dtsi
++++ b/arch/arm/boot/dts/armada-39x.dtsi
+@@ -443,8 +443,9 @@ pcie@1,0 {
+ 				reg = <0x0800 0 0 0 0>;
+ 				#address-cells = <3>;
+ 				#size-cells = <2>;
+-				interrupt-names = "intx";
+-				interrupts-extended = <&gic GIC_SPI 29 IRQ_TYPE_LEVEL_HIGH>;
++				interrupt-names = "intx", "error";
++				interrupts-extended = <&gic GIC_SPI 29 IRQ_TYPE_LEVEL_HIGH>,
++						      <&soc_err 4>;
+ 				#interrupt-cells = <1>;
+ 				ranges = <0x82000000 0 0 0x82000000 0x1 0 1 0
+ 					  0x81000000 0 0 0x81000000 0x1 0 1 0>;
+@@ -472,8 +473,9 @@ pcie@2,0 {
+ 				reg = <0x1000 0 0 0 0>;
+ 				#address-cells = <3>;
+ 				#size-cells = <2>;
+-				interrupt-names = "intx";
+-				interrupts-extended = <&gic GIC_SPI 33 IRQ_TYPE_LEVEL_HIGH>;
++				interrupt-names = "intx", "error";
++				interrupts-extended = <&gic GIC_SPI 33 IRQ_TYPE_LEVEL_HIGH>,
++						      <&soc_err 5>;
+ 				#interrupt-cells = <1>;
+ 				ranges = <0x82000000 0 0 0x82000000 0x2 0 1 0
+ 					  0x81000000 0 0 0x81000000 0x2 0 1 0>;
+@@ -501,8 +503,9 @@ pcie@3,0 {
+ 				reg = <0x1800 0 0 0 0>;
+ 				#address-cells = <3>;
+ 				#size-cells = <2>;
+-				interrupt-names = "intx";
+-				interrupts-extended = <&gic GIC_SPI 70 IRQ_TYPE_LEVEL_HIGH>;
++				interrupt-names = "intx", "error";
++				interrupts-extended = <&gic GIC_SPI 70 IRQ_TYPE_LEVEL_HIGH>,
++						      <&soc_err 15>;
+ 				#interrupt-cells = <1>;
+ 				ranges = <0x82000000 0 0 0x82000000 0x3 0 1 0
+ 					  0x81000000 0 0 0x81000000 0x3 0 1 0>;
+@@ -533,8 +536,9 @@ pcie@4,0 {
+ 				reg = <0x2000 0 0 0 0>;
+ 				#address-cells = <3>;
+ 				#size-cells = <2>;
+-				interrupt-names = "intx";
+-				interrupts-extended = <&gic GIC_SPI 71 IRQ_TYPE_LEVEL_HIGH>;
++				interrupt-names = "intx", "error";
++				interrupts-extended = <&gic GIC_SPI 71 IRQ_TYPE_LEVEL_HIGH>,
++						      <&soc_err 16>;
+ 				#interrupt-cells = <1>;
+ 				ranges = <0x82000000 0 0 0x82000000 0x4 0 1 0
+ 					  0x81000000 0 0 0x81000000 0x4 0 1 0>;
+-- 
+2.34.1
+

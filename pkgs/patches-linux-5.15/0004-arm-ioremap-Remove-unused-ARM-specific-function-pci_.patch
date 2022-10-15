@@ -1,0 +1,55 @@
+From 084358229bf6939d2f5e54e4d3e9aa84bc9240fa Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Tue, 23 Nov 2021 12:24:04 +0100
+Subject: [PATCH 04/90] arm: ioremap: Remove unused ARM-specific function
+ pci_ioremap_io()
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+This function is not used by any driver anymore. So completely remove it.
+
+Signed-off-by: Pali Rohár <pali@kernel.org>
+---
+ arch/arm/include/asm/io.h |  2 --
+ arch/arm/mm/ioremap.c     | 11 -----------
+ 2 files changed, 13 deletions(-)
+
+diff --git a/arch/arm/include/asm/io.h b/arch/arm/include/asm/io.h
+index 79d246ac93ab..2d551fa12a34 100644
+--- a/arch/arm/include/asm/io.h
++++ b/arch/arm/include/asm/io.h
+@@ -179,8 +179,6 @@ void pci_ioremap_set_mem_type(int mem_type);
+ static inline void pci_ioremap_set_mem_type(int mem_type) {}
+ #endif
+ 
+-extern int pci_ioremap_io(unsigned int offset, phys_addr_t phys_addr);
+-
+ /*
+  * PCI configuration space mapping function.
+  *
+diff --git a/arch/arm/mm/ioremap.c b/arch/arm/mm/ioremap.c
+index 2660bdfcad4d..0e67162c978d 100644
+--- a/arch/arm/mm/ioremap.c
++++ b/arch/arm/mm/ioremap.c
+@@ -453,17 +453,6 @@ void pci_ioremap_set_mem_type(int mem_type)
+ 	pci_ioremap_mem_type = mem_type;
+ }
+ 
+-int pci_ioremap_io(unsigned int offset, phys_addr_t phys_addr)
+-{
+-	BUG_ON(offset + SZ_64K - 1 > IO_SPACE_LIMIT);
+-
+-	return ioremap_page_range(PCI_IO_VIRT_BASE + offset,
+-				  PCI_IO_VIRT_BASE + offset + SZ_64K,
+-				  phys_addr,
+-				  __pgprot(get_mem_type(pci_ioremap_mem_type)->prot_pte));
+-}
+-EXPORT_SYMBOL_GPL(pci_ioremap_io);
+-
+ void __iomem *pci_remap_cfgspace(resource_size_t res_cookie, size_t size)
+ {
+ 	return arch_ioremap_caller(res_cookie, size, MT_UNCACHED,
+-- 
+2.34.1
+

@@ -1,0 +1,49 @@
+From 748cb95b78593cba8dd0abbbb7d466322c46bde2 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Thu, 11 Aug 2022 10:57:05 +0200
+Subject: [PATCH 63/90] irqchip/armada-370-xp: Do not call ipi_resume() when
+ IPI is not used
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+When IPI is not used then ipi_resume() does nothing. IPI is used only on
+systems where mpic controller does not parent GIC IRQ (e.g. on Armada XP).
+For documentation purpose add condition when ipi_resume() should be called.
+This simplify understanding of irq-armada-370-xp.c driver when individual
+driver functions are called when they do something. No functional change.
+
+Signed-off-by: Pali Rohár <pali@kernel.org>
+---
+ drivers/irqchip/irq-armada-370-xp.c | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/irqchip/irq-armada-370-xp.c b/drivers/irqchip/irq-armada-370-xp.c
+index 3fa6bd70684b..11b6ce81d17e 100644
+--- a/drivers/irqchip/irq-armada-370-xp.c
++++ b/drivers/irqchip/irq-armada-370-xp.c
+@@ -509,7 +509,9 @@ static void armada_xp_mpic_reenable_percpu(void)
+ 		armada_370_xp_irq_unmask(data);
+ 	}
+ 
+-	ipi_resume();
++	/* IPI is used only when we do not have parent irq */
++	if (parent_irq <= 0)
++		ipi_resume();
+ }
+ 
+ static int armada_xp_mpic_starting_cpu(unsigned int cpu)
+@@ -735,7 +737,9 @@ static void armada_370_xp_mpic_resume(void)
+ 	if (doorbell_mask_reg & PCI_MSI_DOORBELL_MASK)
+ 		writel(1, per_cpu_int_base + ARMADA_370_XP_INT_CLEAR_MASK_OFFS);
+ 
+-	ipi_resume();
++	/* IPI is used only when we do not have parent irq */
++	if (parent_irq <= 0)
++		ipi_resume();
+ }
+ 
+ static struct syscore_ops armada_370_xp_mpic_syscore_ops = {
+-- 
+2.34.1
+

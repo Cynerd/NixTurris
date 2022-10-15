@@ -1,0 +1,35 @@
+From e5a5d4fd63c10ff98847e9c1cfa3c6161f4b69e8 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Thu, 11 Aug 2022 11:15:56 +0200
+Subject: [PATCH 64/90] irqchip/armada-370-xp: Fix comment about unmasking mpic
+ source 1
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+mpic source 1 unmasks MSI interrupts, not IPI interrupt (IPI has source 0).
+Function armada_370_xp_msi_init() is used for initializing MSI interrupts,
+so code is correct (it should enable MSI interrupts; not IPI), just comment
+was wrong.
+
+Signed-off-by: Pali Rohár <pali@kernel.org>
+---
+ drivers/irqchip/irq-armada-370-xp.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/irqchip/irq-armada-370-xp.c b/drivers/irqchip/irq-armada-370-xp.c
+index 11b6ce81d17e..9b28e6269176 100644
+--- a/drivers/irqchip/irq-armada-370-xp.c
++++ b/drivers/irqchip/irq-armada-370-xp.c
+@@ -293,7 +293,7 @@ static int armada_370_xp_msi_init(struct device_node *node,
+ 	writel(reg, per_cpu_int_base +
+ 	       ARMADA_370_XP_IN_DRBEL_MSK_OFFS);
+ 
+-	/* Unmask IPI interrupt */
++	/* Unmask MSI interrupt */
+ 	writel(1, per_cpu_int_base + ARMADA_370_XP_INT_CLEAR_MASK_OFFS);
+ 
+ 	return 0;
+-- 
+2.34.1
+

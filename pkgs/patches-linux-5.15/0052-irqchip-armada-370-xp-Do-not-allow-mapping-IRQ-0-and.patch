@@ -1,0 +1,37 @@
+From 9e71688dc62f92af7691bc3c0c30c25f82022f6d Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Sun, 17 Apr 2022 22:56:55 +0200
+Subject: [PATCH 52/90] irqchip/armada-370-xp: Do not allow mapping IRQ 0 and 1
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+IRQs 0 and 1 cannot be mapped, they are handled internally by this driver
+and this driver does not call generic_handle_domain_irq() for these IRQs.
+So do not allow mapping these IRQs and correctly propagate error from the
+.irq_map callback.
+
+Signed-off-by: Pali Rohár <pali@kernel.org>
+Cc: stable@vger.kernel.org
+---
+ drivers/irqchip/irq-armada-370-xp.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/drivers/irqchip/irq-armada-370-xp.c b/drivers/irqchip/irq-armada-370-xp.c
+index 01709c61e364..3fa6bd70684b 100644
+--- a/drivers/irqchip/irq-armada-370-xp.c
++++ b/drivers/irqchip/irq-armada-370-xp.c
+@@ -546,6 +546,10 @@ static struct irq_chip armada_370_xp_irq_chip = {
+ static int armada_370_xp_mpic_irq_map(struct irq_domain *h,
+ 				      unsigned int virq, irq_hw_number_t hw)
+ {
++	/* IRQs 0 and 1 cannot be mapped, they are handled internally */
++	if (hw <= 1)
++		return -EINVAL;
++
+ 	armada_370_xp_irq_mask(irq_get_irq_data(virq));
+ 	if (!is_percpu_irq(hw))
+ 		writel(hw, per_cpu_int_base +
+-- 
+2.34.1
+

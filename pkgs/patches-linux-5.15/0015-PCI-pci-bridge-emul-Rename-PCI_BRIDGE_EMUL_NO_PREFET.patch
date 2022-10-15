@@ -1,0 +1,69 @@
+From bb5a2178ce576f3100ae3679599777d823f459a4 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Tue, 16 Nov 2021 10:59:52 +0100
+Subject: [PATCH 15/90] PCI: pci-bridge-emul: Rename
+ PCI_BRIDGE_EMUL_NO_PREFETCHABLE_BAR to PCI_BRIDGE_EMUL_NO_PREFMEM_FORWARD
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+This flag describe whether PCI bridge supports forwarding of prefetchable
+memory requests in given range between primary and secondary buses. It does
+not specify if bridge has support for prefetchable memory BAR (moreover
+this pci-bridge-emul.c driver does not provide support for BARs).
+
+So change name of this flag to be less misleading and add comment.
+
+Signed-off-by: Pali Rohár <pali@kernel.org>
+---
+ drivers/pci/controller/pci-mvebu.c | 2 +-
+ drivers/pci/pci-bridge-emul.c      | 2 +-
+ drivers/pci/pci-bridge-emul.h      | 6 +++++-
+ 3 files changed, 7 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/pci/controller/pci-mvebu.c b/drivers/pci/controller/pci-mvebu.c
+index 2ecc1ab12249..2e10ade660a1 100644
+--- a/drivers/pci/controller/pci-mvebu.c
++++ b/drivers/pci/controller/pci-mvebu.c
+@@ -747,7 +747,7 @@ static int mvebu_pci_bridge_emul_init(struct mvebu_pcie_port *port)
+ 	bridge->data = port;
+ 	bridge->ops = &mvebu_pci_bridge_emul_ops;
+ 
+-	return pci_bridge_emul_init(bridge, PCI_BRIDGE_EMUL_NO_PREFETCHABLE_BAR);
++	return pci_bridge_emul_init(bridge, PCI_BRIDGE_EMUL_NO_PREFMEM_FORWARD);
+ }
+ 
+ static inline struct mvebu_pcie *sys_to_pcie(struct pci_sys_data *sys)
+diff --git a/drivers/pci/pci-bridge-emul.c b/drivers/pci/pci-bridge-emul.c
+index c994ebec2360..ceacba03e714 100644
+--- a/drivers/pci/pci-bridge-emul.c
++++ b/drivers/pci/pci-bridge-emul.c
+@@ -377,7 +377,7 @@ int pci_bridge_emul_init(struct pci_bridge_emul *bridge,
+ 			~(BIT(10) << 16);
+ 	}
+ 
+-	if (flags & PCI_BRIDGE_EMUL_NO_PREFETCHABLE_BAR) {
++	if (flags & PCI_BRIDGE_EMUL_NO_PREFMEM_FORWARD) {
+ 		bridge->pci_regs_behavior[PCI_PREF_MEMORY_BASE / 4].ro = ~0;
+ 		bridge->pci_regs_behavior[PCI_PREF_MEMORY_BASE / 4].rw = 0;
+ 	}
+diff --git a/drivers/pci/pci-bridge-emul.h b/drivers/pci/pci-bridge-emul.h
+index 0690b6369755..087b5fa01bcf 100644
+--- a/drivers/pci/pci-bridge-emul.h
++++ b/drivers/pci/pci-bridge-emul.h
+@@ -120,7 +120,11 @@ struct pci_bridge_emul {
+ };
+ 
+ enum {
+-	PCI_BRIDGE_EMUL_NO_PREFETCHABLE_BAR = BIT(0),
++	/*
++	 * PCI bridge does not support forwarding of prefetchable memory
++	 * requests between primary and secondary buses.
++	 */
++	PCI_BRIDGE_EMUL_NO_PREFMEM_FORWARD = BIT(0),
+ };
+ 
+ int pci_bridge_emul_init(struct pci_bridge_emul *bridge,
+-- 
+2.34.1
+

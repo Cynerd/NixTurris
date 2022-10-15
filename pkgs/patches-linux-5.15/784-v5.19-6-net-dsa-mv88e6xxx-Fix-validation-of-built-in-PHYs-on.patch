@@ -1,0 +1,73 @@
+From d2056d3cd927b7c0e0f1a466f77f21b0f6658e7b Mon Sep 17 00:00:00 2001
+From: Tobias Waldekranz <tobias@waldekranz.com>
+Date: Sun, 13 Feb 2022 19:51:54 +0100
+Subject: [PATCH 6/6] net: dsa: mv88e6xxx: Fix validation of built-in PHYs on
+ 6095/6097
+
+These chips have 8 built-in FE PHYs and 3 SERDES interfaces that can
+run at 1G. With the blamed commit, the built-in PHYs could no longer
+be connected to, using an MII PHY interface mode.
+
+Create a separate .phylink_get_caps callback for these chips, which
+takes the FE/GE split into consideration.
+
+Fixes: 2ee84cfefb1e ("net: dsa: mv88e6xxx: convert to phylink_generic_validate()")
+Signed-off-by: Tobias Waldekranz <tobias@waldekranz.com>
+Reviewed-by: Russell King (Oracle) <rmk+kernel@armlinux.org.uk>
+Link: https://lore.kernel.org/r/20220213185154.3262207-1-tobias@waldekranz.com
+Signed-off-by: Jakub Kicinski <kuba@kernel.org>
+---
+ drivers/net/dsa/mv88e6xxx/chip.c | 23 +++++++++++++++++++++--
+ 1 file changed, 21 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/net/dsa/mv88e6xxx/chip.c b/drivers/net/dsa/mv88e6xxx/chip.c
+index 5bac1d54325e..5c3a490a206e 100644
+--- a/drivers/net/dsa/mv88e6xxx/chip.c
++++ b/drivers/net/dsa/mv88e6xxx/chip.c
+@@ -573,6 +573,25 @@ static const u8 mv88e6185_phy_interface_modes[] = {
+ 	[MV88E6185_PORT_STS_CMODE_PHY]		 = PHY_INTERFACE_MODE_SGMII,
+ };
+ 
++static void mv88e6095_phylink_get_caps(struct mv88e6xxx_chip *chip, int port,
++				       struct phylink_config *config)
++{
++	u8 cmode = chip->ports[port].cmode;
++
++	config->mac_capabilities = MAC_SYM_PAUSE | MAC_10 | MAC_100;
++
++	if (mv88e6xxx_phy_is_internal(chip->ds, port)) {
++		__set_bit(PHY_INTERFACE_MODE_MII, config->supported_interfaces);
++	} else {
++		if (cmode < ARRAY_SIZE(mv88e6185_phy_interface_modes) &&
++		    mv88e6185_phy_interface_modes[cmode])
++			__set_bit(mv88e6185_phy_interface_modes[cmode],
++				  config->supported_interfaces);
++
++		config->mac_capabilities |= MAC_1000FD;
++	}
++}
++
+ static void mv88e6185_phylink_get_caps(struct mv88e6xxx_chip *chip, int port,
+ 				       struct phylink_config *config)
+ {
+@@ -3749,7 +3768,7 @@ static const struct mv88e6xxx_ops mv88e6095_ops = {
+ 	.reset = mv88e6185_g1_reset,
+ 	.vtu_getnext = mv88e6185_g1_vtu_getnext,
+ 	.vtu_loadpurge = mv88e6185_g1_vtu_loadpurge,
+-	.phylink_get_caps = mv88e6185_phylink_get_caps,
++	.phylink_get_caps = mv88e6095_phylink_get_caps,
+ 	.set_max_frame_size = mv88e6185_g1_set_max_frame_size,
+ };
+ 
+@@ -3796,7 +3815,7 @@ static const struct mv88e6xxx_ops mv88e6097_ops = {
+ 	.rmu_disable = mv88e6085_g1_rmu_disable,
+ 	.vtu_getnext = mv88e6352_g1_vtu_getnext,
+ 	.vtu_loadpurge = mv88e6352_g1_vtu_loadpurge,
+-	.phylink_get_caps = mv88e6185_phylink_get_caps,
++	.phylink_get_caps = mv88e6095_phylink_get_caps,
+ 	.set_max_frame_size = mv88e6185_g1_set_max_frame_size,
+ };
+ 
+-- 
+2.35.1
+

@@ -1,0 +1,38 @@
+From 589599f1ebbfa109bbcad2758af525b48c01b495 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Wed, 31 Mar 2021 15:14:29 +0200
+Subject: [PATCH 87/90] PCI: pciehp: Enable Command Completed Interrupt only if
+ supported
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+The No Command Completed Support bit in the Slot Capabilities register
+indicates whether Command Completed Interrupt Enable is unsupported.
+
+Enable this interrupt only in the case it is supported.
+
+Signed-off-by: Pali Rohár <pali@kernel.org>
+Signed-off-by: Marek Behún <kabel@kernel.org>
+---
+ drivers/pci/hotplug/pciehp_hpc.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/pci/hotplug/pciehp_hpc.c b/drivers/pci/hotplug/pciehp_hpc.c
+index 5b0d48435b36..701031d809f5 100644
+--- a/drivers/pci/hotplug/pciehp_hpc.c
++++ b/drivers/pci/hotplug/pciehp_hpc.c
+@@ -817,7 +817,9 @@ static void pcie_enable_notification(struct controller *ctrl)
+ 	else
+ 		cmd |= PCI_EXP_SLTCTL_PDCE;
+ 	if (!pciehp_poll_mode)
+-		cmd |= PCI_EXP_SLTCTL_HPIE | PCI_EXP_SLTCTL_CCIE;
++		cmd |= PCI_EXP_SLTCTL_HPIE;
++	if (!pciehp_poll_mode && !NO_CMD_CMPL(ctrl))
++		cmd |= PCI_EXP_SLTCTL_CCIE;
+ 
+ 	mask = (PCI_EXP_SLTCTL_PDCE | PCI_EXP_SLTCTL_ABPE |
+ 		PCI_EXP_SLTCTL_PFDE |
+-- 
+2.34.1
+

@@ -1,0 +1,32 @@
+From 71d68bf335708fe14724bd520d72afcd71ee56dd Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Tue, 2 Nov 2021 11:06:18 +0100
+Subject: [PATCH 67/90] dt-bindings: PCI: mvebu: Update information about error
+ interrupt
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+mvebu error interrupt is triggered by any non-intx event, which is mainly
+some pcie error.
+
+Signed-off-by: Pali Rohár <pali@kernel.org>
+---
+ Documentation/devicetree/bindings/pci/mvebu-pci.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Documentation/devicetree/bindings/pci/mvebu-pci.txt b/Documentation/devicetree/bindings/pci/mvebu-pci.txt
+index 6d022a9d36ee..8f0bca42113f 100644
+--- a/Documentation/devicetree/bindings/pci/mvebu-pci.txt
++++ b/Documentation/devicetree/bindings/pci/mvebu-pci.txt
+@@ -83,6 +83,7 @@ and the following optional properties:
+   specified will default to 100ms, as required by the PCIe specification.
+ - interrupt-names: list of interrupt names, supported are:
+    - "intx" - interrupt line triggered by one of the legacy interrupt
++   - "error" - interrupt line triggered by any other event (non-intx)
+ - interrupts or interrupts-extended: List of the interrupt sources which
+   corresponding to the "interrupt-names". If non-empty then also additional
+   'interrupt-controller' subnode must be defined.
+-- 
+2.34.1
+

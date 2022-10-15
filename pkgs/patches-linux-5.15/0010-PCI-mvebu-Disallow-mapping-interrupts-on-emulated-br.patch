@@ -1,0 +1,51 @@
+From 7931a2a131998d990e5f9732fc3dc448ec672046 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Fri, 17 Sep 2021 13:42:10 +0200
+Subject: [PATCH 10/90] PCI: mvebu: Disallow mapping interrupts on emulated
+ bridges
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Interrupt support on mvebu emulated bridges is not implemented yet.
+
+So properly indicate return value to callers that they cannot request
+interrupts from emulated bridge.
+
+Signed-off-by: Pali Rohár <pali@kernel.org>
+Cc: stable@vger.kernel.org
+---
+ drivers/pci/controller/pci-mvebu.c | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/drivers/pci/controller/pci-mvebu.c b/drivers/pci/controller/pci-mvebu.c
+index 5bf1889cfb38..0a8b552364aa 100644
+--- a/drivers/pci/controller/pci-mvebu.c
++++ b/drivers/pci/controller/pci-mvebu.c
+@@ -787,6 +787,15 @@ static struct pci_ops mvebu_pcie_ops = {
+ 	.write = mvebu_pcie_wr_conf,
+ };
+ 
++static int mvebu_pcie_map_irq(const struct pci_dev *dev, u8 slot, u8 pin)
++{
++	/* Interrupt support on mvebu emulated bridges is not implemented yet */
++	if (dev->bus->number == 0)
++		return 0; /* Proper return code 0 == NO_IRQ */
++
++	return of_irq_parse_and_map_pci(dev, slot, pin);
++}
++
+ static resource_size_t mvebu_pcie_align_resource(struct pci_dev *dev,
+ 						 const struct resource *res,
+ 						 resource_size_t start,
+@@ -1279,6 +1288,7 @@ static int mvebu_pcie_probe(struct platform_device *pdev)
+ 	bridge->sysdata = pcie;
+ 	bridge->ops = &mvebu_pcie_ops;
+ 	bridge->align_resource = mvebu_pcie_align_resource;
++	bridge->map_irq = mvebu_pcie_map_irq;
+ 
+ 	return pci_host_probe(bridge);
+ }
+-- 
+2.34.1
+

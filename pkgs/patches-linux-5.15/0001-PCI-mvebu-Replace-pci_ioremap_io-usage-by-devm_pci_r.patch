@@ -1,0 +1,62 @@
+From 42b54ca7612af1051a744abf00fdd5a04bccb627 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Tue, 23 Nov 2021 12:22:59 +0100
+Subject: [PATCH 01/90] PCI: mvebu: Replace pci_ioremap_io() usage by
+ devm_pci_remap_iospace()
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Now when ARM architecture code also provides standard PCI core function
+pci_remap_iospace(), use its devm_pci_remap_iospace() variant in
+pci-mvebu.c driver instead of old ARM-specific pci_ioremap_io() function.
+
+Call devm_pci_remap_iospace() before adding IO resource to host bridge
+structure, at the place where it should be.
+
+Signed-off-by: Pali Rohár <pali@kernel.org>
+---
+ drivers/pci/controller/pci-mvebu.c | 13 ++++---------
+ 1 file changed, 4 insertions(+), 9 deletions(-)
+
+diff --git a/drivers/pci/controller/pci-mvebu.c b/drivers/pci/controller/pci-mvebu.c
+index 2a3bf82aa4e2..12661311853b 100644
+--- a/drivers/pci/controller/pci-mvebu.c
++++ b/drivers/pci/controller/pci-mvebu.c
+@@ -1082,6 +1082,10 @@ static int mvebu_pcie_parse_request_resources(struct mvebu_pcie *pcie)
+ 					 resource_size(&pcie->io) - 1);
+ 		pcie->realio.name = "PCI I/O";
+ 
++		ret = devm_pci_remap_iospace(dev, &pcie->realio, pcie->io.start);
++		if (ret)
++			return ret;
++
+ 		pci_add_resource(&bridge->windows, &pcie->realio);
+ 		ret = devm_request_resource(dev, &ioport_resource, &pcie->realio);
+ 		if (ret)
+@@ -1100,7 +1104,6 @@ static int mvebu_pcie_parse_request_resources(struct mvebu_pcie *pcie)
+  */
+ static int mvebu_pci_host_probe(struct pci_host_bridge *bridge)
+ {
+-	struct mvebu_pcie *pcie;
+ 	struct pci_bus *bus, *child;
+ 	int ret;
+ 
+@@ -1110,14 +1113,6 @@ static int mvebu_pci_host_probe(struct pci_host_bridge *bridge)
+ 		return ret;
+ 	}
+ 
+-	pcie = pci_host_bridge_priv(bridge);
+-	if (resource_size(&pcie->io) != 0) {
+-		unsigned int i;
+-
+-		for (i = 0; i < resource_size(&pcie->realio); i += SZ_64K)
+-			pci_ioremap_io(i, pcie->io.start + i);
+-	}
+-
+ 	bus = bridge->bus;
+ 
+ 	/*
+-- 
+2.34.1
+

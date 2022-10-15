@@ -1,0 +1,43 @@
+From 9740547f8b4a338e7d67760db774ef49033ed033 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Mon, 27 Jun 2022 16:31:57 +0200
+Subject: [PATCH 77/90] ARM: dts: armada-370.dtsi: Add definitions for PCIe
+ error interrupts
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Pali Rohár <pali@kernel.org>
+---
+ arch/arm/boot/dts/armada-370.dtsi | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm/boot/dts/armada-370.dtsi b/arch/arm/boot/dts/armada-370.dtsi
+index 2013a5ccecd3..9daece786a53 100644
+--- a/arch/arm/boot/dts/armada-370.dtsi
++++ b/arch/arm/boot/dts/armada-370.dtsi
+@@ -60,8 +60,8 @@ pcie0: pcie@1,0 {
+ 				reg = <0x0800 0 0 0 0>;
+ 				#address-cells = <3>;
+ 				#size-cells = <2>;
+-				interrupt-names = "intx";
+-				interrupts-extended = <&mpic 58>;
++				interrupt-names = "intx", "error";
++				interrupts-extended = <&mpic 58>, <&soc_err 4>;
+ 				#interrupt-cells = <1>;
+                                 ranges = <0x82000000 0 0 0x82000000 0x1 0 1 0
+                                           0x81000000 0 0 0x81000000 0x1 0 1 0>;
+@@ -88,8 +88,8 @@ pcie2: pcie@2,0 {
+ 				reg = <0x1000 0 0 0 0>;
+ 				#address-cells = <3>;
+ 				#size-cells = <2>;
+-				interrupt-names = "intx";
+-				interrupts-extended = <&mpic 62>;
++				interrupt-names = "intx", "error";
++				interrupts-extended = <&mpic 62>, <&soc_err 5>;
+ 				#interrupt-cells = <1>;
+                                 ranges = <0x82000000 0 0 0x82000000 0x2 0 1 0
+                                           0x81000000 0 0 0x81000000 0x2 0 1 0>;
+-- 
+2.34.1
+

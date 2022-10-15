@@ -1,0 +1,47 @@
+From fbe986f71d0b5c280cbf08a3ce11d121739f9c8f Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Fri, 17 Sep 2021 14:54:29 +0200
+Subject: [PATCH 89/90] PCI: mvebu: use BIT() and GENMASK() macros instead of
+ hardcoded hex values
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Pali Rohár <pali@kernel.org>
+---
+ drivers/pci/controller/pci-mvebu.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/pci/controller/pci-mvebu.c b/drivers/pci/controller/pci-mvebu.c
+index 2792b02278b9..87f1c2aa5010 100644
+--- a/drivers/pci/controller/pci-mvebu.c
++++ b/drivers/pci/controller/pci-mvebu.c
+@@ -44,7 +44,7 @@
+ #define PCIE_WIN5_BASE_OFF	0x1884
+ #define PCIE_WIN5_REMAP_OFF	0x188c
+ #define PCIE_CONF_ADDR_OFF	0x18f8
+-#define  PCIE_CONF_ADDR_EN		0x80000000
++#define  PCIE_CONF_ADDR_EN		BIT(31)
+ #define  PCIE_CONF_REG(r)		((((r) & 0xf00) << 16) | ((r) & 0xfc))
+ #define  PCIE_CONF_BUS(b)		(((b) & 0xff) << 16)
+ #define  PCIE_CONF_DEV(d)		(((d) & 0x1f) << 11)
+@@ -70,13 +70,13 @@
+ #define  PCIE_INT_ERR_MASK		(PCIE_INT_ERR_FATAL | PCIE_INT_ERR_NONFATAL | PCIE_INT_ERR_COR)
+ #define  PCIE_INT_ALL_MASK		GENMASK(31, 0)
+ #define PCIE_CTRL_OFF		0x1a00
+-#define  PCIE_CTRL_X1_MODE		0x0001
++#define  PCIE_CTRL_X1_MODE		BIT(0)
+ #define  PCIE_CTRL_RC_MODE		BIT(1)
+ #define  PCIE_CTRL_MASTER_HOT_RESET	BIT(24)
+ #define PCIE_STAT_OFF		0x1a04
+-#define  PCIE_STAT_BUS                  0xff00
+-#define  PCIE_STAT_DEV                  0x1f0000
+ #define  PCIE_STAT_LINK_DOWN		BIT(0)
++#define  PCIE_STAT_BUS			GENMASK(15, 8)
++#define  PCIE_STAT_DEV			GENMASK(20, 16)
+ #define PCIE_SSPL_OFF		0x1a0c
+ #define  PCIE_SSPL_VALUE_SHIFT		0
+ #define  PCIE_SSPL_VALUE_MASK		GENMASK(7, 0)
+-- 
+2.34.1
+

@@ -1,0 +1,94 @@
+From 1e7448b4d20311d861dd8e7e9cfa60fea643b001 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Mon, 27 Jun 2022 20:15:56 +0200
+Subject: [PATCH 69/90] ARM: dts: kirkwood: Add definitions for PCIe error
+ interrupts
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+First PCIe controller on Kirkwood SoC reports error interrupt via IRQ 44
+and second PCIe controller via IRQ 45.
+
+Signed-off-by: Pali Rohár <pali@kernel.org>
+---
+ arch/arm/boot/dts/kirkwood-6192.dtsi     | 4 ++--
+ arch/arm/boot/dts/kirkwood-6281.dtsi     | 4 ++--
+ arch/arm/boot/dts/kirkwood-6282.dtsi     | 8 ++++----
+ arch/arm/boot/dts/kirkwood-98dx4122.dtsi | 4 ++--
+ 4 files changed, 10 insertions(+), 10 deletions(-)
+
+diff --git a/arch/arm/boot/dts/kirkwood-6192.dtsi b/arch/arm/boot/dts/kirkwood-6192.dtsi
+index 07f4f7f98c0c..705c0d7effed 100644
+--- a/arch/arm/boot/dts/kirkwood-6192.dtsi
++++ b/arch/arm/boot/dts/kirkwood-6192.dtsi
+@@ -26,8 +26,8 @@ pcie0: pcie@1,0 {
+ 				ranges = <0x82000000 0 0 0x82000000 0x1 0 1 0
+ 					  0x81000000 0 0 0x81000000 0x1 0 1 0>;
+ 				bus-range = <0x00 0xff>;
+-				interrupt-names = "intx";
+-				interrupts = <9>;
++				interrupt-names = "intx", "error";
++				interrupts = <9>, <44>;
+ 				interrupt-map-mask = <0 0 0 7>;
+ 				interrupt-map = <0 0 0 1 &pcie_intc 0>,
+ 						<0 0 0 2 &pcie_intc 1>,
+diff --git a/arch/arm/boot/dts/kirkwood-6281.dtsi b/arch/arm/boot/dts/kirkwood-6281.dtsi
+index d08a9a5ecc26..8e311165fd13 100644
+--- a/arch/arm/boot/dts/kirkwood-6281.dtsi
++++ b/arch/arm/boot/dts/kirkwood-6281.dtsi
+@@ -26,8 +26,8 @@ pcie0: pcie@1,0 {
+ 				ranges = <0x82000000 0 0 0x82000000 0x1 0 1 0
+ 					  0x81000000 0 0 0x81000000 0x1 0 1 0>;
+ 				bus-range = <0x00 0xff>;
+-				interrupt-names = "intx";
+-				interrupts = <9>;
++				interrupt-names = "intx", "error";
++				interrupts = <9>, <44>;
+ 				interrupt-map-mask = <0 0 0 7>;
+ 				interrupt-map = <0 0 0 1 &pcie_intc 0>,
+ 						<0 0 0 2 &pcie_intc 1>,
+diff --git a/arch/arm/boot/dts/kirkwood-6282.dtsi b/arch/arm/boot/dts/kirkwood-6282.dtsi
+index 2eea5b304f47..e33723160ce7 100644
+--- a/arch/arm/boot/dts/kirkwood-6282.dtsi
++++ b/arch/arm/boot/dts/kirkwood-6282.dtsi
+@@ -30,8 +30,8 @@ pcie0: pcie@1,0 {
+ 				ranges = <0x82000000 0 0 0x82000000 0x1 0 1 0
+ 					  0x81000000 0 0 0x81000000 0x1 0 1 0>;
+ 				bus-range = <0x00 0xff>;
+-				interrupt-names = "intx";
+-				interrupts = <9>;
++				interrupt-names = "intx", "error";
++				interrupts = <9>, <44>;
+ 				interrupt-map-mask = <0 0 0 7>;
+ 				interrupt-map = <0 0 0 1 &pcie0_intc 0>,
+ 						<0 0 0 2 &pcie0_intc 1>,
+@@ -58,8 +58,8 @@ pcie1: pcie@2,0 {
+ 				ranges = <0x82000000 0 0 0x82000000 0x2 0 1 0
+ 					  0x81000000 0 0 0x81000000 0x2 0 1 0>;
+ 				bus-range = <0x00 0xff>;
+-				interrupt-names = "intx";
+-				interrupts = <10>;
++				interrupt-names = "intx", "error";
++				interrupts = <10>, <45>;
+ 				interrupt-map-mask = <0 0 0 7>;
+ 				interrupt-map = <0 0 0 1 &pcie1_intc 0>,
+ 						<0 0 0 2 &pcie1_intc 1>,
+diff --git a/arch/arm/boot/dts/kirkwood-98dx4122.dtsi b/arch/arm/boot/dts/kirkwood-98dx4122.dtsi
+index 070bc13242b8..c3469a2fc58a 100644
+--- a/arch/arm/boot/dts/kirkwood-98dx4122.dtsi
++++ b/arch/arm/boot/dts/kirkwood-98dx4122.dtsi
+@@ -26,8 +26,8 @@ pcie0: pcie@1,0 {
+ 				ranges = <0x82000000 0 0 0x82000000 0x1 0 1 0
+ 					  0x81000000 0 0 0x81000000 0x1 0 1 0>;
+ 				bus-range = <0x00 0xff>;
+-				interrupt-names = "intx";
+-				interrupts = <9>;
++				interrupt-names = "intx", "error";
++				interrupts = <9>, <44>;
+ 				interrupt-map-mask = <0 0 0 7>;
+ 				interrupt-map = <0 0 0 1 &pcie_intc 0>,
+ 						<0 0 0 2 &pcie_intc 1>,
+-- 
+2.34.1
+

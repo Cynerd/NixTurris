@@ -1,0 +1,51 @@
+From f589f5a4a08608cf0fc5184b82e1404250632530 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Thu, 1 Sep 2022 11:32:28 +0200
+Subject: [PATCH 1/2] PCI: aardvark: Replace custom PCIE_CORE_ERR_CAPCTL_*
+ macros by linux/pci_regs.h macros
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Kernel already has these macros defined under different names.
+
+Signed-off-by: Pali Rohár <pali@kernel.org>
+Signed-off-by: Marek Behún <kabel@kernel.org>
+---
+ drivers/pci/controller/pci-aardvark.c | 13 +++----------
+ 1 file changed, 3 insertions(+), 10 deletions(-)
+
+diff --git a/drivers/pci/controller/pci-aardvark.c b/drivers/pci/controller/pci-aardvark.c
+index defaf74935a3..a5b1ebfb9520 100644
+--- a/drivers/pci/controller/pci-aardvark.c
++++ b/drivers/pci/controller/pci-aardvark.c
+@@ -38,11 +38,6 @@
+ #define PCIE_CORE_SSDEV_ID_REG					0x2c
+ #define PCIE_CORE_PCIEXP_CAP					0xc0
+ #define PCIE_CORE_PCIERR_CAP					0x100
+-#define PCIE_CORE_ERR_CAPCTL_REG				0x118
+-#define     PCIE_CORE_ERR_CAPCTL_ECRC_CHK_TX			BIT(5)
+-#define     PCIE_CORE_ERR_CAPCTL_ECRC_CHK_TX_EN			BIT(6)
+-#define     PCIE_CORE_ERR_CAPCTL_ECRC_CHCK			BIT(7)
+-#define     PCIE_CORE_ERR_CAPCTL_ECRC_CHCK_RCV			BIT(8)
+ /* PIO registers base address and register offsets */
+ #define PIO_BASE_ADDR				0x4000
+ #define PIO_CTRL				(PIO_BASE_ADDR + 0x0)
+@@ -592,11 +587,9 @@ static void advk_pcie_setup_hw(struct advk_pcie *pcie)
+ 	advk_writel(pcie, reg, PCIE_CORE_CMD_STATUS_REG);
+ 
+ 	/* Set Advanced Error Capabilities and Control PF0 register */
+-	reg = PCIE_CORE_ERR_CAPCTL_ECRC_CHK_TX |
+-		PCIE_CORE_ERR_CAPCTL_ECRC_CHK_TX_EN |
+-		PCIE_CORE_ERR_CAPCTL_ECRC_CHCK |
+-		PCIE_CORE_ERR_CAPCTL_ECRC_CHCK_RCV;
+-	advk_writel(pcie, reg, PCIE_CORE_ERR_CAPCTL_REG);
++	reg = PCI_ERR_CAP_ECRC_GENC | PCI_ERR_CAP_ECRC_GENE |
++	      PCI_ERR_CAP_ECRC_CHKC | PCI_ERR_CAP_ECRC_CHKE;
++	advk_writel(pcie, reg, PCIE_CORE_PCIERR_CAP + PCI_ERR_CAP);
+ 
+ 	/* Set PCIe Device Control register */
+ 	reg = advk_readl(pcie, PCIE_CORE_PCIEXP_CAP + PCI_EXP_DEVCTL);
+-- 
+2.34.1
+

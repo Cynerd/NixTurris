@@ -1,0 +1,39 @@
+From b47763b59b70859fdcb98e228ac5d762cca39ab7 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Fri, 17 Sep 2021 11:57:20 +0200
+Subject: [PATCH 22/90] PCI: mvebu: Update comment for PCI_EXP_LNKCTL register
+ on emulated bridge
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Logic and code for clearing PCI_EXP_LNKCTL_CLKREQ_EN bit is correct, but
+comment describing it is misleading. PCI_EXP_LNKCTL_CLKREQ_EN bit should be
+hardwired to zero but mvebu hw allows to change it.
+
+Signed-off-by: Pali Rohár <pali@kernel.org>
+---
+ drivers/pci/controller/pci-mvebu.c | 7 +++----
+ 1 file changed, 3 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/pci/controller/pci-mvebu.c b/drivers/pci/controller/pci-mvebu.c
+index 1aac65977b97..dffa330de174 100644
+--- a/drivers/pci/controller/pci-mvebu.c
++++ b/drivers/pci/controller/pci-mvebu.c
+@@ -663,10 +663,9 @@ mvebu_pci_bridge_emul_pcie_conf_write(struct pci_bridge_emul *bridge,
+ 
+ 	case PCI_EXP_LNKCTL:
+ 		/*
+-		 * If we don't support CLKREQ, we must ensure that the
+-		 * CLKREQ enable bit always reads zero.  Since we haven't
+-		 * had this capability, and it's dependent on board wiring,
+-		 * disable it for the time being.
++		 * PCIe requires that the Enable Clock Power Management bit
++		 * is hard-wired to zero for downstream ports but HW allows
++		 * to change it.
+ 		 */
+ 		new &= ~PCI_EXP_LNKCTL_CLKREQ_EN;
+ 
+-- 
+2.34.1
+

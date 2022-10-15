@@ -1,0 +1,33 @@
+From 4a4519b81a342e4fe0616d839f07c215325aed86 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Tue, 16 Nov 2021 20:18:18 +0100
+Subject: [PATCH 18/90] PCI: mvebu: Remove duplicate nports assignment
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Member pcie->nports is initialized to correct value before the previous
+for-loop. There is not need to initialize it more times.
+
+Signed-off-by: Pali Rohár <pali@kernel.org>
+Acked-by: Thomas Petazzoni <thomas.petazzoni@bootlin.com>
+---
+ drivers/pci/controller/pci-mvebu.c | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/drivers/pci/controller/pci-mvebu.c b/drivers/pci/controller/pci-mvebu.c
+index 2e10ade660a1..016f709b3067 100644
+--- a/drivers/pci/controller/pci-mvebu.c
++++ b/drivers/pci/controller/pci-mvebu.c
+@@ -1337,8 +1337,6 @@ static int mvebu_pcie_probe(struct platform_device *pdev)
+ 		mvebu_pcie_set_local_bus_nr(port, 0);
+ 	}
+ 
+-	pcie->nports = i;
+-
+ 	bridge->sysdata = pcie;
+ 	bridge->ops = &mvebu_pcie_ops;
+ 	bridge->align_resource = mvebu_pcie_align_resource;
+-- 
+2.34.1
+

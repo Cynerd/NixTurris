@@ -1,0 +1,79 @@
+From d7af6212b6962f75c52dd61516ab92eb448a83bb Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Mon, 27 Jun 2022 19:33:45 +0200
+Subject: [PATCH 78/90] ARM: dts: armada-xp-mv78230.dtsi: Add definitions for
+ PCIe error interrupts
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+PCIe controllers on Marvell Port 0 share MPIC SoC Error IRQ 4 and PCIe
+controller on Marvell Port 1 uses MPIC SoC Error IRQ 5.
+
+Signed-off-by: Pali Rohár <pali@kernel.org>
+---
+ arch/arm/boot/dts/armada-xp-mv78230.dtsi | 20 ++++++++++----------
+ 1 file changed, 10 insertions(+), 10 deletions(-)
+
+diff --git a/arch/arm/boot/dts/armada-xp-mv78230.dtsi b/arch/arm/boot/dts/armada-xp-mv78230.dtsi
+index 5ea9d509cd30..b8d169c4feec 100644
+--- a/arch/arm/boot/dts/armada-xp-mv78230.dtsi
++++ b/arch/arm/boot/dts/armada-xp-mv78230.dtsi
+@@ -83,8 +83,8 @@ pcie1: pcie@1,0 {
+ 				reg = <0x0800 0 0 0 0>;
+ 				#address-cells = <3>;
+ 				#size-cells = <2>;
+-				interrupt-names = "intx";
+-				interrupts-extended = <&mpic 58>;
++				interrupt-names = "intx", "error";
++				interrupts-extended = <&mpic 58>, <&soc_err 4>;
+ 				#interrupt-cells = <1>;
+ 				ranges = <0x82000000 0 0 0x82000000 0x1 0 1 0
+ 					  0x81000000 0 0 0x81000000 0x1 0 1 0>;
+@@ -111,8 +111,8 @@ pcie2: pcie@2,0 {
+ 				reg = <0x1000 0 0 0 0>;
+ 				#address-cells = <3>;
+ 				#size-cells = <2>;
+-				interrupt-names = "intx";
+-				interrupts-extended = <&mpic 59>;
++				interrupt-names = "intx", "error";
++				interrupts-extended = <&mpic 59>, <&soc_err 4>;
+ 				#interrupt-cells = <1>;
+ 				ranges = <0x82000000 0 0 0x82000000 0x2 0 1 0
+ 					  0x81000000 0 0 0x81000000 0x2 0 1 0>;
+@@ -139,8 +139,8 @@ pcie3: pcie@3,0 {
+ 				reg = <0x1800 0 0 0 0>;
+ 				#address-cells = <3>;
+ 				#size-cells = <2>;
+-				interrupt-names = "intx";
+-				interrupts-extended = <&mpic 60>;
++				interrupt-names = "intx", "error";
++				interrupts-extended = <&mpic 60>, <&soc_err 4>;
+ 				#interrupt-cells = <1>;
+ 				ranges = <0x82000000 0 0 0x82000000 0x3 0 1 0
+ 					  0x81000000 0 0 0x81000000 0x3 0 1 0>;
+@@ -167,8 +167,8 @@ pcie4: pcie@4,0 {
+ 				reg = <0x2000 0 0 0 0>;
+ 				#address-cells = <3>;
+ 				#size-cells = <2>;
+-				interrupt-names = "intx";
+-				interrupts-extended = <&mpic 61>;
++				interrupt-names = "intx", "error";
++				interrupts-extended = <&mpic 61>, <&soc_err 4>;
+ 				#interrupt-cells = <1>;
+ 				ranges = <0x82000000 0 0 0x82000000 0x4 0 1 0
+ 					  0x81000000 0 0 0x81000000 0x4 0 1 0>;
+@@ -195,8 +195,8 @@ pcie5: pcie@5,0 {
+ 				reg = <0x2800 0 0 0 0>;
+ 				#address-cells = <3>;
+ 				#size-cells = <2>;
+-				interrupt-names = "intx";
+-				interrupts-extended = <&mpic 62>;
++				interrupt-names = "intx", "error";
++				interrupts-extended = <&mpic 62>, <&soc_err 5>;
+ 				#interrupt-cells = <1>;
+ 				ranges = <0x82000000 0 0 0x82000000 0x5 0 1 0
+ 					  0x81000000 0 0 0x81000000 0x5 0 1 0>;
+-- 
+2.34.1
+

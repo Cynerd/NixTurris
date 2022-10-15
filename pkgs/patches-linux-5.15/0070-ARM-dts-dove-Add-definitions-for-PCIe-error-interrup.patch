@@ -1,0 +1,46 @@
+From db1cf8c55bbea9735a91e550bcea4b2d9abf1d39 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Mon, 27 Jun 2022 20:18:11 +0200
+Subject: [PATCH 70/90] ARM: dts: dove: Add definitions for PCIe error
+ interrupts
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+First PCIe controller on Dove SoC reports error interrupt via IRQ 15
+and second PCIe controller via IRQ 17.
+
+Signed-off-by: Pali Rohár <pali@kernel.org>
+---
+ arch/arm/boot/dts/dove.dtsi | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm/boot/dts/dove.dtsi b/arch/arm/boot/dts/dove.dtsi
+index 70d45d2b1258..9aee3cfd3e98 100644
+--- a/arch/arm/boot/dts/dove.dtsi
++++ b/arch/arm/boot/dts/dove.dtsi
+@@ -122,8 +122,8 @@ pcie0: pcie@1 {
+ 				bus-range = <0x00 0xff>;
+ 
+ 				#interrupt-cells = <1>;
+-				interrupt-names = "intx";
+-				interrupts = <16>;
++				interrupt-names = "intx", "error";
++				interrupts = <16>, <15>;
+ 				interrupt-map-mask = <0 0 0 7>;
+ 				interrupt-map = <0 0 0 1 &pcie0_intc 0>,
+ 						<0 0 0 2 &pcie0_intc 1>,
+@@ -151,8 +151,8 @@ pcie1: pcie@2 {
+ 				bus-range = <0x00 0xff>;
+ 
+ 				#interrupt-cells = <1>;
+-				interrupt-names = "intx";
+-				interrupts = <18>;
++				interrupt-names = "intx", "error";
++				interrupts = <18>, <17>;
+ 				interrupt-map-mask = <0 0 0 7>;
+ 				interrupt-map = <0 0 0 1 &pcie1_intc 0>,
+ 						<0 0 0 2 &pcie1_intc 1>,
+-- 
+2.34.1
+

@@ -1,0 +1,41 @@
+From 2749ad1d3c854bf6926d2582cc2a7f727d0d53b3 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Wed, 24 Aug 2022 15:59:49 +0200
+Subject: [PATCH 5/9] PCI: aardvark: Dispose bridge irq prior to removing
+ bridge domain
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Documentation for irq_domain_remove() says that all mapping within the
+domain must be disposed prior to domain remove.
+
+Currently bridge irq is not disposed in pci-aardvark.c device unbind callback
+which cause that kernel crashes after unloading driver and trying to read
+/sys/kernel/debug/irq/irqs/<num> or /proc/interrupts.
+
+Fixes: 815bc3136867 ("PCI: aardvark: Use separate INTA interrupt for emulated root bridge")
+Signed-off-by: Pali Rohár <pali@kernel.org>
+---
+ drivers/pci/controller/pci-aardvark.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/drivers/pci/controller/pci-aardvark.c b/drivers/pci/controller/pci-aardvark.c
+index f2be2ba51217..db97dc0a8ad7 100644
+--- a/drivers/pci/controller/pci-aardvark.c
++++ b/drivers/pci/controller/pci-aardvark.c
+@@ -1579,6 +1579,11 @@ static int advk_pcie_init_rp_irq_domain(struct advk_pcie *pcie)
+ 
+ static void advk_pcie_remove_rp_irq_domain(struct advk_pcie *pcie)
+ {
++	int virq;
++
++	virq = irq_find_mapping(pcie->rp_irq_domain, 0);
++	if (virq > 0)
++		irq_dispose_mapping(virq);
+ 	irq_domain_remove(pcie->rp_irq_domain);
+ }
+ 
+-- 
+2.34.1
+

@@ -1,0 +1,42 @@
+From 7324692109764dbd416a308e796ef1d463d07100 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Fri, 6 May 2022 14:22:28 +0200
+Subject: [PATCH 71/90] dt-bindings: irqchip: armada-370-xp: Update information
+ about MPIC SoC Error
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Pali Rohár <pali@kernel.org>
+---
+ .../interrupt-controller/marvell,armada-370-xp-mpic.txt  | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/Documentation/devicetree/bindings/interrupt-controller/marvell,armada-370-xp-mpic.txt b/Documentation/devicetree/bindings/interrupt-controller/marvell,armada-370-xp-mpic.txt
+index 5fc03134a999..8cddbc16ddbd 100644
+--- a/Documentation/devicetree/bindings/interrupt-controller/marvell,armada-370-xp-mpic.txt
++++ b/Documentation/devicetree/bindings/interrupt-controller/marvell,armada-370-xp-mpic.txt
+@@ -24,6 +24,11 @@ Optional properties:
+   connected as a slave to the Cortex-A9 GIC. The provided interrupt
+   indicate to which GIC interrupt the MPIC output is connected.
+ 
++Optional subnodes:
++
++- interrupt-controller@20 with interrupt-controller property for
++  MPIC SoC Error IRQ controller
++
+ Example:
+ 
+         mpic: interrupt-controller@d0020000 {
+@@ -35,4 +40,8 @@ Example:
+               msi-controller;
+               reg = <0xd0020a00 0x1d0>,
+                     <0xd0021070 0x58>;
++              soc_err: interrupt-controller@20 {
++                    interrupt-controller;
++                    #interrupt-cells = <1>;
++              };
+         };
+-- 
+2.34.1
+

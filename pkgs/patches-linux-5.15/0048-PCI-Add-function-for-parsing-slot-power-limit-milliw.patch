@@ -1,0 +1,135 @@
+From 3514828cb2cf52e545fe71bb7dc2d105d8b0084e Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Sun, 31 Oct 2021 16:07:06 +0100
+Subject: [PATCH 48/90] PCI: Add function for parsing
+ 'slot-power-limit-milliwatt' DT property
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Add function of_pci_get_slot_power_limit(), which parses the
+'slot-power-limit-milliwatt' DT property, returning the value in
+milliwatts and in format ready for the PCIe Slot Capabilities Register.
+
+Signed-off-by: Pali Rohár <pali@kernel.org>
+Signed-off-by: Marek Behún <kabel@kernel.org>
+Reviewed-by: Rob Herring <robh@kernel.org>
+---
+ drivers/pci/of.c  | 70 +++++++++++++++++++++++++++++++++++++++++++++++
+ drivers/pci/pci.h | 15 ++++++++++
+ 2 files changed, 85 insertions(+)
+
+diff --git a/drivers/pci/of.c b/drivers/pci/of.c
+index d84381ce82b5..1372da653929 100644
+--- a/drivers/pci/of.c
++++ b/drivers/pci/of.c
+@@ -627,3 +627,73 @@ int of_pci_get_max_link_speed(struct device_node *node)
+ 	return max_link_speed;
+ }
+ EXPORT_SYMBOL_GPL(of_pci_get_max_link_speed);
++
++/**
++ * of_pci_get_slot_power_limit - Parses the "slot-power-limit-milliwatt"
++ *				 property.
++ *
++ * @node: device tree node with the slot power limit information
++ * @slot_power_limit_value: pointer where the value should be stored in PCIe
++ *			    Slot Capabilities Register format
++ * @slot_power_limit_scale: pointer where the scale should be stored in PCIe
++ *			    Slot Capabilities Register format
++ *
++ * Returns the slot power limit in milliwatts and if @slot_power_limit_value
++ * and @slot_power_limit_scale pointers are non-NULL, fills in the value and
++ * scale in format used by PCIe Slot Capabilities Register.
++ *
++ * If the property is not found or is invalid, returns 0.
++ */
++u32 of_pci_get_slot_power_limit(struct device_node *node,
++				u8 *slot_power_limit_value,
++				u8 *slot_power_limit_scale)
++{
++	u32 slot_power_limit_mw;
++	u8 value, scale;
++
++	if (of_property_read_u32(node, "slot-power-limit-milliwatt",
++				 &slot_power_limit_mw))
++		slot_power_limit_mw = 0;
++
++	/* Calculate Slot Power Limit Value and Slot Power Limit Scale */
++	if (slot_power_limit_mw == 0) {
++		value = 0x00;
++		scale = 0;
++	} else if (slot_power_limit_mw <= 255) {
++		value = slot_power_limit_mw;
++		scale = 3;
++	} else if (slot_power_limit_mw <= 255*10) {
++		value = slot_power_limit_mw / 10;
++		scale = 2;
++		slot_power_limit_mw = slot_power_limit_mw / 10 * 10;
++	} else if (slot_power_limit_mw <= 255*100) {
++		value = slot_power_limit_mw / 100;
++		scale = 1;
++		slot_power_limit_mw = slot_power_limit_mw / 100 * 100;
++	} else if (slot_power_limit_mw <= 239*1000) {
++		value = slot_power_limit_mw / 1000;
++		scale = 0;
++		slot_power_limit_mw = slot_power_limit_mw / 1000 * 1000;
++	} else if (slot_power_limit_mw < 250*1000) {
++		value = 0xEF;
++		scale = 0;
++		slot_power_limit_mw = 239*1000;
++	} else if (slot_power_limit_mw <= 600*1000) {
++		value = 0xF0 + (slot_power_limit_mw / 1000 - 250) / 25;
++		scale = 0;
++		slot_power_limit_mw = slot_power_limit_mw / (1000*25) * (1000*25);
++	} else {
++		value = 0xFE;
++		scale = 0;
++		slot_power_limit_mw = 600*1000;
++	}
++
++	if (slot_power_limit_value)
++		*slot_power_limit_value = value;
++
++	if (slot_power_limit_scale)
++		*slot_power_limit_scale = scale;
++
++	return slot_power_limit_mw;
++}
++EXPORT_SYMBOL_GPL(of_pci_get_slot_power_limit);
+diff --git a/drivers/pci/pci.h b/drivers/pci/pci.h
+index 1cce56c2aea0..9352278141be 100644
+--- a/drivers/pci/pci.h
++++ b/drivers/pci/pci.h
+@@ -665,6 +665,9 @@ struct device_node;
+ int of_pci_parse_bus_range(struct device_node *node, struct resource *res);
+ int of_get_pci_domain_nr(struct device_node *node);
+ int of_pci_get_max_link_speed(struct device_node *node);
++u32 of_pci_get_slot_power_limit(struct device_node *node,
++				u8 *slot_power_limit_value,
++				u8 *slot_power_limit_scale);
+ void pci_set_of_node(struct pci_dev *dev);
+ void pci_release_of_node(struct pci_dev *dev);
+ void pci_set_bus_of_node(struct pci_bus *bus);
+@@ -691,6 +694,18 @@ of_pci_get_max_link_speed(struct device_node *node)
+ 	return -EINVAL;
+ }
+ 
++static inline u32
++of_pci_get_slot_power_limit(struct device_node *node,
++			    u8 *slot_power_limit_value,
++			    u8 *slot_power_limit_scale)
++{
++	if (slot_power_limit_value)
++		*slot_power_limit_value = 0;
++	if (slot_power_limit_scale)
++		*slot_power_limit_scale = 0;
++	return 0;
++}
++
+ static inline void pci_set_of_node(struct pci_dev *dev) { }
+ static inline void pci_release_of_node(struct pci_dev *dev) { }
+ static inline void pci_set_bus_of_node(struct pci_bus *bus) { }
+-- 
+2.34.1
+

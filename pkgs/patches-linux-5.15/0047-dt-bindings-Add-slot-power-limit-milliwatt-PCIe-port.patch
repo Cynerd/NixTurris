@@ -1,0 +1,46 @@
+From 0b9d2e40cc7379a4ad00dc198f755748eb654b49 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Sun, 31 Oct 2021 16:07:05 +0100
+Subject: [PATCH 47/90] dt-bindings: Add 'slot-power-limit-milliwatt' PCIe port
+ property
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+This property specifies slot power limit in mW unit. It is a form-factor
+and board specific value and must be initialized by hardware.
+
+Some PCIe controllers delegate this work to software to allow hardware
+flexibility and therefore this property basically specifies what should
+host bridge program into PCIe Slot Capabilities registers.
+
+The property needs to be specified in mW unit instead of the special format
+defined by Slot Capabilities (which encodes scaling factor or different
+unit). Host drivers should convert the value from mW to needed format.
+
+Signed-off-by: Pali Rohár <pali@kernel.org>
+Signed-off-by: Marek Behún <kabel@kernel.org>
+---
+ Documentation/devicetree/bindings/pci/pci.txt | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/Documentation/devicetree/bindings/pci/pci.txt b/Documentation/devicetree/bindings/pci/pci.txt
+index 6a8f2874a24d..b0cc133ed00d 100644
+--- a/Documentation/devicetree/bindings/pci/pci.txt
++++ b/Documentation/devicetree/bindings/pci/pci.txt
+@@ -32,6 +32,12 @@ driver implementation may support the following properties:
+    root port to downstream device and host bridge drivers can do programming
+    which depends on CLKREQ signal existence. For example, programming root port
+    not to advertise ASPM L1 Sub-States support if there is no CLKREQ signal.
++- slot-power-limit-milliwatt:
++   If present, this property specifies slot power limit in milliwatts. Host
++   drivers can parse this property and use it for programming Root Port or host
++   bridge, or for composing and sending PCIe Set_Slot_Power_Limit messages
++   through the Root Port or host bridge when transitioning PCIe link from a
++   non-DL_Up Status to a DL_Up Status.
+ 
+ PCI-PCI Bridge properties
+ -------------------------
+-- 
+2.34.1
+

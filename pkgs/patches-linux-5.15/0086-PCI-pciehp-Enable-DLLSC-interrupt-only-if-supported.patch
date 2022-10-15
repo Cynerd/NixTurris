@@ -1,0 +1,139 @@
+From ff967b37402c672f475854be60f6b47a69732a59 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>
+Date: Wed, 31 Mar 2021 15:12:50 +0200
+Subject: [PATCH 86/90] PCI: pciehp: Enable DLLSC interrupt only if supported
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Don't enable Data Link Layer State Changed interrupt if it isn't
+supported.
+
+Data Link Layer Link Active Reporting Capable bit in Link Capabilities
+register indicates if Data Link Layer State Changed Enable is supported.
+
+Signed-off-by: Pali Rohár <pali@kernel.org>
+Signed-off-by: Marek Behún <kabel@kernel.org>
+---
+ drivers/pci/hotplug/pciehp_hpc.c | 32 ++++++++++++++++++++++++--------
+ drivers/pci/hotplug/pnv_php.c    | 13 +++++++++----
+ 2 files changed, 33 insertions(+), 12 deletions(-)
+
+diff --git a/drivers/pci/hotplug/pciehp_hpc.c b/drivers/pci/hotplug/pciehp_hpc.c
+index 60098a701e83..5b0d48435b36 100644
+--- a/drivers/pci/hotplug/pciehp_hpc.c
++++ b/drivers/pci/hotplug/pciehp_hpc.c
+@@ -788,6 +788,7 @@ static int pciehp_poll(void *data)
+ static void pcie_enable_notification(struct controller *ctrl)
+ {
+ 	u16 cmd, mask;
++	u32 link_cap;
+ 
+ 	/*
+ 	 * TBD: Power fault detected software notification support.
+@@ -800,12 +801,17 @@ static void pcie_enable_notification(struct controller *ctrl)
+ 	 * next power fault detected interrupt was notified again.
+ 	 */
+ 
++	pcie_capability_read_dword(ctrl_dev(ctrl), PCI_EXP_LNKCAP, &link_cap);
++
+ 	/*
+-	 * Always enable link events: thus link-up and link-down shall
+-	 * always be treated as hotplug and unplug respectively. Enable
+-	 * presence detect only if Attention Button is not present.
+-	 */
+-	cmd = PCI_EXP_SLTCTL_DLLSCE;
++	 * Enable link events if their support is indicated in Link Capability
++	 * register: thus link-up and link-down shall always be treated as
++	 * hotplug and unplug respectively. Enable presence detect only if
++	 * Attention Button is not present.
++	*/
++	cmd = 0;
++	if (link_cap & PCI_EXP_LNKCAP_DLLLARC)
++		cmd |= PCI_EXP_SLTCTL_DLLSCE;
+ 	if (ATTN_BUTTN(ctrl))
+ 		cmd |= PCI_EXP_SLTCTL_ABPE;
+ 	else
+@@ -845,8 +851,13 @@ void pcie_clear_hotplug_events(struct controller *ctrl)
+ void pcie_enable_interrupt(struct controller *ctrl)
+ {
+ 	u16 mask;
++	u32 link_cap;
+ 
+-	mask = PCI_EXP_SLTCTL_HPIE | PCI_EXP_SLTCTL_DLLSCE;
++	pcie_capability_read_dword(ctrl_dev(ctrl), PCI_EXP_LNKCAP, &link_cap);
++
++	mask = PCI_EXP_SLTCTL_HPIE;
++	if (link_cap & PCI_EXP_LNKCAP_DLLLARC)
++		mask |= PCI_EXP_SLTCTL_DLLSCE;
+ 	pcie_write_cmd(ctrl, mask, mask);
+ }
+ 
+@@ -904,19 +915,24 @@ int pciehp_reset_slot(struct hotplug_slot *hotplug_slot, bool probe)
+ 	struct controller *ctrl = to_ctrl(hotplug_slot);
+ 	struct pci_dev *pdev = ctrl_dev(ctrl);
+ 	u16 stat_mask = 0, ctrl_mask = 0;
++	u32 link_cap;
+ 	int rc;
+ 
+ 	if (probe)
+ 		return 0;
+ 
++	pcie_capability_read_dword(pdev, PCI_EXP_LNKCAP, &link_cap);
++
+ 	down_write_nested(&ctrl->reset_lock, ctrl->depth);
+ 
+ 	if (!ATTN_BUTTN(ctrl)) {
+ 		ctrl_mask |= PCI_EXP_SLTCTL_PDCE;
+ 		stat_mask |= PCI_EXP_SLTSTA_PDC;
+ 	}
+-	ctrl_mask |= PCI_EXP_SLTCTL_DLLSCE;
+-	stat_mask |= PCI_EXP_SLTSTA_DLLSC;
++	if (link_cap & PCI_EXP_LNKCAP_DLLLARC) {
++		ctrl_mask |= PCI_EXP_SLTCTL_DLLSCE;
++		stat_mask |= PCI_EXP_SLTSTA_DLLSC;
++	}
+ 
+ 	pcie_write_cmd(ctrl, 0, ctrl_mask);
+ 	ctrl_dbg(ctrl, "%s: SLOTCTRL %x write cmd %x\n", __func__,
+diff --git a/drivers/pci/hotplug/pnv_php.c b/drivers/pci/hotplug/pnv_php.c
+index f4c2e6e01be0..41b86fae41c8 100644
+--- a/drivers/pci/hotplug/pnv_php.c
++++ b/drivers/pci/hotplug/pnv_php.c
+@@ -839,6 +839,7 @@ static void pnv_php_init_irq(struct pnv_php_slot *php_slot, int irq)
+ {
+ 	struct pci_dev *pdev = php_slot->pdev;
+ 	u32 broken_pdc = 0;
++	u32 link_cap;
+ 	u16 sts, ctrl;
+ 	int ret;
+ 
+@@ -873,17 +874,21 @@ static void pnv_php_init_irq(struct pnv_php_slot *php_slot, int irq)
+ 		return;
+ 	}
+ 
++	pcie_capability_read_dword(pdev, PCI_EXP_LNKCAP, &link_cap);
++
+ 	/* Enable the interrupts */
+ 	pcie_capability_read_word(pdev, PCI_EXP_SLTCTL, &ctrl);
+ 	if (php_slot->flags & PNV_PHP_FLAG_BROKEN_PDC) {
+ 		ctrl &= ~PCI_EXP_SLTCTL_PDCE;
+-		ctrl |= (PCI_EXP_SLTCTL_HPIE |
+-			 PCI_EXP_SLTCTL_DLLSCE);
++		ctrl |= PCI_EXP_SLTCTL_HPIE;
+ 	} else {
+ 		ctrl |= (PCI_EXP_SLTCTL_HPIE |
+-			 PCI_EXP_SLTCTL_PDCE |
+-			 PCI_EXP_SLTCTL_DLLSCE);
++				PCI_EXP_SLTCTL_PDCE);
+ 	}
++	if (link_cap & PCI_EXP_LNKCAP_DLLLARC)
++		ctrl |= PCI_EXP_SLTCTL_DLLSCE;
++	else
++		ctrl &= ~PCI_EXP_SLTCTL_DLLSCE;
+ 	pcie_capability_write_word(pdev, PCI_EXP_SLTCTL, ctrl);
+ 
+ 	/* The interrupt is initialized successfully when @irq is valid */
+-- 
+2.34.1
+
