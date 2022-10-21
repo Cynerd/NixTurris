@@ -17,6 +17,13 @@ with lib;
       "moxtet" "gpio-moxtet" "turris-mox-rwtm"
     ];
 
+    # Systemd seems to not handling hardware watchdog for some reason
+    systemd.services."nowatchdog" = {
+      script = "echo V >/dev/watchdog0";
+      wantedBy = [ "multi-user.target" ];
+    };
+
+
     # The additional administration packages
     environment.systemPackages =  with pkgs; [
       mox-otp
