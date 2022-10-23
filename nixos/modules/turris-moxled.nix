@@ -16,9 +16,9 @@ with lib;
 
     systemd.services."mox-redled" = {
       script = if config.turris.moxled then
-          "echo heartbeat > /sys/class/leds/red/trigger"
+          "echo heartbeat > /sys/class/leds/mox:red:activity/trigger"
         else
-          "echo 0 > /sys/class/leds/red/brightness"
+          "echo 0 > /sys/class/leds/mox:red:activity/brightness"
           "";
       wantedBy = [ "multi-user.target" ];
     };
