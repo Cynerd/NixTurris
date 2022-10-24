@@ -84,6 +84,25 @@ let
         '';
       };
 
+      bridge = mkOption {
+        type = with types; nullOr str;
+        default = null;
+        example = "br0";
+        description = ''
+          In case of atheros and nl80211 driver interfaces, an additional
+          configuration parameter, bridge, may be used to notify hostapd if the
+          interface is included in a bridge. This parameter is not used with
+          Host AP driver. If the bridge parameter is not set, the drivers will
+          automatically figure out the bridge interface (assuming sysfs is
+          enabled and mounted to /sys) and this parameter may not be needed.
+          
+          For nl80211, this parameter can be used to request the AP interface to
+          be added to the bridge automatically (brctl may refuse to do this
+          before hostapd has been started to change the interface mode). If
+          needed, the bridge interface is also created.
+        '';
+      };
+
       group = mkOption {
         default = "wheel";
         example = "network";
@@ -447,6 +466,7 @@ let
     logger_stdout_level=${toString icfg.logLevel}
 
     interface=${iface}
+    ${optionalString (icfg.bridge != null) "bridge=${icfg.bridge}"}
     driver=${icfg.driver}
     use_driver_iface_addr=1
     hw_mode=${icfg.hwMode}
@@ -569,6 +589,7 @@ in
     systemd.services.hostapd = let
       interfaces = map utils.escapeSystemdPath (attrNames (filterAttrs (n: v: v.enable) cfg.interfaces));
       links = interfaces ++ (map utils.escapeSystemdPath (concatMap attrNames (catAttrs "bss" (attrValues (filterAttrs (n: v: v.enable) cfg.interfaces)))));
+      # TODO also include bridge??
       devices = map (ifc: "sys-subsystem-net-devices-${ifc}.device") interfaces;
       services = map (ifc: "network-link-${ifc}.service") links;
     in {
