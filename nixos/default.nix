@@ -8,6 +8,7 @@ self: let
     turris-mox-support = import ./modules/turris-mox-support.nix;
     turris-moxled = import ./modules/turris-moxled.nix;
     turris-omnia-support = import ./modules/turris-omnia-support.nix;
+    turris-omnialeds = import ./modules/turris-omnialeds.nix;
     turris-tarball = import ./modules/turris-tarball.nix;
 
     #kernel-patches = import ./modules/kernel-patches.nix;
