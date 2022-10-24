@@ -16,6 +16,9 @@ with lib;
       "armada_37xx_wdt"
       "moxtet" "gpio-moxtet" "turris-mox-rwtm"
     ];
+    # Explicitly set device tree to ensure we load the correct one.
+    # This fixes boot with some U-Boot versions.
+    hardware.deviceTree.name = "marvell/armada-3720-turris-mox.dtb";
 
     # Systemd seems to not handling hardware watchdog for some reason
     systemd.services."nowatchdog" = {
