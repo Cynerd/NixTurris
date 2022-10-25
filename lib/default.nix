@@ -19,25 +19,32 @@
     modules ? [],
     override ? {}
   }: nixpkgs.lib.nixosSystem ({
-    system = boardSystem.${board}.system;
     modules = [
       self.nixosModules.default
-      { turris.board = board; }
+      {
+        nixpkgs.system = boardSystem.${board}.system;
+        turris.board = board;
+      }
     ] ++ modules;
   } // override);
 
   # The minimalized system to decrease amount of ram needed for rebuild
-  # TODO this does not work right now as it requires just load of work to do
+  # TODO this does not work right now as it requires just load of work to do.
+  # The nix-daemon pulls in xserver and the result is that pretty much
+  # everything has to be included in such case.
   nixturrisMinSystem = {
-    nixpkgs,
+    board,
+    nixpkgs ? nixpkgsDefault,
     modules ? [],
-    ...
-  } @args: self.lib.nixturrisSystem (args // {
-    nixpkgs = nixpkgs;
-    modules = modules ++ [ ../nixos/nixos-modules-minfake.nix ];
-    override = {
-      baseModules = import ../nixos/nixos-modules.nix nixpkgs;
-    };
-  });
+    override ? {}
+  }:nixpkgs.lib.nixos.evalModules ({
+    modules = (map (v: nixpkgs.outPath + "/nixos/modules" + v) (import ./nixos-min-modules.nix)) ++ [
+      self.nixosModules.default
+      {
+        nixpkgs.system = boardSystem.${board}.system;
+        turris.board = board;
+      }
+    ] ++ modules;
+  } // override);
 
 }
