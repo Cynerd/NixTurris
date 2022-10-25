@@ -22,7 +22,11 @@ let
             readDir ./patches-linux-5.15)));
       };
 
-    # NOR Firmwares
+    # NOR Firmware as considered stable by Turris and shipped in Turris OS
+    tosFirmwareOmnia = callPackage ./tos-firmware { board = "omnia"; };
+    tosFirmwareMox = callPackage ./tos-firmware { board = "mox"; };
+
+    # NOR Firmwares build in Nix
     armTrustedFirmwareTurrisMox = buildArmTrustedFirmware rec {
       platform = "a3700";
       extraMeta.platforms = ["aarch64-linux"];
