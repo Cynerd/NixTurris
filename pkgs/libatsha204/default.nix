@@ -1,8 +1,14 @@
-{ stdenv, lib, fetchgit
-, pkg-config, perl, patchelf
-, glibc , openssl, unbound
+{
+  stdenv,
+  lib,
+  fetchgit,
+  pkg-config,
+  perl,
+  patchelf,
+  glibc,
+  openssl,
+  unbound,
 }:
-
 stdenv.mkDerivation rec {
   pname = "libatsha204";
   version = "29.2";
@@ -34,12 +40,12 @@ stdenv.mkDerivation rec {
   ];
   configurePhase = ''
     sed -i 's|/usr/bin/perl|${perl}/bin/perl|' build/embed_gen.pl build/normalize_dep_file.pl
-    '';
+  '';
   installPhase = ''
     mkdir -p $out/usr/include $out/lib $out/bin
     cp src/libatsha204/atsha204.h $out/usr/include/
     cp lib/libatsha204.so* $out/lib
     cp bin/atsha204cmd $out/bin
     patchelf --set-rpath $out/lib:${openssl.out}/lib:${unbound.lib}/lib:${glibc}/lib $out/bin/atsha204cmd
-    '';
+  '';
 }

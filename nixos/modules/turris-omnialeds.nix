@@ -1,12 +1,18 @@
-{ config, lib, pkgs, ... }:
-
-with lib;
-
-let
-
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+with lib; let
   cfg = config.turris.omnialeds;
 
-  ledConfig = {name, trigger ? "none", netdevName ? null, color}: {
+  ledConfig = {
+    name,
+    trigger ? "none",
+    netdevName ? null,
+    color,
+  }: {
     enabled = mkOption {
       type = types.bool;
       default = true;
@@ -17,12 +23,13 @@ let
       default = 255;
       description = "Set brightness intensity";
     };
-    color = let 
-      clr = c: mkOption {
-        type = types.ints.u8;
-        default = color.${c};
-        description = "Set intensity for the color ${c}";
-      };
+    color = let
+      clr = c:
+        mkOption {
+          type = types.ints.u8;
+          default = color.${c};
+          description = "Set intensity for the color ${c}";
+        };
     in {
       red = clr "red";
       green = clr "green";
@@ -42,26 +49,35 @@ let
       '';
     };
   };
-  lanConfig = i: ledConfig {
-    name = "lan${toString i}";
-    trigger = "netdev";
-    netdevName = "lan${toString i}";
-    color = {
-      red = 255; green = 255; blue = 0;
+  lanConfig = i:
+    ledConfig {
+      name = "lan${toString i}";
+      trigger = "netdev";
+      netdevName = "lan${toString i}";
+      color = {
+        red = 255;
+        green = 255;
+        blue = 0;
+      };
     };
-  };
-  wlanConfig = i: ledConfig {
-    name = "wlan${toString i}";
-    color = {
-      red = 0; green = 255; blue = 255;
+  wlanConfig = i:
+    ledConfig {
+      name = "wlan${toString i}";
+      color = {
+        red = 0;
+        green = 255;
+        blue = 255;
+      };
     };
-  };
-  indicatorConfig = i: ledConfig {
-    name = "indicator${toString i}";
-    color = {
-      red = 0; green = 255; blue = 255;
+  indicatorConfig = i:
+    ledConfig {
+      name = "indicator${toString i}";
+      color = {
+        red = 0;
+        green = 255;
+        blue = 255;
+      };
     };
-  };
 
   ledSetup = sysname: lcfg: ''
     echo ${toString lcfg.brightness} > /sys/class/leds/rgb:${sysname}/brightness
@@ -69,9 +85,7 @@ let
     echo ${lcfg.trigger} > /sys/class/leds/rgb:${sysname}/trigger
     ${optionalString (lcfg.trigger == "netdev") "echo '${lcfg.netdevName}' > /sys/class/leds/rgb:${sysname}/device_name"}
   '';
-
 in {
-
   options = {
     turris.omnialeds = {
       enabled = mkOption {
@@ -88,7 +102,9 @@ in {
         name = "power";
         trigger = "heartbeat";
         color = {
-          red = 0; green = 255; blue = 0;
+          red = 0;
+          green = 255;
+          blue = 0;
         };
       };
       wan = ledConfig {
@@ -96,7 +112,9 @@ in {
         trigger = "netdev";
         netdevName = "eth2";
         color = {
-          red = 0; green = 255; blue = 0;
+          red = 0;
+          green = 255;
+          blue = 0;
         };
       };
       lan0 = lanConfig 0;
@@ -118,10 +136,12 @@ in {
   };
 
   config = mkIf (config.turris.board == "omnia" && cfg.enabled) {
-
     # TODO modprobe triggers only if required
     boot.kernelModules = [
-      "ledtrig_tty" "ledtrig_activity" "ledtrig_pattern" "ledtrig_netdev"
+      "ledtrig_tty"
+      "ledtrig_activity"
+      "ledtrig_pattern"
+      "ledtrig_netdev"
       "ledtrig_usbport"
     ];
 
@@ -145,8 +165,7 @@ in {
         # Extra commands
         ${cfg.extraCommands}
       '';
-      wantedBy = [ "multi-user.target" ];
+      wantedBy = ["multi-user.target"];
     };
-
   };
 }

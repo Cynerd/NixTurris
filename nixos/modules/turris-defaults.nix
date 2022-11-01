@@ -1,13 +1,12 @@
-{ config, lib, pkgs, ... }:
-
-with lib;
-
-let
-
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+with lib; let
   cnf = config.turris.defaults;
-
 in {
-
   options = {
     turris.defaults = {
       enable = mkOption {
@@ -39,8 +38,8 @@ in {
     boot.kernelPackages = mkDefault pkgs.linuxPackages_latest;
 
     # The supported deployment is on BTRFS
-    boot.supportedFilesystems = [ "btrfs" ];
-    boot.initrd.supportedFilesystems = [ "btrfs" ];
+    boot.supportedFilesystems = ["btrfs"];
+    boot.initrd.supportedFilesystems = ["btrfs"];
 
     # Cover nix memory consumption peaks by compressing the RAM
     zramSwap = mkDefault {
@@ -63,8 +62,9 @@ in {
     programs.vim.defaultEditor = mkDefault true;
 
     # The additional administration packages
-    environment.systemPackages =  with pkgs; [
-      htop iw
+    environment.systemPackages = with pkgs; [
+      htop
+      iw
     ];
 
     # No need for installer tools in standard system

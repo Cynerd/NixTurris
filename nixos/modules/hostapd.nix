@@ -1,74 +1,74 @@
-{ config, lib, pkgs, utils, ... }:
-
+{
+  config,
+  lib,
+  pkgs,
+  utils,
+  ...
+}:
 # TODO:
 #
 # asserts
 #   ensure that the nl80211 module is loaded/compiled in the kernel
 #   wpa_supplicant and hostapd on the same wireless interface doesn't make any sense
-
 with builtins;
-with lib;
-
-let
-
+with lib; let
   cfg = config.networking.wirelessAP;
 
   options_bss = {
+    ssid = mkOption {
+      type = types.str;
+      default = "nixos";
+      example = "mySpecialSSID";
+      description = "SSID to be used in IEEE 802.11 management frames.";
+    };
 
-      ssid = mkOption {
-        type = types.str;
-        default = "nixos";
-        example = "mySpecialSSID";
-        description = "SSID to be used in IEEE 802.11 management frames.";
-      };
+    wpa = mkOption {
+      type = types.bool;
+      default = true;
+      description = ''
+        Enable WPA (IEEE 802.11i/D3.0) to authenticate with the access point.
+      '';
+    };
 
-      wpa = mkOption {
-        type = types.bool;
-        default = true;
-        description = ''
-          Enable WPA (IEEE 802.11i/D3.0) to authenticate with the access point.
-        '';
-      };
+    wpa3 = mkOption {
+      type = types.bool;
+      default = true;
+      description = ''
+        Use WPA3 instead of WPA2 for authentication. This changes the key
+        management from WPA_PSK to SAE.
+      '';
+    };
 
-      wpa3 = mkOption {
-        type = types.bool;
-        default = true;
-        description = ''
-          Use WPA3 instead of WPA2 for authentication. This changes the key
-          management from WPA_PSK to SAE.
-        '';
-      };
+    wpaPassphrase = mkOption {
+      type = with types; nullOr str;
+      default = null;
+      example = "any_64_char_string";
+      description = ''
+        WPA-PSK (pre-shared-key) passphrase. Clients will need this
+        passphrase to associate with this access point.
+        Warning: This passphrase will get put into a world-readable file in
+        the Nix store! You should use wpaPskFile in most cases.
+      '';
+    };
 
-      wpaPassphrase = mkOption {
-        type = with types; nullOr str;
-        default = null;
-        example = "any_64_char_string";
-        description = ''
-          WPA-PSK (pre-shared-key) passphrase. Clients will need this
-          passphrase to associate with this access point.
-          Warning: This passphrase will get put into a world-readable file in
-          the Nix store! You should use wpaPskFile in most cases.
-        '';
-      };
-
-      wpaPskFile = mkOption {
-        type = with types; nullOr str;
-        default = null;
-        example = "/etc/hostapd.wpa_psk";
-        description = ''
-          Optionally, WPA PSKs can be read from a separate text file (containing
-          list of (PSK,MAC address) pairs. This allows more than one PSK to be
-          configured.  Use absolute path name to make sure that the files can be
-          read on SIGHUP configuration reloads.
-          This is higly suggested to be used over wpaPassphrase as it won't save
-          your password to the Nix store!
-        '';
-      };
-
+    wpaPskFile = mkOption {
+      type = with types; nullOr str;
+      default = null;
+      example = "/etc/hostapd.wpa_psk";
+      description = ''
+        Optionally, WPA PSKs can be read from a separate text file (containing
+        list of (PSK,MAC address) pairs. This allows more than one PSK to be
+        configured.  Use absolute path name to make sure that the files can be
+        read on SIGHUP configuration reloads.
+        This is higly suggested to be used over wpaPassphrase as it won't save
+        your password to the Nix store!
+      '';
+    };
   };
 
-  options_interface = options_bss // {
-
+  options_interface =
+    options_bss
+    // {
       enable = mkOption {
         type = types.bool;
         default = true;
@@ -95,7 +95,7 @@ let
           Host AP driver. If the bridge parameter is not set, the drivers will
           automatically figure out the bridge interface (assuming sysfs is
           enabled and mounted to /sys) and this parameter may not be needed.
-          
+
           For nl80211, this parameter can be used to request the AP interface to
           be added to the bridge automatically (brctl may refuse to do this
           before hostapd has been started to change the interface mode). If
@@ -149,7 +149,7 @@ let
 
       hwMode = mkOption {
         default = "g";
-        type = types.enum [ "a" "b" "g" ];
+        type = types.enum ["a" "b" "g"];
         description = ''
           Operation mode.
           (a = IEEE 802.11a, b = IEEE 802.11b, g = IEEE 802.11g).
@@ -205,37 +205,37 @@ let
         type = with types; listOf str;
         default = ["HT40-" "SHORT-GI-20" "SHORT-GI-40"];
         description = ''
-        HT capabilities (list of flags)
-        LDPC coding capability: [LDPC] = supported
-        Supported channel width set: [HT40-] = both 20 MHz and 40 MHz with secondary
-          channel below the primary channel; [HT40+] = both 20 MHz and 40 MHz
-          with secondary channel above the primary channel
-          (20 MHz only if neither is set)
-          Note: There are limits on which channels can be used with HT40- and
-          HT40+. Following table shows the channels that may be available for
-          HT40- and HT40+ use per IEEE 802.11n Annex J:
-          freq		HT40-		HT40+
-          2.4 GHz		5-13		1-7 (1-9 in Europe/Japan)
-          5 GHz		40,48,56,64	36,44,52,60
-          (depending on the location, not all of these channels may be available
-          for use)
-          Please note that 40 MHz channels may switch their primary and secondary
-          channels if needed or creation of 40 MHz channel maybe rejected based
-          on overlapping BSSes. These changes are done automatically when hostapd
-          is setting up the 40 MHz channel.
-        HT-greenfield: [GF] (disabled if not set)
-        Short GI for 20 MHz: [SHORT-GI-20] (disabled if not set)
-        Short GI for 40 MHz: [SHORT-GI-40] (disabled if not set)
-        Tx STBC: [TX-STBC] (disabled if not set)
-        Rx STBC: [RX-STBC1] (one spatial stream), [RX-STBC12] (one or two spatial
-          streams), or [RX-STBC123] (one, two, or three spatial streams); Rx STBC
-          disabled if none of these set
-        HT-delayed Block Ack: [DELAYED-BA] (disabled if not set)
-        Maximum A-MSDU length: [MAX-AMSDU-7935] for 7935 octets (3839 octets if not
-          set)
-        DSSS/CCK Mode in 40 MHz: [DSSS_CCK-40] = allowed (not allowed if not set)
-        40 MHz intolerant [40-INTOLERANT] (not advertised if not set)
-        L-SIG TXOP protection support: [LSIG-TXOP-PROT] (disabled if not set)
+          HT capabilities (list of flags)
+          LDPC coding capability: [LDPC] = supported
+          Supported channel width set: [HT40-] = both 20 MHz and 40 MHz with secondary
+            channel below the primary channel; [HT40+] = both 20 MHz and 40 MHz
+            with secondary channel above the primary channel
+            (20 MHz only if neither is set)
+            Note: There are limits on which channels can be used with HT40- and
+            HT40+. Following table shows the channels that may be available for
+            HT40- and HT40+ use per IEEE 802.11n Annex J:
+            freq		HT40-		HT40+
+            2.4 GHz		5-13		1-7 (1-9 in Europe/Japan)
+            5 GHz		40,48,56,64	36,44,52,60
+            (depending on the location, not all of these channels may be available
+            for use)
+            Please note that 40 MHz channels may switch their primary and secondary
+            channels if needed or creation of 40 MHz channel maybe rejected based
+            on overlapping BSSes. These changes are done automatically when hostapd
+            is setting up the 40 MHz channel.
+          HT-greenfield: [GF] (disabled if not set)
+          Short GI for 20 MHz: [SHORT-GI-20] (disabled if not set)
+          Short GI for 40 MHz: [SHORT-GI-40] (disabled if not set)
+          Tx STBC: [TX-STBC] (disabled if not set)
+          Rx STBC: [RX-STBC1] (one spatial stream), [RX-STBC12] (one or two spatial
+            streams), or [RX-STBC123] (one, two, or three spatial streams); Rx STBC
+            disabled if none of these set
+          HT-delayed Block Ack: [DELAYED-BA] (disabled if not set)
+          Maximum A-MSDU length: [MAX-AMSDU-7935] for 7935 octets (3839 octets if not
+            set)
+          DSSS/CCK Mode in 40 MHz: [DSSS_CCK-40] = allowed (not allowed if not set)
+          40 MHz intolerant [40-INTOLERANT] (not advertised if not set)
+          L-SIG TXOP protection support: [LSIG-TXOP-PROT] (disabled if not set)
         '';
       };
 
@@ -381,7 +381,7 @@ let
         description = "Require stations to support VHT PHY (reject association if they do not)";
       };
 
-      vht_oper_chwidth= mkOption {
+      vht_oper_chwidth = mkOption {
         type = types.int;
         default = 1;
         description = ''
@@ -389,7 +389,7 @@ let
           1 = 80 MHz channel width
           2 = 160 MHz channel width
           3 = 80+80 MHz channel width
-          '';
+        '';
       };
 
       vht_oper_centr_freq_seg0_idx = mkOption {
@@ -398,7 +398,7 @@ let
         description = ''
           center freq 5 GHz + (5 * index)
           So index 42 gives center freq 5.210 GHz which is channel 42 in 5G band.
-          '';
+        '';
       };
 
       vht_oper_centr_freq_seg1_idx = mkOption {
@@ -407,18 +407,18 @@ let
         description = ''
           center freq = 5 GHz + (5 * index)
           So index 159 gives center freq 5.795 GHz which is channel 159 in 5G band.
-          '';
+        '';
       };
 
       use_sta_nsts = mkOption {
         type = types.bool;
         default = false;
         description = ''
-        Workaround to use station's nsts capability in (Re)Association Response frame
-        This may be needed with some deployed devices as an interoperability
-        workaround for beamforming if the AP's capability is greater than the
-        station's capability. This is disabled by default and can be enabled by
-        setting use_sta_nsts=true.
+          Workaround to use station's nsts capability in (Re)Association Response frame
+          This may be needed with some deployed devices as an interoperability
+          workaround for beamforming if the AP's capability is greater than the
+          station's capability. This is disabled by default and can be enabled by
+          setting use_sta_nsts=true.
         '';
       };
 
@@ -430,7 +430,7 @@ let
 
       bss = mkOption {
         type = with types; attrsOf (submodule {options = options_bss;});
-        default = { };
+        default = {};
         example = literalExpression ''
           {
             "wlan0host" = {
@@ -438,10 +438,10 @@ let
               wpaPassphrase = "NotSoSecretPassword";
             };
           }
-          '';
+        '';
         description = ''
           Support for multiple BSSIDs.
-          '';
+        '';
       };
 
       extraConfig = mkOption {
@@ -449,9 +449,7 @@ let
         type = types.lines;
         description = "Extra configuration options to put in hostapd.conf.";
       };
-
-  };
-
+    };
 
   mkConfig = iface: let
     icfg = cfg.interfaces."${iface}";
@@ -505,29 +503,31 @@ let
   '';
 
   mapCapab = list: concatStrings (map (key: "[${key}]") list);
-  boolean = bool: if bool then "1" else "0";
+  boolean = bool:
+    if bool
+    then "1"
+    else "0";
 
   configBss = bsscfg: ''
     ${optionalString bsscfg.wpa ''
       wpa=2
       wpa_pairwise=CCMP TKIP
-      wpa_key_mgmt=${if bsscfg.wpa3 then "SAE" else "WPA-PSK"}
+      wpa_key_mgmt=${
+        if bsscfg.wpa3
+        then "SAE"
+        else "WPA-PSK"
+      }
       ${optionalString (bsscfg.wpaPassphrase != null) "wpa_passphrase=${bsscfg.wpaPassphrase}"}
       ${optionalString (bsscfg.wpaPskFile != null) "wpa_psk_file=${bsscfg.wpaPskFile}"}
     ''}
   '';
-
-in
-
-{
-
+in {
   #disabledModules = [ "services/networking/hostapd.nix" ];
 
   ###### interface
 
   options = {
     networking.wirelessAP = {
-
       enable = mkOption {
         type = types.bool;
         default = false;
@@ -555,7 +555,7 @@ in
 
       interfaces = mkOption {
         type = with types; attrsOf (submodule {options = options_interface;});
-        default = { };
+        default = {};
         example = literalExpression ''
           { "wlan0" = {
               hw_mode = "a";
@@ -564,27 +564,27 @@ in
               wpaPassphrase = "SecretPassword";
             };
           }
-          '';
+        '';
         description = ''
           Interface for which to start <command>hostapd</command>.
-          '';
+        '';
       };
-
     };
   };
-
 
   ###### implementation
 
   config = mkIf (cfg.enable && (any (val: val.enable) (attrValues cfg.interfaces))) {
-    assertions = [{
-      assertion = all (val: ! val.enable or val.countryCode != null) (attrValues cfg.interfaces);
-      message = "Country code has to be specified to prevent violation of the law.";
-    }];
+    assertions = [
+      {
+        assertion = all (val: ! val.enable or val.countryCode != null) (attrValues cfg.interfaces);
+        message = "Country code has to be specified to prevent violation of the law.";
+      }
+    ];
     ## TODO mkRenamedOptionModule
 
-    environment.systemPackages = [ pkgs.hostapd ];
-    services.udev.packages = [ pkgs.crda ];
+    environment.systemPackages = [pkgs.hostapd];
+    services.udev.packages = [pkgs.crda];
 
     systemd.services.hostapd = let
       interfaces = map utils.escapeSystemdPath (attrNames (filterAttrs (n: v: v.enable) cfg.interfaces));
@@ -593,36 +593,35 @@ in
       devices = map (ifc: "sys-subsystem-net-devices-${ifc}.device") interfaces;
       services = map (ifc: "network-link-${ifc}.service") links;
     in {
-        description = "Hostapd wireless AP";
-        after = devices;
-        bindsTo = devices;
-        requiredBy = services;
-        wantedBy = [ "multi-user.target" ];
+      description = "Hostapd wireless AP";
+      after = devices;
+      bindsTo = devices;
+      requiredBy = services;
+      wantedBy = ["multi-user.target"];
 
-        path = [ pkgs.hostapd ];
-        serviceConfig = {
-          RuntimeDirectory = "hostapd";
-          RuntimeDirectoryMode = "700";
-          EnvironmentFile = mkIf (cfg.environmentFile != null) (builtins.toString cfg.environmentFile);
-          Restart = "always";
-        };
-        script =
-        ''
-          # substitute environment variables
-          ${concatStrings (forEach (attrNames cfg.interfaces) (iface: let
-              configFile = pkgs.writeText "hostapd_${iface}.conf" (mkConfig iface);
-              finalConfig = ''"$RUNTIME_DIRECTORY"/${iface}.conf'';
-            in ''
-              ${pkgs.gawk}/bin/awk '{
-                for(varname in ENVIRON)
-                  gsub("@"varname"@", ENVIRON[varname])
-                print
-              }' "${configFile}" > "${finalConfig}"
-            ''))}
+      path = [pkgs.hostapd];
+      serviceConfig = {
+        RuntimeDirectory = "hostapd";
+        RuntimeDirectoryMode = "700";
+        EnvironmentFile = mkIf (cfg.environmentFile != null) (builtins.toString cfg.environmentFile);
+        Restart = "always";
+      };
+      script = ''
+        # substitute environment variables
+        ${concatStrings (forEach (attrNames cfg.interfaces) (iface: let
+          configFile = pkgs.writeText "hostapd_${iface}.conf" (mkConfig iface);
+          finalConfig = ''"$RUNTIME_DIRECTORY"/${iface}.conf'';
+        in ''
+          ${pkgs.gawk}/bin/awk '{
+            for(varname in ENVIRON)
+              gsub("@"varname"@", ENVIRON[varname])
+            print
+          }' "${configFile}" > "${finalConfig}"
+        ''))}
 
-          # run hostapd
-          exec hostapd ${concatStringsSep " " (forEach (attrNames cfg.interfaces) (iface: ''"$RUNTIME_DIRECTORY"/${iface}.conf''))}
-        '';
+        # run hostapd
+        exec hostapd ${concatStringsSep " " (forEach (attrNames cfg.interfaces) (iface: ''"$RUNTIME_DIRECTORY"/${iface}.conf''))}
+      '';
     };
   };
 }

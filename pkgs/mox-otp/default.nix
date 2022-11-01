@@ -1,7 +1,9 @@
-{ buildPythonApplication, lib, fetchgit
-, python3
+{
+  buildPythonApplication,
+  lib,
+  fetchgit,
+  python3,
 }:
-
 buildPythonApplication rec {
   pname = "mox-otp";
   version = "0.3.1";

@@ -1,5 +1,7 @@
-{ self, nixpkgsDefault }: rec {
-
+{
+  self,
+  nixpkgsDefault,
+}: rec {
   # Mapping of board name to the appropriate system
   boardSystem = {
     omnia = {
@@ -17,16 +19,20 @@
     board,
     nixpkgs ? nixpkgsDefault,
     modules ? [],
-    override ? {}
-  }: nixpkgs.lib.nixosSystem ({
-    modules = [
-      self.nixosModules.default
-      {
-        nixpkgs.system = boardSystem.${board}.system;
-        turris.board = board;
+    override ? {},
+  }:
+    nixpkgs.lib.nixosSystem ({
+        modules =
+          [
+            self.nixosModules.default
+            {
+              nixpkgs.system = boardSystem.${board}.system;
+              turris.board = board;
+            }
+          ]
+          ++ modules;
       }
-    ] ++ modules;
-  } // override);
+      // override);
 
   # The minimalized system to decrease amount of ram needed for rebuild
   # TODO this does not work right now as it requires just load of work to do.
@@ -36,15 +42,19 @@
     board,
     nixpkgs ? nixpkgsDefault,
     modules ? [],
-    override ? {}
-  }:nixpkgs.lib.nixos.evalModules ({
-    modules = (map (v: nixpkgs.outPath + "/nixos/modules" + v) (import ./nixos-min-modules.nix)) ++ [
-      self.nixosModules.default
-      {
-        nixpkgs.system = boardSystem.${board}.system;
-        turris.board = board;
+    override ? {},
+  }:
+    nixpkgs.lib.nixos.evalModules ({
+        modules =
+          (map (v: nixpkgs.outPath + "/nixos/modules" + v) (import ./nixos-min-modules.nix))
+          ++ [
+            self.nixosModules.default
+            {
+              nixpkgs.system = boardSystem.${board}.system;
+              turris.board = board;
+            }
+          ]
+          ++ modules;
       }
-    ] ++ modules;
-  } // override);
-
+      // override);
 }

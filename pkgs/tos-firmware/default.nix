@@ -1,7 +1,8 @@
-{ stdenvNoCC, fetchgit
-, board
+{
+  stdenvNoCC,
+  fetchgit,
+  board,
 }:
-
 stdenvNoCC.mkDerivation rec {
   pname = "tos-firmware-" + board;
   version = "6.0";
