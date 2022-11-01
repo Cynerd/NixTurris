@@ -14,7 +14,7 @@ paste this `flake.nix` file in it:
   description = "Turris system management flake";
 
   inputs = {
-    nixturris.url = "git+https://git.cynerd.cz/nixturris";
+    nixturris.url = "github:cynerd/nixturris";
   };
 
   outputs = { self, nixpkgs, flake-utils, nixturris }:
