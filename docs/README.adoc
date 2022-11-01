@@ -1,0 +1,27 @@
+= NixOS for Turris routers documentation
+
+Please see general remarks about this project in the top level
+../README.adoc[README file].
+
+To start with NixOS on Turris please read install documentation for your
+specific board:
+
+* link:./install-omnia.adoc[*Omnia installation*]
+* link:./install-mox.adoc[*Mox installation*]
+
+The board specific instructions provide you with hopefully working installation
+of the NixOS on Turris OS. The following articles should give you more info on
+how to manage it:
+
+* link:./initial-access.adoc[*Initial router access*]
+* link:./nixos-rebuild-remote.adoc[*NixOS rebuild remotely and pushing changes*]
+* link:./nixos-rebuild-onsite.adoc[*NixOS rebuild on the router*]
+* link:./switch.adoc[*Switch setup*]
+* link:./router.adoc[*Router setup*]
+* link:./wifi-ap.adoc[*Wi-Fi Access Point*]
+
+Some additional topics:
+
+* link:./qemu-build.adoc[*Cross build vs Qemu build*]
+* link:./build-tarball.adoc[*Building system tarball*]
+* link:./todo.adoc[*Things to be done and improved*]

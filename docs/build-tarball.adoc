@@ -1,0 +1,15 @@
+= NixTurris tarball
+
+TODO
+
+== Building standard tarball
+
+Add nixturris repository to your local Nix registry and build it. The image is
+cross compiled in this case (unless you are running on Aarch64 platform). You
+can also build it natively and this is discussed in the chapter "Native build
+using Qemu" in this document.
+
+----
+~$ nix registry add nixturris git+https://git.cynerd.cz/nixturris
+~$ nix build nixturris#crossTarballMox
+----

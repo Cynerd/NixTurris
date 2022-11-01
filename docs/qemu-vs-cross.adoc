@@ -1,0 +1,49 @@
+= Cross build vs. Qemu build
+
+When building packages or NixOS on any other machine (most likely amd64) you
+have two options how to build. You can either build natively like you would be
+running on the target platform using Qemu. Or you can use cross build. This
+document tires to gives you some comparison so you can decide on your own which
+you want to use. In general use what works for you.
+
+Compilation speed:: The cross build is much faster compared to Qemu. It is
+simple as that.
+
+Build success:: There is a lot of packages that are broken for cross build in
+Nixpkgs and thus sometimes you might have more luck with native builds. At the
+same time there is a lot of packages that won't compile natively on armv7 for
+multiple reasons (the most common is that test cases do not expect 32bit
+system). The rule of thumb is that with aarch64 native build is more stable
+while cross build might be more stable for armv7.
+
+Device rebuilds:: The one huge disadvantage for the cross builds is that they
+produce different result compared to native builds in Nix. The effect is that
+`nixos-rebuild` on the device can't reuse cross builds while it can reuse native
+builds.
+
+
+== Native (Qemu) build Nix setup
+
+To get native build work you need the Nix with ability to run aarch64 and/or
+armv7 binaries. That is in general option `extra-platforms` with value
+`aarch64-linux` for Turris Mox and `armv7l-linux` for Turris Omnia. To actually
+allow access to the emulator you need something like `extra-sandbox-paths` with
+value such as `/usr/bin/qemu-aarch64` (for Turris Mox) or `/usr/bin/qemu-arm`
+(for Turris Omnia). This way you can build aarch64 or armv7l package on other
+platforms. You might also want to add some ARM specific substituters.
+
+The configuration file for Nix should thus contain something like:
+
+----
+extra-platforms = aarch64-linux armv7l-linux
+extra-sandbox-paths = /usr/bin/qemu-aarch64 /usr/bin/qemu-arm
+extra-substituters = https://arm.cachix.org https://thefloweringash-armv7.cachix.org
+extra-trusted-public-keys = arm.cachix.org-1:K3XjAeWPgWkFtSS9ge5LJSLw3xgnNqyOaG7MDecmTQ8= thefloweringash-armv7.cachix.org-1:v+5yzBD2odFKeXbmC+OPWVqx4WVoIVO6UXgnSAWFtso=
+----
+
+If you are running on the NixOS then you can use configuration:
+
+[source,nix]
+----
+boot.binfmt.emulatedSystems = [ "aarch64-linux" "armv7l-linux" ];
+----

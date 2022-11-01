@@ -1,0 +1,147 @@
+= NixOS on Turris Mox
+
+Deploying NixOS to the Turris Mox is pretty easy and fast. The advantage is that
+aarch64 packages cache is provided by official Hydra builds and thus there is no
+need to build everything from the sources.
+
+TIP: Read the whole documentation before you start to understand what you are
+getting yourself into.
+
+NOTE: The Turris Shield is in core Turris Mox and thus these instructions can be
+used for it as well.
+
+
+== 1.) Updating U-Boot
+
+The updated U-Boot is required to make Turris Mox work with NixOS. The reason
+for this is limited small length for the string holding path to the files for
+system boot in the U-Boot version 2018.11 (the one Turris Mox ships with).
+
+You can verify if you have new enough U-Boot by running the following command as
+root on the router:
+
+----
+strings /dev/mtd1 | grep 'U-Boot [0-9.]\+'
+----
+
+The minimal suggested version is U-Boot 2022.07.
+
+=== Updating U-Boot on Turris OS
+
+These instructions apply if you have SD card with Turris OS and want to use the
+official way of updating firmware on Turris Mox. The minimal version of Turris
+OS to get new stable version of U-Boot is Turris OS 6.0. Please update the
+Turris OS installation to this version or newer before you continue.
+
+The next step is to install `turris-nor-update` and run it:
+
+----
+opkg update
+opkg install turris-nor-update
+turris-nor-update
+----
+
+This should give you at least U-Boot 2022.07.
+
+=== Updating U-Boot on NixOS
+
+TODO
+
+
+== 2.) Expanding space for Linux kernel
+
+The space allocated for the kernel during the boot is in default set to be too
+small. The kernel of NixOS can get pretty big compared to the Turris OS and
+thus we have to increase this space.
+
+CAUTION: The system is going to fail to boot with cryptic message that it can't
+mount root file-system if you skip this! That is caused by initrd start being
+overwritten by kernel image's tail.
+
+=== Directly from U-Boot
+
+You need compatible serial to USB converter to be attached to the serial console
+of your Mox. Consult the https://docs.turris.cz/hw/serial/#turris-mox[official
+documentation] for this.
+
+The first step is to enter U-Boot console, reboot your router (either by issuing
+`reboot` command or by disconnecting and reconnecting the power source). Next
+press kbd:[Enter] few times once you see `U-Boot` booting. You should get U-Boot
+prompt shortly after (the line starting with `> `). Enter the following commands
+to set required settings:
+
+----
+setenv ramdisk_addr_r 0x9000000
+saveenv
+----
+
+To continue boot you can enter command `boot`.
+
+=== From running system
+
+You need to have `uboot-envtools` package installed on Turris OS or `ubootTools`
+on NixOS.
+
+Verify that your environment access is correctly set by printing a current
+environment using `fw_printenv` (as root). You should get output with no message
+informing you about invalid CRC. Do not proceed if you get it.
+
+To set required settings run:
+
+----
+fw_setenv ramdisk_addr_r 0x9000000
+----
+
+Feel free to validate settings by running `fw_printenv` again.
+
+
+== 3.) Get tarball with NixOS
+
+The initial system can either be downloaded from Gitlab or build locally. Note
+that version available for download can be pretty old. It is just some version
+that was build with latest commit to the NixTurris repository.
+
+* TODO (we do not have CI builds yet)
+* link:./build-tarball.adoc[Documentation on how to build your own tarball]
+
+
+== 4.) Prepare the SD card
+
+At minimum, you should use micro SD card with size 8 GB. It is highly suggested
+to use some high quality one as you might have to use it for swap and that can
+reduce lifetime a lot and kill the low quality one very fast. 
+
+You need to format the SD card first. The required partition table is GPT. You
+can use only one partition that would be preferably formatted with BTRFS. The
+important thing is to set label `NixTurris` so boot can locate the correct
+partition by it.
+
+It is up to you which tool are you going to use. The instructions here are going
+to be for GNU Parted. The following shell log should give you an idea of what
+you should do to get the correct layout:
+
+----
+~# parted /dev/mmcblk1
+(parted) mktable gpt
+(parted) mkpart NixTurris 0% 100%
+(parted) set 1 boot on
+(parted) quit
+~# mkfs.btrfs /dev/mmcblk1p1
+----
+
+The last step is to unpack the tarball to the SD card.
+
+----
+~# mkdir -p mnt
+~# mount /dev/mmcblk1p1 mnt
+~# tar -xf nixos-system-aarch64-linux.tar.xz -C mnt
+~# umount mnt
+~# eject /dev/mmcblk1
+----
+
+Now you can take this micro SD card and insert it to your Mox and boot the
+initial version of the system.
+
+Now you should have running NixOS system on the Turris Mox. The next step is to
+do first configuration and for that you have to be able to
+link:./initial-access.adoc[access the router].

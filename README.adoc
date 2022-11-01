@@ -1,0 +1,41 @@
+= NixOS for Turris routers
+
+This repository contains nix flake to get NixOS running on Turris routers.
+
+Using NixOS on router has few shortcomings, and you should know about them right
+away so here is a list of issues you should expect:
+
+* NixOS is pretty memory hungry. There are few reasons for this such as Systemd
+  and specially Journald as those simply required more memory than other
+  alternatives. But but but... The biggest issue is NixOS itself. The wide range
+  of configuration options in NixOS result in pretty significant memory being
+  required on evaluation. The peak is around 2 GB and thus device with 512 MB is
+  pretty much screwed. Thankfully Nix is not using that memory most of the time,
+  and thus we can use swap without hampering the performance that much.
+* Firewall configuration right now expects at most one NAT network thus forget
+  about multiple networks. There can't be dedicated network for you IOT devices
+  or for your guests.
+* Hostapd configuration is complex and it is pretty hard to configure functional
+  Wi-Fi with higher standards than 802.11b.
+* VLAN filtering on the switch is not easilly configured and thus you have to
+  use multiple bridges to separate networks. This also means that having
+  untagged traffic on the same trunk as tagged one is not easilly possible
+  unless you accept that bridge that contains untagged interface distributes all
+  traffic including the tagged one.
+
+This repository provides the following functionality on top of the standard
+NixOS:
+
+* Minimal system configuration to support Turris Omnia and Mox.
+* Simple module for LEDs configurations for Turris Omnia and Mox.
+* Improved Hostapd configuration as the default one in NixOS supports only
+  single wireless network and adapter.
+* Simple way to cross build NixOS with path:
+  `config.system.build.cross.${system}.config.system.build.toplevel`
+* Simple way to build tarball to deploy NixOS to Turris:
+  `config.system.built.tarball`
+
+IMPORTANT: This repository required Nix with flakes support thus update your Nix
+to the latest version and allow flakes.
+
+For more info feel free to read link:./docs/README.adoc[documentation].

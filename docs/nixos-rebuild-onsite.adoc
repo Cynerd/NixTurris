@@ -1,0 +1,44 @@
+= NixOS rebuild on the router
+
+WARNING: This is pretty slow.
+
+To rebuild NixOS directly on device something like 2GB of memory is required.
+This pretty much is covered only by Turris Omnia 2G version and even that might
+not be enough. Thus if you want to rebuild NixOS on the device you need the
+SWAP. There is in default configure zram SWAP but that won't be enough. It is
+highly suggested to create swap file of something like 2GB or 4GB size.
+
+The creation and first addition of swap can be done like this (this expects that
+used file-system is BTRFS):
+
+[source,sh]
+----
+sudo truncate -s 4G /run/swap
+sudo chattr +C /run/swap
+sudo btrfs property set /run/swap compression none
+sudo chmod 600 /run/swap
+sudo mkswap /run/swap
+sudo swapnon -p 0 /run/swap
+----
+
+Few notes here... Swap file is created by root and set to be accessible only by
+root. For BTRFS the copy-on-write functionality is disabled and compression for
+it. The swap itself is then added with lowest priority to prefer zram swap and
+thus reduce real swap usage.
+
+Do not forget to add this swap file to your NixOS configuration so it is added
+on every boot. Edit file `/etc/nixos/configuration.nix` and add the following
+lines:
+
+[source,nix]
+----
+swapDevices = [
+  {
+    device = "/run/swap";
+    priority = 0;
+  }
+];
+----
+
+Then you can pretty much manage it as any other NixOS device using
+`nixos-rebuild` script running directly on the device, just very slowly.

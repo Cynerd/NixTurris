@@ -1,0 +1,39 @@
+= Initial router access after installation
+
+This describes how to access the router right after the initial NixOS
+installation. The WAN port has to be connected to the existing network to receive
+IP address. This has to be the same network the machine you are planning on
+using for connecting to the board is connected to. You have to get this IP
+somehow. One option is to use https://docs.turris.cz/hw/serial/[serial
+connection] to get it by logging in and entering command `ip addr`. Another
+option is scanning the local network or if you have access you can just look for
+`NixTurris` system in DHCP logs.
+
+Once you have IP address you should be able to login over SSH. The SSH allows
+loging to root user with password `nixturris`.
+
+Make sure you setup your own access route to the device before you do the
+initial rebuild as this setup is set only for the tarball boot and is removed
+with first boot. Feel free to paste the following to your initial configuration
+so you would not lost this default setting initialy:
+
+[source,nix]
+----
+users = {
+   mutableUsers = false;
+   users.root.password = mkDefault "nixturris";
+};
+services.openssh = {
+   enable = true;
+   passwordAuthentication = true;
+   permitRootLogin = "yes";
+};
+----
+
+Make sure you change this as soon as possible as this is highly unsafe.
+
+Now you can follow to the first NixOS rebuild. There you have to decide if you
+prefer link:./nixos-rebuild-remote.adoc[managing it remotely] or
+link:./nixos-rebuild-onsite.adoc[managing it directly on the router]. The remote
+way is more complex to setup but much faster in the long run while rebuild on
+the router can be pretty much done immediately.

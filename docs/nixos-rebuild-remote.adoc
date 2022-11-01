@@ -1,0 +1,39 @@
+= NixOS rebuild remotely
+
+The suggested way to update NixOS on Turris is to build system on more powerful
+device and push only resulting build to the device. The reason for this are
+memory requirements for Nix itself. NixOS and its packages repository evaluation
+consumes a lot of memory and thus doing that on different PC is just faster.
+
+Prepare directory where you are going to be managing your Turris device(s) and
+paste this `flake.nix` file in it:
+
+[source,nix]
+----
+{
+  description = "Turris system management flake";
+
+  inputs = {
+    nixturris.url = "git+https://git.cynerd.cz/nixturris";
+  };
+
+  outputs = { self, nixpkgs, flake-utils, nixturris }:
+    with flake-utils.lib;
+    {
+      nixosConfigurations.turris = nixturris.lib.nixturrisSystem {
+      nixpkgs = nixpkgs;
+      board = "mox"; # <1>
+      modules = [
+        # Place for your modules
+      ];
+    };
+    };
+}
+----
+
+<1> Declares board type. Change to `omnia` if you are managing Turris Omnia.
+
+**TODO** describe here how to generate key, sign build and distribute it to the
+device.
+
+To update system before build run `nix flake update`.

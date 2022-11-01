@@ -1,0 +1,181 @@
+= NixOS on Turris Omnia
+
+CAUTION: PCIe devices are not functional right now on the Turris Omnia!
+
+The Turris Omnia is little bit more complex regarding the initial setup compared
+to Turris Mox. One issue is that armv7 builds are not provided by official
+Hydra. The second issue is that there is not a single reasonable installation
+(such as SD card on Turris Mox).
+
+Turris Omnia can be booted either from USB or internal disk or from internal
+MMC. The USB drive is the easies to setup from PCs and thus it is suggested for
+testing NixOS on your Turris Omnia. You can always return to the Turris OS just
+by unplugging the USB drive.
+
+== 1.) Updating U-Boot
+
+The updated U-Boot is required to make Turris Omnia work with NixOS in most
+cases. The reason is that the original U-Boot 2015.10 does not support booting
+from USB or internal drive. The newer Turris Omnia routers have newer U-Boot
+versions but always verify the U-Boot version before you continue by running the
+following command as root on the router:
+
+include::shards/install-uboot.adoc[]
+
+----
+strings /dev/mtd0 | grep 'U-Boot [0-9.]\+'
+----
+
+The minimal suggested version is U-Boot 2022.07.
+
+=== Updating U-Boot on Turris OS
+
+These instructions apply if you have SD card with Turris OS and want to use the
+official way of updating firmware on Turris Mox. The minimal version of Turris
+OS to get new stable version of U-Boot is Turris OS 6.0. Please update the
+Turris OS installation to this version or newer before you continue.
+
+The next step is to install `turris-nor-update` and run it:
+
+----
+opkg update
+opkg install turris-nor-update
+turris-nor-update
+----
+
+This should give you at least U-Boot 2022.07.
+
+=== Updating U-Boot on NixOS
+
+TODO
+
+== 2.) Get tarball with NixOS
+
+The initial system can either be downloaded from Gitlab or build locally. Note
+that version available for download can be pretty old. It is just some version
+that was build with latest commit to the NixTurris repository.
+
+* TODO (we do not have CI builds yet)
+* link:./build-tarball.adoc[Documentation on how to build your own tarball]
+
+== 3a.) Boot from USB drive
+
+This is the easies option to get NixOS on Turris Omnia. You can prepare the
+drive in any Linux system and then just plug it into the Omnia.
+
+You should use some reliable and preferably USB 3.0 flash drive or just regular
+SSD drive. The suggested minimal size is 8GB but that is pretty much every USB
+drive on the market right now. You might want to use swap and thus make sure
+that you use some higher quality one as swap can kill cheap flash drives pretty
+fast.
+
+You need to format the USB drive first. The required partition table is GPT. You
+can use only one partition that would be preferably formatted with BTRFS. The
+important thing is to set label `NixTurris` so boot can locate the correct
+partition by it. 
+
+It is up to you which tool are you going to use. The instructions here are going
+to be for GNU Parted. The following shell log should give you an idea of what
+you should do to get the correct layout:
+
+----
+~# parted /dev/sdx
+(parted) mktable gpt
+(parted) mkpart NixTurris 0% 100%
+(parted) set 1 boot on
+(parted) quit
+~# mkfs.btrfs /dev/sdx1
+----
+
+The next step is to unpack the tarball to the USB drive.
+
+----
+~# mkdir -p mnt
+~# mount /dev/sdx1 mnt
+~# tar -xf nixos-system-armv7-linux.tar.xz -C mnt
+~# umount mnt
+~# eject /dev/sdx
+----
+
+Now you can take this drive and plug it in the Turris Omnia. The last step is to
+instruct firmware to boot from USB.
+
+TIP: If you have USB to serial converter (see
+https://docs.turris.cz/hw/serial/#turris-omnia[official documentation]) then you
+can trigger USB boot only once using it. You have to reboot Omnia and halt boot
+process by pressing kbd:[Enter] few times once you see `U-Boot` booting. You
+should get U-Boot prompt shortly after (the line starting with `> `). USB boot
+is initialized by entering `run usb_boot` to it and confirming by kbd:[Enter].
+
+You need to have `uboot-envtools` package installed on Turris OS or `ubootTools`
+on NixOS.
+
+First you have to verify your environment access configuration by printing the
+current environment using `fw_printenv` (as root). You should get output with no
+message informing you about invalid CRC. Do not proceed if you get it.
+
+To set USB boot as a preferred method run:
+
+----
+fw_setenv boot_targets usb0 mmc0 nvme0 scsi0 pxe dhcp
+----
+
+Feel free to validate settings by running `fw_printenv` again.
+
+Now you can reboot your Omnia to NixOS. The next step is to do first
+configuration and for that you have to be able to
+link:./initial-access.adoc[access the router].
+
+== 3b.) Install on internal storage
+
+It is highly suggested not to use internal MMC for the whole system. The
+suggested deployment is rather the `/boot` partition on MMC or the whole system
+on internal drive (note that U-Boot might not be able to boot from all internal
+drives).
+
+TODO
+
+WARNING: this is not fully supported at the moment as tarball contains in
+`/boot` only Syslinux configuration and thus boot simply from `/boot` is not
+possible. You have to copy kernel, initrd and dtb to the `/boot` partition and
+modify Syslinux's configuration file.
+
+
+== Reverting to Turris OS
+
+The steps required to revert to Turris OS differ from how deep have you went
+with installation. If you are lucky it is just about restarting U-Boot
+environment, if not then you have to use Medkit to install Turris OS back.
+
+=== Resetting U-Boot environment to the default
+
+The modification suggested by this document are only to the single variable
+(`boot_targets`). The revert to the previous value should be in most cases
+enough. This can be done by (see previous usage in this document for required
+packages):
+
+----
+fw_setenv boot_targets mmc0 nvme0 scsi0 usb0 pxe dhcp
+----
+
+You can also reset environment to the default if you want to be sure. For that
+you need USB to serial converter connected (see
+https://docs.turris.cz/hw/serial/#turris-omnia[official documentation]). Reboot
+the board and halt boot process by pressing kbd:[Enter] few times once you see
+`U-Boot` booting. You should get U-Boot prompt shortly after (the line starting
+with `> `). To reset environment enter:
+
+----
+env default -a
+saveenv
+----
+
+To continue boot you can enter command `boot`.
+
+=== Using Medkit to install Turris OS back to the MMC
+
+You have to do this only if you attempted installation on internal storage.
+First you have to reset U-Boot environment and thus follow steps in the previous
+section. Next follow the
+https://docs.turris.cz/hw/omnia/rescue-modes/#re-flash-router[official medkit
+steps].
