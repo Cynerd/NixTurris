@@ -21,5 +21,12 @@ with lib;
       libatsha204
     ];
 
+    # Kernel patches for Linux 6.0 for Turris Omnia
+    boot.kernelPatches = mkIf (versionOlder config.boot.kernelPackages.kernel.version "6.1") 
+    (map (p: {
+      name = toString p;
+      patch = p;
+    }) (filesystem.listFilesRecursive ./omnia-kernel-patches));
+
   };
 }

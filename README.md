@@ -32,6 +32,10 @@ At minimum, you should use micro SD card with size 8 GB. It is highly suggested
 to use some high quality one as we have to use it for swap and that can reduce
 lifetime a lot and kill the low quality one very fast. 
 
+The updated U-Boot is required to make Turris Mox work with NixOS. This can be
+done on Turris OS 6.0 with command `turris-nor-update`. The second modification
+that is required is change of ramdisk load address (see the next section).
+
 ### Prepare the SD card
 
 You need to format the SD card first. The GPT is suggested as the partition
@@ -89,11 +93,6 @@ serial console and run:
 setenv ramdisk_addr_r 0x9000000
 saveenv
 ```
-
-### Know issues with Turris Mox support without known fix for now
-
-* Router won't reboot by software. Power cycle is required.
-* Access to the serial number and other crypto functionalities seems to not work
 
 
 ## Turris Omnia

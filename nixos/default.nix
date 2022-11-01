@@ -11,7 +11,6 @@ self: let
     turris-omnialeds = import ./modules/turris-omnialeds.nix;
     turris-tarball = import ./modules/turris-tarball.nix;
 
-    #kernel-patches = import ./modules/kernel-patches.nix;
     armv7l-overlay = import ./modules/armv7l-overlay.nix;
 
     hostapd = import ./modules/hostapd.nix;

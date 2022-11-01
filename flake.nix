@@ -2,11 +2,12 @@
   description = "Turris flake";
 
   outputs = { self, flake-utils, nixpkgs }:
+  with nixpkgs.lib;
   with flake-utils.lib;
   let
     supportedHostSystems = (
       # Note: crossTarball* targets are broken on darwin so it gets disabled here
-      with builtins; filter (system: match ".*-darwin" system == null) defaultSystems
+      with builtins; filter (system: hasSuffix "-darwin" system) defaultSystems
     ) ++ [system.armv7l-linux];
   in {
 

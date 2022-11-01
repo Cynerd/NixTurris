@@ -6,7 +6,7 @@ let
 
   crossVariant = host: extendModules {
     modules = [{
-      nixpkgs.system = host;
+      nixpkgs.system = mkForce host;
       nixpkgs.crossSystem = {
         inherit (config.nixpkgs.localSystem) system config;
       };
