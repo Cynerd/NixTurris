@@ -1,0 +1,30 @@
+stages:
+  - test
+  - style
+
+.nix:
+  tags:
+    - nix
+
+## Test stage ##################################################################
+
+# Note: we do not have enough RAM for this to work on our CI runner
+#nix-check:
+#  stage: test
+#  extends: .nix
+#  script:
+#    - nix flake check
+
+include:
+  - template: Security/SAST.gitlab-ci.yml
+  - template: Security/Secret-Detection.gitlab-ci.yml
+
+## Style stage #################################################################
+
+nixfmt:
+  stage: style
+  extends: .nix
+  allow_failure: true
+  script:
+    - "nix fmt"
+    - "git diff --exit-code"
