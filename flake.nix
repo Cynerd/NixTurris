@@ -59,6 +59,8 @@
             crossOverlays = [self.overlays.default];
           };
 
+          outPaths = builtins.mapAttrs (n: v: self.lib.outputs v) self.packages.${system};
+
           formatter = nixpkgs.legacyPackages.${system}.alejandra;
         }
       );

@@ -1,9 +1,6 @@
-{
-  nixpkgs ? <nixpkgs>,
-  nixlib ? nixpkgs.lib,
-}:
+{nixpkgs}:
 with builtins;
-with nixlib; let
+with nixpkgs.lib; let
   pkgs = nixpkgs // turrispkgs;
   callPackage = callPackageWith pkgs;
 

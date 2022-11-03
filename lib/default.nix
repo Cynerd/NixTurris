@@ -57,4 +57,29 @@
           ++ modules;
       }
       // override);
+
+  # Print all outputs used for building this derivation.
+  # This is used to identify all outputs used during the build and thus required
+  # to be pushed to the cachix for anyone to reuse.
+  outputs = with builtins; let
+    op = res: val:
+      if (isAttrs val)
+      then
+        (
+          if (val.type or null == "derivation")
+          then
+            (
+              if (all (v: v != val.outPath) res)
+              then recurse (res ++ [val.outPath]) val.drvAttrs
+              else res
+            )
+          else recurse res val
+        )
+      else if (isList val)
+      then (foldl' op res val)
+      else res;
+
+    recurse = res: val: foldl' op res (attrValues val);
+  in
+    drv: recurse [drv.outPath] drv;
 }

@@ -1,10 +1,53 @@
 stages:
+  - build
   - test
   - style
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+
+variables:
+  CACHIX_NAME: nixturris
 
 .nix:
   tags:
     - nix
+  before_script:
+    - "cachix use $CACHIX_NAME"
+
+## Build stage #################################################################
+
+.build:
+  stage: build
+  extends: .nix
+  script:
+    - "nix build .#$ARG"
+    - "[ -z \"$CACHIX_KEY\" ] || cachix authtoken $CACHIX_NAME $CACHIX_KEY"
+    - "[ -z \"$CACHIX_KEY\" ] || cachix push $(readlink -f result)"
+
+# TODO: we do not have binfmt in the CI
+# Note: we should have dedicated runner for it to prevent issues with non-native
+# binaries being executed as part of build and thus issues would be hidden.
+#build:tarballMox:
+#  extends: .build
+#  variables:
+#    ARG: tarballMox
+#
+#build:tarballOmnia:
+#  extends: .build
+#  variables:
+#    ARG: tarballOmnia
+
+build:crossTarballMox:
+  extends: .build
+  variables:
+    ARG: crossTarballMox
+
+build:crossTarballOmnia:
+  extends: .build
+  variables:
+    ARG: crossTarballOmnia
 
 ## Test stage ##################################################################
 
