@@ -84,6 +84,16 @@ with lib; let
         '';
       };
 
+      config = mkOption {
+        type = with types; nullOr str;
+        default = null;
+        description = ''
+          The raw configuration for the interface. This disables usage of any
+          other option and allows you to simply write your config as it fits to
+          you.
+        '';
+      };
+
       bridge = mkOption {
         type = with types; nullOr str;
         default = null;
@@ -453,7 +463,7 @@ with lib; let
 
   mkConfig = iface: let
     icfg = cfg.interfaces."${iface}";
-  in ''
+  in if icfg.config != null then icfg.config else ''
     ctrl_interface=/run/hostapd
     ctrl_interface_group=${icfg.group}
 
