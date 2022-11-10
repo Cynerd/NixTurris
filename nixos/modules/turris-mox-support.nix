@@ -10,7 +10,6 @@ with lib; {
     boot.kernelParams = [
       "earlycon=ar3700_uart,0xd0012000"
       "console=ttyMV0,115200"
-      "pcie_aspm=off" # Fix for crashes due to SError Interrupt on ath10k load
     ];
     # Insert these modules early. The watchdog should be handled as soon as
     # possible and moxtet is for some reason ignored otherwise.
@@ -19,6 +18,7 @@ with lib; {
       "moxtet"
       "gpio-moxtet"
       "turris-mox-rwtm"
+      "aspm" # Required to prevent SError kernel panic
     ];
     # Explicitly set device tree to ensure we load the correct one.
     # This fixes boot with some U-Boot versions.

@@ -11,6 +11,9 @@ with lib; {
       "earlyprintk"
       "console=ttyS0,115200"
     ];
+    boot.initrd.kernelModules = [
+      "aspm"
+    ];
     # Force load of Turris Omnia leds
     boot.kernelModules = [
       "leds_turris_omnia"
