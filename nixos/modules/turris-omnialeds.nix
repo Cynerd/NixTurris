@@ -12,6 +12,7 @@ with lib; let
     trigger ? "none",
     netdevName ? null,
     color,
+    brightness ? 255,
   }: {
     enabled = mkOption {
       type = types.bool;
@@ -20,7 +21,7 @@ with lib; let
     };
     brightness = mkOption {
       type = types.ints.u8;
-      default = 255;
+      default = brightness;
       description = "Set brightness intensity";
     };
     color = let
@@ -63,6 +64,8 @@ with lib; let
   wlanConfig = i:
     ledConfig {
       name = "wlan${toString i}";
+      trigger = "netdev";
+      netdevName = "wlp${toString i}s0";
       color = {
         red = 0;
         green = 255;
@@ -77,6 +80,7 @@ with lib; let
         green = 255;
         blue = 255;
       };
+      brightness = 0;
     };
 
   ledSetup = sysname: lcfg: ''
