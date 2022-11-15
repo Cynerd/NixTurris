@@ -18,7 +18,6 @@ with lib; {
       "moxtet"
       "gpio-moxtet"
       "turris-mox-rwtm"
-      "aspm" # Required to prevent SError kernel panic
     ];
     # Explicitly set device tree to ensure we load the correct one.
     # This fixes boot with some U-Boot versions.
