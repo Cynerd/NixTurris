@@ -463,54 +463,57 @@ with lib; let
 
   mkConfig = iface: let
     icfg = cfg.interfaces."${iface}";
-  in if icfg.config != null then icfg.config else ''
-    ctrl_interface=/run/hostapd
-    ctrl_interface_group=${icfg.group}
+  in
+    if icfg.config != null
+    then icfg.config
+    else ''
+      ctrl_interface=/run/hostapd
+      ctrl_interface_group=${icfg.group}
 
-    # logging (debug level)
-    logger_syslog=-1
-    logger_syslog_level=${toString icfg.logLevel}
-    logger_stdout=-1
-    logger_stdout_level=${toString icfg.logLevel}
+      # logging (debug level)
+      logger_syslog=-1
+      logger_syslog_level=${toString icfg.logLevel}
+      logger_stdout=-1
+      logger_stdout_level=${toString icfg.logLevel}
 
-    interface=${iface}
-    ${optionalString (icfg.bridge != null) "bridge=${icfg.bridge}"}
-    driver=${icfg.driver}
-    use_driver_iface_addr=1
-    hw_mode=${icfg.hwMode}
-    channel=${toString icfg.channel}
-    country_code=${icfg.countryCode}
-    ieee80211d=1
-    ${optionalString (icfg.ieee80211h) "ieee80211h=1"}
-    wmm_enabled=${boolean icfg.wmm_enabled}
-    ${optionalString icfg.ieee80211n ''
-      ieee80211n=1
-      ht_capab=${mapCapab icfg.ht_capab}
-      require_ht=${boolean icfg.require_ht}
-    ''}
-    ${optionalString icfg.ieee80211ac ''
-      ieee80211ac=1
-      vht_capab=${mapCapab icfg.vht_capab}
-      require_vht=${boolean icfg.require_vht}
-      vht_oper_chwidth=${toString icfg.vht_oper_chwidth}
-      vht_oper_centr_freq_seg0_idx=${toString icfg.vht_oper_centr_freq_seg0_idx}
-      vht_oper_centr_freq_seg1_idx=${toString icfg.vht_oper_centr_freq_seg1_idx}
-      use_sta_nsts=${boolean icfg.use_sta_nsts}
-    ''}
-    ${optionalString icfg.ieee80211ax ''
-      ieee80211ax=1
-    ''}
+      interface=${iface}
+      ${optionalString (icfg.bridge != null) "bridge=${icfg.bridge}"}
+      driver=${icfg.driver}
+      use_driver_iface_addr=1
+      hw_mode=${icfg.hwMode}
+      channel=${toString icfg.channel}
+      country_code=${icfg.countryCode}
+      ieee80211d=1
+      ${optionalString (icfg.ieee80211h) "ieee80211h=1"}
+      wmm_enabled=${boolean icfg.wmm_enabled}
+      ${optionalString icfg.ieee80211n ''
+        ieee80211n=1
+        ht_capab=${mapCapab icfg.ht_capab}
+        require_ht=${boolean icfg.require_ht}
+      ''}
+      ${optionalString icfg.ieee80211ac ''
+        ieee80211ac=1
+        vht_capab=${mapCapab icfg.vht_capab}
+        require_vht=${boolean icfg.require_vht}
+        vht_oper_chwidth=${toString icfg.vht_oper_chwidth}
+        vht_oper_centr_freq_seg0_idx=${toString icfg.vht_oper_centr_freq_seg0_idx}
+        vht_oper_centr_freq_seg1_idx=${toString icfg.vht_oper_centr_freq_seg1_idx}
+        use_sta_nsts=${boolean icfg.use_sta_nsts}
+      ''}
+      ${optionalString icfg.ieee80211ax ''
+        ieee80211ax=1
+      ''}
 
-    ssid=${icfg.ssid}
-    ${configBss icfg}
+      ssid=${icfg.ssid}
+      ${configBss icfg}
 
-    ${concatMapStringsSep "\n" (bss: ''
-      bss=${bss}
-      ssid=${icfg.bss.${bss}.ssid}
-      ${configBss icfg.bss."${bss}"}'') (attrNames icfg.bss)}
+      ${concatMapStringsSep "\n" (bss: ''
+        bss=${bss}
+        ssid=${icfg.bss.${bss}.ssid}
+        ${configBss icfg.bss."${bss}"}'') (attrNames icfg.bss)}
 
-    ${icfg.extraConfig}
-  '';
+      ${icfg.extraConfig}
+    '';
 
   mapCapab = list: concatStrings (map (key: "[${key}]") list);
   boolean = bool:
