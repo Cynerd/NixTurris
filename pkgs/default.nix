@@ -13,21 +13,6 @@ with nixlib; let
     mox-otp = python3Packages.callPackage ./mox-otp {};
     crypto-wrapper = callPackage ./crypto-wrapper {};
 
-    # Turris kernels with patches
-    linux_turris_5_15 =
-      callPackage
-      "${nixpkgs.path}/pkgs/os-specific/linux/kernel/linux-5.15.nix" {
-        kernelPatches =
-          map (p: {
-            name = toString p;
-            patch = ./patches-linux-5.15 + "/${p}";
-          }) (
-            attrNames (filterAttrs (n: v: v == "regular") (
-              readDir ./patches-linux-5.15
-            ))
-          );
-      };
-
     # NOR Firmware as considered stable by Turris and shipped in Turris OS
     tosFirmwareOmnia = callPackage ./tos-firmware {board = "omnia";};
     tosFirmwareMox = callPackage ./tos-firmware {board = "mox";};
