@@ -21,6 +21,16 @@ with lib; {
     # The additional administration packages
     environment.systemPackages = with pkgs; [
       libatsha204
+      tosFirmwareOmnia
     ];
+
+    # U-Boot environment access
+    firmware.environment = {
+      enable = true;
+      device = "/dev/mtd0";
+      offset = 786432; # 0xC0000
+      size = 65536; # 0x10000
+      secsize = 262144; # 0x40000
+    };
   };
 }

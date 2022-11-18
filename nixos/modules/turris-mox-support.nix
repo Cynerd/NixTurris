@@ -32,6 +32,14 @@ with lib; {
     # The additional administration packages
     environment.systemPackages = with pkgs; [
       mox-otp
+      tosFirmwareMox
     ];
+
+    # U-Boot environment access
+    firmware.environment = {
+      enable = true;
+      device = "/dev/mtd2";
+      size = 65536; # 0x10000
+    };
   };
 }

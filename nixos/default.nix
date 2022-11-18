@@ -13,6 +13,7 @@ self: let
     armv7l-overlay = import ./modules/armv7l-overlay.nix;
 
     hostapd = import ./modules/hostapd.nix;
+    fwenv = import ./modules/fwenv.nix;
   };
 in
   modules
