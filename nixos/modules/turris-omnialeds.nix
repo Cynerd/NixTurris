@@ -56,9 +56,9 @@ with lib; let
       trigger = "netdev";
       netdevName = "lan${toString i}";
       color = {
-        red = 255;
-        green = 255;
-        blue = 0;
+        red = 0;
+        green = 0;
+        blue = 255;
       };
     };
   wlanConfig = i:
@@ -67,16 +67,16 @@ with lib; let
       trigger = "netdev";
       netdevName = "wlp${toString i}s0";
       color = {
-        red = 0;
+        red = 255;
         green = 255;
-        blue = 255;
+        blue = 0;
       };
     };
   indicatorConfig = i:
     ledConfig {
       name = "indicator${toString i}";
       color = {
-        red = 0;
+        red = 255;
         green = 255;
         blue = 255;
       };
