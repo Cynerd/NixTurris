@@ -87,7 +87,12 @@ with lib; let
     echo ${toString lcfg.brightness} > /sys/class/leds/rgb:${sysname}/brightness
     echo ${toString lcfg.color.red} ${toString lcfg.color.green} ${toString lcfg.color.blue} > /sys/class/leds/rgb:${sysname}/multi_intensity
     echo ${lcfg.trigger} > /sys/class/leds/rgb:${sysname}/trigger
-    ${optionalString (lcfg.trigger == "netdev") "echo '${lcfg.netdevName}' > /sys/class/leds/rgb:${sysname}/device_name"}
+    ${optionalString (lcfg.trigger == "netdev") ''
+      echo '${lcfg.netdevName}' > /sys/class/leds/rgb:${sysname}/device_name
+      echo 1 > /sys/class/leds/rgb:${sysname}/link
+      echo 1 > /sys/class/leds/rgb:${sysname}/rx
+      echo 1 > /sys/class/leds/rgb:${sysname}/tx
+    ''}
   '';
 in {
   options = {
