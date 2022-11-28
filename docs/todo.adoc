@@ -13,9 +13,6 @@ Generate template configuration in `/etc/nixos/`:: This is common way
 the installation of NixOS proceeds. We would use it only with NixOS rebuild on
 site but we should still do it.
 
-Linux 6.0 for Turris Omnia:: There are patches to fix PCIe on Turris Omnia for
-Linux 5.15 but there are none for Linux 6.0.
-
 Boot files should be copied to `/boot` on tarball:: The standard syslinux
 generator copies boot files (linux, initrd and dtb) to `/boot` while current
 implementation in tarball keeps them in Nix store. This prevents installation on

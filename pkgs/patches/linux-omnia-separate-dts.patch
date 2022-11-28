@@ -1,4 +1,4 @@
-From 7e5c97a1b1596cfcfcf078b25716787cc54387b9 Mon Sep 17 00:00:00 2001
+From cb9058f6081a92b9a40bd1e1e82bf41c1a946177 Mon Sep 17 00:00:00 2001
 From: Tomas Hlavacek <tmshlvck@gmail.com>
 Date: Tue, 5 May 2020 20:40:24 +0200
 Subject: [PATCH] ARM: dts: mvebu: armada-385-turris-omnia: separate dts for
@@ -41,10 +41,10 @@ Signed-off-by: Marek Behún <marek.behun@nic.cz>
  rename arch/arm/boot/dts/{armada-385-turris-omnia.dts => armada-385-turris-omnia.dtsi} (94%)
 
 diff --git a/arch/arm/boot/dts/Makefile b/arch/arm/boot/dts/Makefile
-index 7a72fc636a7a..9ae9710aff2b 100644
+index 05d8aef6e5d2..96670dbbfdb4 100644
 --- a/arch/arm/boot/dts/Makefile
 +++ b/arch/arm/boot/dts/Makefile
-@@ -1400,7 +1400,8 @@ dtb-$(CONFIG_MACH_ARMADA_38X) += \
+@@ -1512,7 +1512,8 @@ dtb-$(CONFIG_MACH_ARMADA_38X) += \
  	armada-385-linksys-rango.dtb \
  	armada-385-linksys-shelby.dtb \
  	armada-385-synology-ds116.dtb \
@@ -115,7 +115,7 @@ diff --git a/arch/arm/boot/dts/armada-385-turris-omnia.dts b/arch/arm/boot/dts/a
 similarity index 94%
 rename from arch/arm/boot/dts/armada-385-turris-omnia.dts
 rename to arch/arm/boot/dts/armada-385-turris-omnia.dtsi
-index 01b0dfd55d70..52846580dc5e 100644
+index a41902e3815c..02485be6b777 100644
 --- a/arch/arm/boot/dts/armada-385-turris-omnia.dts
 +++ b/arch/arm/boot/dts/armada-385-turris-omnia.dtsi
 @@ -8,8 +8,6 @@
@@ -127,7 +127,7 @@ index 01b0dfd55d70..52846580dc5e 100644
  #include <dt-bindings/gpio/gpio.h>
  #include <dt-bindings/input/input.h>
  #include <dt-bindings/leds/common.h>
-@@ -88,11 +86,11 @@ pcie@3,0 {
+@@ -91,11 +89,11 @@ pcie@3,0 {
  	sfp: sfp {
  		compatible = "sff,sfp";
  		i2c-bus = <&sfp_i2c>;
@@ -144,7 +144,7 @@ index 01b0dfd55d70..52846580dc5e 100644
  		maximum-power-milliwatt = <3000>;
  
  		/*
-@@ -144,7 +142,7 @@ fixed-link {
+@@ -147,7 +145,7 @@ fixed-link {
  	};
  };
  
@@ -153,7 +153,7 @@ index 01b0dfd55d70..52846580dc5e 100644
  &eth2 {
  	/*
  	 * eth2 is connected via a multiplexor to both the SFP cage and to
-@@ -155,9 +153,8 @@ &eth2 {
+@@ -158,9 +156,8 @@ &eth2 {
  	 * is present, U-Boot has to enable the sfp node above, remove phy
  	 * handle and add managed = "in-band-status" property.
  	 */
@@ -164,7 +164,7 @@ index 01b0dfd55d70..52846580dc5e 100644
  	phys = <&comphy5 2>;
  	sfp = <&sfp>;
  	buffer-manager = <&bm>;
-@@ -361,7 +358,7 @@ i2c@7 {
+@@ -365,7 +362,7 @@ i2c@7 {
  			#size-cells = <0>;
  			reg = <7>;
  
@@ -173,7 +173,7 @@ index 01b0dfd55d70..52846580dc5e 100644
  				/*
  				 * GPIO expander for SFP+ signals and
  				 * and phy irq
-@@ -370,7 +367,7 @@ pcawan: gpio@71 {
+@@ -374,7 +371,7 @@ pcawan: gpio@71 {
  				reg = <0x71>;
  
  				pinctrl-names = "default";
@@ -182,7 +182,7 @@ index 01b0dfd55d70..52846580dc5e 100644
  
  				interrupt-parent = <&gpio1>;
  				interrupts = <14 IRQ_TYPE_LEVEL_LOW>;
-@@ -450,13 +447,23 @@ fixed-link {
+@@ -455,13 +452,23 @@ fixed-link {
  				};
  			};
  

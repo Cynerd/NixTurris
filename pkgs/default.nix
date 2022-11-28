@@ -13,6 +13,40 @@ with nixlib; let
     mox-otp = python3Packages.callPackage ./mox-otp {};
     crypto-wrapper = callPackage ./crypto-wrapper {};
 
+    # Kernel patches and board specific kernels
+    kernelPatchesTurris = {
+      mvebu_pci_aadvark = {
+        # This patch is required to fix PCI for mvebu
+        name = "mvebu-pci-aadvark";
+        patch = ./patches/linux-6.0-pci-aadvark-controller-changes.patch;
+      };
+      mvebu_pci_omnia_fix = {
+        # This is special hack for Turris Omnia as PCI doesn't work with
+        # PCIEASPM configuration symbol.
+        name = "mvebu-pci-fix";
+        patch = null;
+        extraStructuredConfig = with lib.kernel; {PCIEASPM = no;};
+      };
+      omnia_separate_dtb = {
+        # The long term patch that provides two separate device trees for Turris
+        # Omnia. The armada-385-turris-omnia-phy.dtb uses metallic Ethernet and
+        # armada-385-turris-omnia-spf uses SFP cage.
+        name = "omnia-separate-dtb";
+        patch = ./patches/linux-omnia-separate-dts.patch;
+      };
+    };
+    linux_6_0_turris_omnia = nixpkgs.linux_6_0.override (oldAttrs: {
+      kernelPatches = [
+        kernelPatchesTurris.mvebu_pci_aadvark
+        kernelPatchesTurris.mvebu_pci_omnia_fix
+        kernelPatchesTurris.omnia_separate_dtb
+      ];
+      features.turrisOmniaSplitDTB = true;
+    });
+    linux_6_0_turris_mox = nixpkgs.linux_6_0.override (oldAttrs: {
+      kernelPatches = [kernelPatchesTurris.mvebu_pci_aadvark];
+    });
+
     # NOR Firmware as considered stable by Turris and shipped in Turris OS
     tosFirmwareOmnia = callPackage ./tos-firmware {board = "omnia";};
     tosFirmwareMox = callPackage ./tos-firmware {board = "mox";};
@@ -50,49 +84,6 @@ with nixlib; let
         ln -sf fw_printenv $out/bin/fw_setenv
       '';
     };
-
-    kernelPatchesTurris = {
-      # Linux 5.15 patches
-      mvebu_pci_fixes_5_15 = {
-        name = "mvebu-pci-fixes";
-        patch = ./patches/linux-5.15-mvebu-pci-improvements.patch;
-        # Disable devices that conflict with PCI
-        extraStructuredConfig = with lib.kernel; {
-          PCIEASPM = no;
-        };
-      };
-      mvebu_pci_aadvark_5_15 = {
-        name = "mvebu-pci-aadvark-5-15";
-        patch = ./patches/linux-5.15-pci-aadvark.patch;
-      };
-      omnia_leds_5_15 = {
-        name = "omnia-leds-5.15";
-        patch = ./patches/linux-5.15-omnia-leds.patch;
-      };
-      omnia_separate_dts_5_15 = {
-        name = "omnia-separate-dts-5.15";
-        patch = ./patches/linux-5.15-turris-omnia-separate-dts.patch;
-      };
-      # Linux 6.0 patches
-      mvebu_pci_aadvark = {
-        name = "mvebu-pci-aadvark";
-        patch = ./patches/linux-6.0-pci-aadvark-controller-changes.patch;
-      };
-    };
-    # Kernel with mvebu PCI patches for Turris Omnia
-    linux_5_15_turris_omnia = nixpkgs.linux_5_15.override (oldAttrs: {
-      kernelPatches = [
-        kernelPatchesTurris.mvebu_pci_fixes_5_15
-        kernelPatchesTurris.mvebu_pci_aadvark_5_15
-        kernelPatchesTurris.omnia_leds_5_15
-        kernelPatchesTurris.omnia_separate_dts_5_15
-      ];
-      features.turrisOmniaSplitDTB = true;
-    });
-    ## Kernel with PCI patches fixing SError on Turris Mox
-    linux_6_0_turris_mox = nixpkgs.linux_6_0.override (oldAttrs: {
-      kernelPatches = [kernelPatchesTurris.mvebu_pci_aadvark];
-    });
   };
 in
   turrispkgs
