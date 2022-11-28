@@ -34,9 +34,6 @@ in {
       "boot.shell_on_fail"
     ];
 
-    # Use the latest kernel
-    boot.kernelPackages = mkDefault pkgs.linuxPackages_latest;
-
     # The supported deployment is on BTRFS
     boot.supportedFilesystems = ["btrfs"];
     boot.initrd.supportedFilesystems = ["btrfs"];

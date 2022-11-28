@@ -50,6 +50,49 @@ with nixlib; let
         ln -sf fw_printenv $out/bin/fw_setenv
       '';
     };
+
+    kernelPatchesTurris = {
+      # Linux 5.15 patches
+      mvebu_pci_fixes_5_15 = {
+        name = "mvebu-pci-fixes";
+        patch = ./patches/linux-5.15-mvebu-pci-improvements.patch;
+        # Disable devices that conflict with PCI
+        extraStructuredConfig = with lib.kernel; {
+          PCIEASPM = no;
+        };
+      };
+      mvebu_pci_aadvark_5_15 = {
+        name = "mvebu-pci-aadvark-5-15";
+        patch = ./patches/linux-5.15-pci-aadvark.patch;
+      };
+      omnia_leds_5_15 = {
+        name = "omnia-leds-5.15";
+        patch = ./patches/linux-5.15-omnia-leds.patch;
+      };
+      omnia_separate_dts_5_15 = {
+        name = "omnia-separate-dts-5.15";
+        patch = ./patches/linux-5.15-turris-omnia-separate-dts.patch;
+      };
+      # Linux 6.0 patches
+      mvebu_pci_aadvark = {
+        name = "mvebu-pci-aadvark";
+        patch = ./patches/linux-6.0-pci-aadvark-controller-changes.patch;
+      };
+    };
+    # Kernel with mvebu PCI patches for Turris Omnia
+    linux_5_15_turris_omnia = nixpkgs.linux_5_15.override (oldAttrs: {
+      kernelPatches = [
+        kernelPatchesTurris.mvebu_pci_fixes_5_15
+        kernelPatchesTurris.mvebu_pci_aadvark_5_15
+        kernelPatchesTurris.omnia_leds_5_15
+        kernelPatchesTurris.omnia_separate_dts_5_15
+      ];
+      features.turrisOmniaSplitDTB = true;
+    });
+    ## Kernel with PCI patches fixing SError on Turris Mox
+    linux_6_0_turris_mox = nixpkgs.linux_6_0.override (oldAttrs: {
+      kernelPatches = [kernelPatchesTurris.mvebu_pci_aadvark];
+    });
   };
 in
   turrispkgs

@@ -1,0 +1,299 @@
+From 3f9f7afc7efe2133c195e3f1e6fb09f29e72b889 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marek=20Beh=C3=BAn?= <kabel@kernel.org>
+Date: Mon, 4 Jul 2022 13:36:21 +0200
+Subject: [PATCH 1/5] ARM: dts: turris-omnia: configure LED[0] pin function to
+ link/activity
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+The marvell PHY driver changes the LED[0] pin function to "On - 1000
+Mbps Link, Off - Else".
+
+Turris Omnia expects that the function is "On - Link, Blink - Activity,
+Off - No link".
+
+Use the `marvell,reg-init` DT property to change the function.
+
+In the future, once netdev trigger will support HW offloading, we will
+be able to have this configured via the combination of PHY driver and
+leds-turris-omnia driver.
+
+Signed-off-by: Marek Behún <kabel@kernel.org>
+---
+ arch/arm/boot/dts/armada-385-turris-omnia.dts | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm/boot/dts/armada-385-turris-omnia.dts b/arch/arm/boot/dts/armada-385-turris-omnia.dts
+index f7c69e1f2373..e70f378392dc 100644
+--- a/arch/arm/boot/dts/armada-385-turris-omnia.dts
++++ b/arch/arm/boot/dts/armada-385-turris-omnia.dts
+@@ -393,7 +393,8 @@ &mdio {
+ 	phy1: ethernet-phy@1 {
+ 		compatible = "ethernet-phy-ieee802.3-c22";
+ 		reg = <1>;
+-		marvell,reg-init = <3 18 0 0x4985>;
++		marvell,reg-init = <3 18 0 0x4985>,
++				   <3 16 0xfff0 0x0001>;
+ 
+ 		/* irq is connected to &pcawan pin 7 */
+ 	};
+-- 
+2.38.1
+
+
+From ea453c59be7555cdf832c364ee15bb9315fddbec Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marek=20Beh=C3=BAn?= <kabel@kernel.org>
+Date: Mon, 4 Jul 2022 13:36:22 +0200
+Subject: [PATCH 2/5] ARM: dts: turris-omnia: enable LED controller node
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+The LED controller node is disabled because the leds-turris-omnia driver
+does not support setting the LED blinking to be controlled by the MCU.
+
+The patches for that have now been sent [1], so let's enable the node.
+
+[1] https://lore.kernel.org/linux-leds/20220704105955.15474-1-kabel@kernel.org/T/
+
+Signed-off-by: Marek Behún <kabel@kernel.org>
+---
+ arch/arm/boot/dts/armada-385-turris-omnia.dts | 7 ++-----
+ 1 file changed, 2 insertions(+), 5 deletions(-)
+
+diff --git a/arch/arm/boot/dts/armada-385-turris-omnia.dts b/arch/arm/boot/dts/armada-385-turris-omnia.dts
+index e70f378392dc..cf8ce39e4577 100644
+--- a/arch/arm/boot/dts/armada-385-turris-omnia.dts
++++ b/arch/arm/boot/dts/armada-385-turris-omnia.dts
+@@ -191,15 +191,13 @@ led-controller@2b {
+ 				reg = <0x2b>;
+ 				#address-cells = <1>;
+ 				#size-cells = <0>;
++				status = "okay";
+ 
+ 				/*
+ 				 * LEDs are controlled by MCU (STM32F0) at
+ 				 * address 0x2b.
+ 				 *
+-				 * The driver does not support HW control mode
+-				 * for the LEDs yet. Disable the LEDs for now.
+-				 *
+-				 * Also LED functions are not stable yet:
++				 * LED functions are not stable yet:
+ 				 * - there are 3 LEDs connected via MCU to PCIe
+ 				 *   ports. One of these ports supports mSATA.
+ 				 *   There is no mSATA nor PCIe function.
+@@ -210,7 +208,6 @@ led-controller@2b {
+ 				 *   B. Again there is no such function defined.
+ 				 *   For now we use LED_FUNCTION_INDICATOR
+ 				 */
+-				status = "disabled";
+ 
+ 				multi-led@0 {
+ 					reg = <0x0>;
+-- 
+2.38.1
+
+
+From c4f1ec732f9d269e2938fe5e9e9faae38e18713f Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marek=20Beh=C3=BAn?= <kabel@kernel.org>
+Date: Mon, 4 Jul 2022 12:59:53 +0200
+Subject: [PATCH 3/5] leds: turris-omnia: support HW controlled mode via
+ private trigger
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Add support for enabling MCU controlled mode of the Turris Omnia LEDs
+via a LED private trigger called "omnia-mcu".
+
+When in MCU controlled mode, the user can still set LED color, but the
+blinking is done by MCU, which does different things for various LEDs:
+- WAN LED is blinked according to the LED[0] pin of the WAN PHY
+- LAN LEDs are blinked according to the LED[0] output of corresponding
+  port of the LAN switch
+- PCIe LEDs are blinked according to the logical OR of the MiniPCIe port
+  LED pins
+
+For a long time I wanted to actually do this differently: I wanted to
+make the netdev trigger to transparently offload the blinking to the HW
+if user set compatible settings for the netdev trigger.
+There was some work on this, and hopefully we will be able to complete
+it sometime, but since there are various complications, it will probably
+not be soon.
+
+In the meantime let's support HW controlled mode via this private LED
+trigger. If, in the future, we manage to complete the netdev trigger
+offloading, we can still keep this private trigger for backwards
+compatiblity, if needed.
+
+We also set "omnia-mcu" to cdev->default_trigger, so that the MCU keeps
+control until the user first wants to take over it. If a different
+default trigger is specified in device-tree via the
+`linux,default-trigger` property, LED class will overwrite
+cdev->default_trigger, and so the DT property will be respected.
+
+Signed-off-by: Marek Behún <kabel@kernel.org>
+---
+ drivers/leds/Kconfig             |  1 +
+ drivers/leds/leds-turris-omnia.c | 41 ++++++++++++++++++++++++++++++++
+ 2 files changed, 42 insertions(+)
+
+diff --git a/drivers/leds/Kconfig b/drivers/leds/Kconfig
+index ed800f5da7d8..52f010b8f58e 100644
+--- a/drivers/leds/Kconfig
++++ b/drivers/leds/Kconfig
+@@ -163,6 +163,7 @@ config LEDS_TURRIS_OMNIA
+ 	depends on I2C
+ 	depends on MACH_ARMADA_38X || COMPILE_TEST
+ 	depends on OF
++	select LEDS_TRIGGERS
+ 	help
+ 	  This option enables basic support for the LEDs found on the front
+ 	  side of CZ.NIC's Turris Omnia router. There are 12 RGB LEDs on the
+diff --git a/drivers/leds/leds-turris-omnia.c b/drivers/leds/leds-turris-omnia.c
+index 1adfed1c0619..c2dfb22d3065 100644
+--- a/drivers/leds/leds-turris-omnia.c
++++ b/drivers/leds/leds-turris-omnia.c
+@@ -41,6 +41,39 @@ struct omnia_leds {
+ 	struct omnia_led leds[];
+ };
+ 
++static struct led_hw_trigger_type omnia_hw_trigger_type;
++
++static int omnia_hwtrig_activate(struct led_classdev *cdev)
++{
++	struct omnia_leds *leds = dev_get_drvdata(cdev->dev->parent);
++	struct omnia_led *led = to_omnia_led(lcdev_to_mccdev(cdev));
++
++	/* put the LED into MCU controlled mode */
++	return i2c_smbus_write_byte_data(leds->client, CMD_LED_MODE,
++					 CMD_LED_MODE_LED(led->reg));
++}
++
++static void omnia_hwtrig_deactivate(struct led_classdev *cdev)
++{
++	struct omnia_leds *leds = dev_get_drvdata(cdev->dev->parent);
++	struct omnia_led *led = to_omnia_led(lcdev_to_mccdev(cdev));
++	int ret;
++
++	/* put the LED into software mode */
++	ret = i2c_smbus_write_byte_data(leds->client, CMD_LED_MODE,
++					CMD_LED_MODE_LED(led->reg) |
++					CMD_LED_MODE_USER);
++	if (ret < 0)
++		dev_err(cdev->dev, "Cannot put to software mode: %i\n", ret);
++}
++
++static struct led_trigger omnia_hw_trigger = {
++	.name		= "omnia-mcu",
++	.activate	= omnia_hwtrig_activate,
++	.deactivate	= omnia_hwtrig_deactivate,
++	.trigger_type	= &omnia_hw_trigger_type,
++};
++
+ static int omnia_led_brightness_set_blocking(struct led_classdev *cdev,
+ 					     enum led_brightness brightness)
+ {
+@@ -112,6 +145,8 @@ static int omnia_led_register(struct i2c_client *client, struct omnia_led *led,
+ 	cdev = &led->mc_cdev.led_cdev;
+ 	cdev->max_brightness = 255;
+ 	cdev->brightness_set_blocking = omnia_led_brightness_set_blocking;
++	cdev->trigger_type = &omnia_hw_trigger_type;
++	cdev->default_trigger = omnia_hw_trigger.name;
+ 
+ 	/* put the LED into software mode */
+ 	ret = i2c_smbus_write_byte_data(client, CMD_LED_MODE,
+@@ -228,6 +263,12 @@ static int omnia_leds_probe(struct i2c_client *client,
+ 
+ 	mutex_init(&leds->lock);
+ 
++	ret = devm_led_trigger_register(dev, &omnia_hw_trigger);
++	if (ret < 0) {
++		dev_err(dev, "Cannot register private LED trigger: %d\n", ret);
++		return ret;
++	}
++
+ 	led = &leds->leds[0];
+ 	for_each_available_child_of_node(np, child) {
+ 		ret = omnia_led_register(client, led, child);
+-- 
+2.38.1
+
+
+From 3f2601413dc088452d205e6796b784c2db4db3d7 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marek=20Beh=C3=BAn?= <kabel@kernel.org>
+Date: Mon, 4 Jul 2022 12:59:54 +0200
+Subject: [PATCH 4/5] leds: turris-omnia: initialize multi-intensity to full
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+The default color of each LED before driver probe (255, 255, 255).
+Initialize multi_intensity to this value, so that it corresponds to the
+reality.
+
+Signed-off-by: Marek Behún <kabel@kernel.org>
+---
+ drivers/leds/leds-turris-omnia.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/drivers/leds/leds-turris-omnia.c b/drivers/leds/leds-turris-omnia.c
+index c2dfb22d3065..fae155bd119c 100644
+--- a/drivers/leds/leds-turris-omnia.c
++++ b/drivers/leds/leds-turris-omnia.c
+@@ -131,10 +131,13 @@ static int omnia_led_register(struct i2c_client *client, struct omnia_led *led,
+ 	}
+ 
+ 	led->subled_info[0].color_index = LED_COLOR_ID_RED;
++	led->subled_info[0].intensity = 255;
+ 	led->subled_info[0].channel = 0;
+ 	led->subled_info[1].color_index = LED_COLOR_ID_GREEN;
++	led->subled_info[1].intensity = 255;
+ 	led->subled_info[1].channel = 1;
+ 	led->subled_info[2].color_index = LED_COLOR_ID_BLUE;
++	led->subled_info[2].intensity = 255;
+ 	led->subled_info[2].channel = 2;
+ 
+ 	led->mc_cdev.subled_info = led->subled_info;
+-- 
+2.38.1
+
+
+From bcf5245037f11b24d3745574ccaa2f50f05d06b6 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marek=20Beh=C3=BAn?= <kabel@kernel.org>
+Date: Mon, 4 Jul 2022 12:59:55 +0200
+Subject: [PATCH 5/5] leds: turris-omnia: change max brightness from 255 to 1
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Using binary brightness makes more sense for this controller, because
+internally in the MCU it works that way: the LED has a color, and a
+state whether it is ON or OFF.
+
+The resulting brightness computation with led_mc_calc_color_components()
+will now always result in either (0, 0, 0) or the multi_intensity value.
+
+Signed-off-by: Marek Behún <kabel@kernel.org>
+---
+ drivers/leds/leds-turris-omnia.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/leds/leds-turris-omnia.c b/drivers/leds/leds-turris-omnia.c
+index fae155bd119c..f53bdc3f4cea 100644
+--- a/drivers/leds/leds-turris-omnia.c
++++ b/drivers/leds/leds-turris-omnia.c
+@@ -146,7 +146,7 @@ static int omnia_led_register(struct i2c_client *client, struct omnia_led *led,
+ 	init_data.fwnode = &np->fwnode;
+ 
+ 	cdev = &led->mc_cdev.led_cdev;
+-	cdev->max_brightness = 255;
++	cdev->max_brightness = 1;
+ 	cdev->brightness_set_blocking = omnia_led_brightness_set_blocking;
+ 	cdev->trigger_type = &omnia_hw_trigger_type;
+ 	cdev->default_trigger = omnia_hw_trigger.name;
+-- 
+2.38.1
+

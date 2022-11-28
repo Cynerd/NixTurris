@@ -13,9 +13,8 @@ Generate template configuration in `/etc/nixos/`:: This is common way
 the installation of NixOS proceeds. We would use it only with NixOS rebuild on
 site but we should still do it.
 
-PCIe on Omnia does not work:: There are patches that make it work on Turris OS
-and attempt to port them to this repository but some important patch seems to be
-still missing as it doesn't work.
+Linux 6.0 for Turris Omnia:: There are patches to fix PCIe on Turris Omnia for
+Linux 5.15 but there are none for Linux 6.0.
 
 Boot files should be copied to `/boot` on tarball:: The standard syslinux
 generator copies boot files (linux, initrd and dtb) to `/boot` while current
@@ -29,6 +28,9 @@ the packages fail their test phases as they most likely expect 64bit system.
 
 
 == Improvements to be tackled
+
+Bridge VLAN filtering:: The current bridge configuration can't be used with VLAN
+filtering. This should be extension that could be easily pushed to the upstream.
 
 Firewall configuration with zones and masquarade:: The NixOS firewall should be
 expanded or replaced by firewall configuration that provides multiple zones with
