@@ -10,6 +10,9 @@ MMC. The USB drive is the easies to setup from PCs and thus it is suggested for
 testing NixOS on your Turris Omnia. You can always return to the Turris OS just
 by unplugging the USB drive.
 
+TIP: Read the whole documentation before you start to understand what you are
+getting yourself into.
+
 == 1.) Updating U-Boot
 
 The updated U-Boot is required to make Turris Omnia work with NixOS in most
@@ -17,8 +20,6 @@ cases. The reason is that the original U-Boot 2015.10 does not support booting
 from USB or internal drive. The newer Turris Omnia routers have newer U-Boot
 versions but always verify the U-Boot version before you continue by running the
 following command as root on the router:
-
-include::shards/install-uboot.adoc[]
 
 ----
 strings /dev/mtd0 | grep 'U-Boot [0-9.]\+'
@@ -45,7 +46,12 @@ This should give you at least U-Boot 2022.07.
 
 === Updating U-Boot on NixOS
 
-TODO
+The factory version of U-Boot of Turris Omnia most likely won't support booting
+from USB devices. This makes this just something for completeness as you won't
+be able to boot NixOS unless you update U-Boot from Turris OS. None the less the
+latest stable version of Turris Omnia firmware is available in NixTurris
+installation under command `turris-firmware-update`. You have to run this
+command as root. It is going to ask you before any change is performed.
 
 == 2.) Get tarball with NixOS
 
