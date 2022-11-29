@@ -1,7 +1,5 @@
 = NixOS on Turris Omnia
 
-CAUTION: PCIe devices are not functional right now on the Turris Omnia!
-
 The Turris Omnia is little bit more complex regarding the initial setup compared
 to Turris Mox. One issue is that armv7 builds are not provided by official
 Hydra. The second issue is that there is not a single reasonable installation
