@@ -4,7 +4,7 @@
   fetchgit,
   board,
   mtdutils,
-  makeBinaryWrapper,
+  makeWrapper,
 }:
 stdenvNoCC.mkDerivation rec {
   pname = "tos-firmware-" + board;
@@ -15,7 +15,7 @@ stdenvNoCC.mkDerivation rec {
     sha256 = "087gxdvkrykm2ghn23zscq5nw86am4jqf4nj5hzf6bmc6zxgdnhg";
   };
 
-  nativeBuildInputs = [makeBinaryWrapper];
+  nativeBuildInputs = [makeWrapper];
   installPhase = ''
     mkdir -p $out/firmware
     cp hardware/${board}/${board}-firmware/files/* $out/firmware

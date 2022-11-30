@@ -1,13 +1,11 @@
 {nixpkgs}:
 with builtins;
 with nixpkgs.lib; let
-  pkgs = nixpkgs // turrispkgs;
-  callPackage = callPackageWith pkgs;
-
-  turrispkgs = with pkgs; {
+  callPackage = nixpkgs.newScope turrispkgs;
+  turrispkgs = {
     # Crypto and certificates
     libatsha204 = callPackage ./libatsha204 {};
-    mox-otp = python3Packages.callPackage ./mox-otp {};
+    mox-otp = nixpkgs.python3Packages.callPackage ./mox-otp {};
     crypto-wrapper = callPackage ./crypto-wrapper {};
 
     # Kernel patches and board specific kernels
@@ -22,7 +20,7 @@ with nixpkgs.lib; let
         # PCIEASPM configuration symbol.
         name = "mvebu-pci-fix";
         patch = null;
-        extraStructuredConfig = with lib.kernel; {PCIEASPM = no;};
+        extraStructuredConfig = with nixpkgs.lib.kernel; {PCIEASPM = no;};
       };
       omnia_separate_dtb = {
         # The long term patch that provides two separate device trees for Turris
@@ -34,14 +32,14 @@ with nixpkgs.lib; let
     };
     linux_6_0_turris_omnia = nixpkgs.linux_6_0.override (oldAttrs: {
       kernelPatches = [
-        kernelPatchesTurris.mvebu_pci_aadvark
-        kernelPatchesTurris.mvebu_pci_omnia_fix
-        kernelPatchesTurris.omnia_separate_dtb
+        turrispkgs.kernelPatchesTurris.mvebu_pci_aadvark
+        turrispkgs.kernelPatchesTurris.mvebu_pci_omnia_fix
+        turrispkgs.kernelPatchesTurris.omnia_separate_dtb
       ];
       features.turrisOmniaSplitDTB = true;
     });
     linux_6_0_turris_mox = nixpkgs.linux_6_0.override (oldAttrs: {
-      kernelPatches = [kernelPatchesTurris.mvebu_pci_aadvark];
+      kernelPatches = [turrispkgs.kernelPatchesTurris.mvebu_pci_aadvark];
     });
 
     # NOR Firmware as considered stable by Turris and shipped in Turris OS
@@ -49,32 +47,32 @@ with nixpkgs.lib; let
     tosFirmwareMox = callPackage ./tos-firmware {board = "mox";};
 
     # NOR Firmwares build in Nix
-    armTrustedFirmwareTurrisMox = buildArmTrustedFirmware rec {
+    armTrustedFirmwareTurrisMox = nixpkgs.buildArmTrustedFirmware rec {
       platform = "a3700";
       extraMeta.platforms = ["aarch64-linux"];
       extraMakeFlags = ["USE_COHERENT_MEM=0" "CM3_SYSTEM_RESET=1" "FIP_ALIGN=0x100"];
       filesToInstall = ["build/${platform}/release/bl31.bin"];
     };
-    ubootTurrisMox = buildUBoot {
+    ubootTurrisMox = nixpkgs.buildUBoot {
       defconfig = "turris_mox_defconfig";
       extraMeta.platforms = ["aarch64-linux"];
       filesToInstall = ["u-boot.bin"];
       extraPatches = [./patches/include-configs-turris_mox-increase-space-for-the-ke.patch];
       BL31 = "${armTrustedFirmwareTurrisMox}/bl31.bin";
     };
-    ubootTurrisOmnia = buildUBoot {
+    ubootTurrisOmnia = nixpkgs.buildUBoot {
       defconfig = "turris_omnia_defconfig";
       extraMeta.platforms = ["armv7l-linux"];
       filesToInstall = ["u-boot-spl.kwb"];
     };
 
     # Firmware environment tools
-    ubootEnvTools = buildUBoot {
+    ubootEnvTools = nixpkgs.buildUBoot {
       defconfig = "tools-only_defconfig";
       installDir = "$out/bin";
       hardeningDisable = [];
       dontStrip = false;
-      extraMeta.platforms = lib.platforms.linux;
+      extraMeta.platforms = nixpkgs.lib.platforms.linux;
       extraMakeFlags = ["envtools"];
       filesToInstall = ["tools/env/fw_printenv"];
       postInstall = ''
