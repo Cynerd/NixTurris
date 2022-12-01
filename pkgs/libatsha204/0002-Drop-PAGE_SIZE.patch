@@ -1,0 +1,25 @@
+From d3bee7d5b698d95702f16e145866dedd5b172edd Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Karel=20Ko=C4=8D=C3=AD?= <cynerd@email.cz>
+Date: Thu, 1 Dec 2022 09:54:23 +0100
+Subject: [PATCH 2/2] Drop PAGE_SIZE
+
+This is not used in the code and fails to be received when building.
+---
+ Makefile | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index 22f7a3a..6ede497 100644
+--- a/Makefile
++++ b/Makefile
+@@ -6,7 +6,6 @@ O := $(RELATIVE).
+ S := $(RELATIVE).
+ ASCIIDOC := asciidoc
+ AR := ar
+-PAGE_SIZE := $(shell getconf PAGE_SIZE)
+ 
+ include $(S)/Makefile.dir
+ 
+-- 
+2.38.1
+

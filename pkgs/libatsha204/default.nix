@@ -3,7 +3,7 @@
   lib,
   fetchgit,
   pkg-config,
-  perl,
+  buildPackages,
   patchelf,
   glibc,
   openssl,
@@ -26,11 +26,12 @@ stdenv.mkDerivation rec {
     sha256 = "1lhvqdy2sfbvz9y9lwqhxggpr8rwfd66v73gv9s7b7811r6way20";
   };
   patches = [
-    ./multiple-definitions.patch
+    ./0001-Fix-multiple-definitions.patch
+    ./0002-Drop-PAGE_SIZE.patch
   ];
 
   buildInputs = [openssl unbound];
-  nativeBuildInputs = [pkg-config perl patchelf];
+  nativeBuildInputs = [pkg-config patchelf];
 
   makeFlags = [
     "RELEASE=1"
@@ -39,7 +40,7 @@ stdenv.mkDerivation rec {
     "DEFAULT_NI2C_DEV_PATH=NI2C_DEV_PATH_OMNIA"
   ];
   configurePhase = ''
-    sed -i 's|/usr/bin/perl|${perl}/bin/perl|' build/embed_gen.pl build/normalize_dep_file.pl
+    sed -i 's|/usr/bin/perl|${buildPackages.perl}/bin/perl|' build/embed_gen.pl build/normalize_dep_file.pl
   '';
   installPhase = ''
     mkdir -p $out/usr/include $out/lib $out/bin

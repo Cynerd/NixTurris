@@ -1,3 +1,12 @@
+From daab73c1783a15d48876f76ea44f53b7f34c63a8 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Karel=20Ko=C4=8D=C3=AD?= <cynerd@email.cz>
+Date: Thu, 1 Dec 2022 09:41:54 +0100
+Subject: [PATCH 1/2] Fix multiple definitions
+
+---
+ src/libatsha204/dnsmagic.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
 diff --git a/src/libatsha204/dnsmagic.c b/src/libatsha204/dnsmagic.c
 index d5f82b4..dc0bb90 100644
 --- a/src/libatsha204/dnsmagic.c
@@ -11,3 +20,6 @@ index d5f82b4..dc0bb90 100644
  
  /*
   * Get decimal number from its string representation
+-- 
+2.38.1
+
