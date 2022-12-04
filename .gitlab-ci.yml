@@ -24,7 +24,7 @@ variables:
   script:
     - "nix build .#$ARG"
     - "[ -z \"$CACHIX_KEY\" ] || cachix authtoken $CACHIX_KEY"
-    - "[ -z \"$CACHIX_KEY\" ] || cachix push $(readlink -f result)"
+    - "[ -z \"$CACHIX_KEY\" ] || cachix push $CACHIX_NAME $(readlink -f result)"
 
 # TODO: we do not have binfmt in the CI
 # Note: we should have dedicated runner for it to prevent issues with non-native
