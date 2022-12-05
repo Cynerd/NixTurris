@@ -68,8 +68,8 @@ with lib; let
       netdevName = "wlp${toString i}s0";
       color = {
         red = 255;
-        green = 255;
-        blue = 0;
+        green = 0;
+        blue = 255;
       };
     };
   indicatorConfig = i:
