@@ -18,6 +18,7 @@ with lib; {
     boot.kernelParams = [
       "earlycon=ar3700_uart,0xd0012000"
       "console=ttyMV0,115200"
+      "pcie_aspm=off" # Fix for crashes due to SError Interrupt on ath10k load
     ];
     # Insert these modules early. The watchdog should be handled as soon as
     # possible and moxtet is for some reason ignored otherwise.
