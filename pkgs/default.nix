@@ -32,7 +32,13 @@ with nixpkgs.lib; let
     };
     linux_6_0_turris_omnia = nixpkgs.linux_6_0.override (oldAttrs: {
       kernelPatches = [
-        turrispkgs.kernelPatchesTurris.mvebu_pci_aadvark
+        turrispkgs.kernelPatchesTurris.mvebu_pci_omnia_fix
+        turrispkgs.kernelPatchesTurris.omnia_separate_dtb
+      ];
+      features.turrisOmniaSplitDTB = true;
+    });
+    linux_6_1_turris_omnia = nixpkgs.linux_6_1.override (oldAttrs: {
+      kernelPatches = [
         turrispkgs.kernelPatchesTurris.mvebu_pci_omnia_fix
         turrispkgs.kernelPatchesTurris.omnia_separate_dtb
       ];

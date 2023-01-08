@@ -18,7 +18,7 @@ with lib; {
 
   config = mkIf (config.turris.board == "omnia") {
     # Use Omnia specific kernel. It is required as otherwise PCI won't work.
-    boot.kernelPackages = mkDefault (pkgs.linuxPackagesFor pkgs.linux_6_0_turris_omnia);
+    boot.kernelPackages = mkDefault (pkgs.linuxPackagesFor pkgs.linux_6_1_turris_omnia);
     # Explicitly set device tree to ensure we load the correct one.
     # This also allows switch between SFP and PHY.
     hardware.deviceTree.name = mkDefault "armada-385-turris-omnia${
