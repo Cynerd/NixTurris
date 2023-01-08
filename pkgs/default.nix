@@ -11,7 +11,7 @@ with nixpkgs.lib; let
     # Kernel patches and board specific kernels
     kernelPatchesTurris = {
       mvebu_pci_aadvark = {
-        # This patch is required to fix PCI for mvebu
+        # This patch is required to fix PCI for Mox
         name = "mvebu-pci-aadvark";
         patch = ./patches/linux-6.0-pci-aadvark-controller-changes.patch;
       };
@@ -39,6 +39,9 @@ with nixpkgs.lib; let
       features.turrisOmniaSplitDTB = true;
     });
     linux_6_0_turris_mox = nixpkgs.linux_6_0.override (oldAttrs: {
+      kernelPatches = [turrispkgs.kernelPatchesTurris.mvebu_pci_aadvark];
+    });
+    linux_6_1_turris_mox = nixpkgs.linux_6_1.override (oldAttrs: {
       kernelPatches = [turrispkgs.kernelPatchesTurris.mvebu_pci_aadvark];
     });
 
