@@ -119,7 +119,7 @@ in {
       wan = ledConfig {
         name = "wan";
         trigger = "netdev";
-        netdevName = "eth2";
+        netdevName = "end2";
         color = {
           red = 0;
           green = 255;
