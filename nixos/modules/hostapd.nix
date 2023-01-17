@@ -23,19 +23,13 @@ with lib; let
     };
 
     wpa = mkOption {
-      type = types.bool;
-      default = true;
+      type = types.enum [false 2 3];
+      default = 2;
       description = ''
         Enable WPA (IEEE 802.11i/D3.0) to authenticate with the access point.
-      '';
-    };
+        You have option to enable either WPA2 or WPA3.
 
-    wpa3 = mkOption {
-      type = types.bool;
-      default = true;
-      description = ''
-        Use WPA3 instead of WPA2 for authentication. This changes the key
-        management from WPA_PSK to SAE.
+        The WPA3 uses SAE for key management while WPA2 uses WPA_PSK.
       '';
     };
 
@@ -522,11 +516,11 @@ with lib; let
     else "0";
 
   configBss = bsscfg: ''
-    ${optionalString bsscfg.wpa ''
+    ${optionalString (bsscfg.wpa != false) ''
       wpa=2
       wpa_pairwise=CCMP TKIP
       wpa_key_mgmt=${
-        if bsscfg.wpa3
+        if bsscfg.wpa == 3
         then "SAE"
         else "WPA-PSK"
       }
