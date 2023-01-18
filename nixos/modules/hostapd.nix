@@ -406,8 +406,8 @@ with lib; let
       };
 
       vht_oper_centr_freq_seg1_idx = mkOption {
-        type = types.int;
-        default = 159;
+        type = with types; nullOr int;
+        default = null;
         description = ''
           center freq = 5 GHz + (5 * index)
           So index 159 gives center freq 5.795 GHz which is channel 159 in 5G band.
@@ -491,7 +491,7 @@ with lib; let
         require_vht=${boolean icfg.require_vht}
         vht_oper_chwidth=${toString icfg.vht_oper_chwidth}
         vht_oper_centr_freq_seg0_idx=${toString icfg.vht_oper_centr_freq_seg0_idx}
-        vht_oper_centr_freq_seg1_idx=${toString icfg.vht_oper_centr_freq_seg1_idx}
+        ${optionalString (icfg.vht_oper_centr_freq_seg1_idx != null) "vht_oper_centr_freq_seg1_idx=${toString icfg.vht_oper_centr_freq_seg1_idx}"}
         use_sta_nsts=${boolean icfg.use_sta_nsts}
       ''}
       ${optionalString icfg.ieee80211ax ''
