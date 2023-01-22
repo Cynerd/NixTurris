@@ -22,6 +22,25 @@ with lib; let
       description = "SSID to be used in IEEE 802.11 management frames.";
     };
 
+    bridge = mkOption {
+      type = with types; nullOr str;
+      default = null;
+      example = "br0";
+      description = ''
+        In case of atheros and nl80211 driver interfaces, an additional
+        configuration parameter, bridge, may be used to notify hostapd if the
+        interface is included in a bridge. This parameter is not used with
+        Host AP driver. If the bridge parameter is not set, the drivers will
+        automatically figure out the bridge interface (assuming sysfs is
+        enabled and mounted to /sys) and this parameter may not be needed.
+
+        For nl80211, this parameter can be used to request the AP interface to
+        be added to the bridge automatically (brctl may refuse to do this
+        before hostapd has been started to change the interface mode). If
+        needed, the bridge interface is also created.
+      '';
+    };
+
     wpa = mkOption {
       type = types.enum [false 2 3];
       default = 2;
@@ -85,25 +104,6 @@ with lib; let
           The raw configuration for the interface. This disables usage of any
           other option and allows you to simply write your config as it fits to
           you.
-        '';
-      };
-
-      bridge = mkOption {
-        type = with types; nullOr str;
-        default = null;
-        example = "br0";
-        description = ''
-          In case of atheros and nl80211 driver interfaces, an additional
-          configuration parameter, bridge, may be used to notify hostapd if the
-          interface is included in a bridge. This parameter is not used with
-          Host AP driver. If the bridge parameter is not set, the drivers will
-          automatically figure out the bridge interface (assuming sysfs is
-          enabled and mounted to /sys) and this parameter may not be needed.
-
-          For nl80211, this parameter can be used to request the AP interface to
-          be added to the bridge automatically (brctl may refuse to do this
-          before hostapd has been started to change the interface mode). If
-          needed, the bridge interface is also created.
         '';
       };
 
@@ -471,7 +471,6 @@ with lib; let
       logger_stdout_level=${toString icfg.logLevel}
 
       interface=${iface}
-      ${optionalString (icfg.bridge != null) "bridge=${icfg.bridge}"}
       driver=${icfg.driver}
       use_driver_iface_addr=1
       hw_mode=${icfg.hwMode}
@@ -516,6 +515,7 @@ with lib; let
     else "0";
 
   configBss = bsscfg: ''
+    ${optionalString (bsscfg.bridge != null) "bridge=${bsscfg.bridge}"}
     ${optionalString (bsscfg.wpa != false) ''
       wpa=2
       wpa_pairwise=CCMP TKIP
