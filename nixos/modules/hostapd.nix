@@ -15,6 +15,28 @@ with lib; let
   cfg = config.networking.wirelessAP;
 
   options_bss = {
+    bssid = mkOption {
+      type = with types; nullOr str;
+      default = null;
+      example = "04:f0:03:21:22:23";
+      description = ''
+        hostapd will generate BSSID mask based on the BSSIDs that are
+        configured. hostapd will verify that dev_addr & MASK == dev_addr. If
+        this is not the case, the MAC address of the radio must be changed
+        before starting hostapd (ifconfig wlan0 hw ether <MAC addr>). If a BSSID
+        is configured for every secondary BSS, this limitation is not applied at
+        hostapd and other masks may be used if the driver supports them (e.g.,
+        swap the locally administered bit)
+
+        BSSIDs are assigned in order to each BSS, unless an explicit BSSID is
+        specified using the 'bssid' parameter.
+        If an explicit BSSID is specified, it must be chosen such that it:
+        - results in a valid MASK that covers it and the dev_addr
+        - is not the same as the MAC address of the radio
+        - is not the same as any other explicitly specified BSSID
+      '';
+    };
+
     ssid = mkOption {
       type = types.str;
       default = "nixos";
@@ -503,7 +525,8 @@ with lib; let
       ${concatMapStringsSep "\n" (bss: ''
         bss=${bss}
         ssid=${icfg.bss.${bss}.ssid}
-        ${configBss icfg.bss."${bss}"}'') (attrNames icfg.bss)}
+        ${configBss icfg.bss."${bss}"}
+      '') (attrNames icfg.bss)}
 
       ${icfg.extraConfig}
     '';
@@ -515,6 +538,7 @@ with lib; let
     else "0";
 
   configBss = bsscfg: ''
+    ${optionalString (bsscfg.bssid != null) "bssid=${bsscfg.bssid}"}
     ${optionalString (bsscfg.bridge != null) "bridge=${bsscfg.bridge}"}
     ${optionalString (bsscfg.wpa != false) ''
       wpa=2
