@@ -19,10 +19,7 @@
       {
         overlays.default = final: prev: import ./pkgs {nixpkgs = prev;};
         nixosModules = import ./nixos self;
-        lib = import ./lib {
-          inherit self;
-          nixpkgsDefault = nixpkgs;
-        };
+        lib = import ./lib {inherit self;};
 
         nixosConfigurations = {
           mox = self.lib.nixturrisSystem {
