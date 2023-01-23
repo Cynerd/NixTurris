@@ -409,7 +409,7 @@ with lib; let
 
       vht_oper_chwidth = mkOption {
         type = types.int;
-        default = 1;
+        default = 0;
         description = ''
           0 = 20 or 40 MHz operating Channel width
           1 = 80 MHz channel width
