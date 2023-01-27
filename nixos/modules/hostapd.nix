@@ -10,9 +10,8 @@
 # asserts
 #   ensure that the nl80211 module is loaded/compiled in the kernel
 #   wpa_supplicant and hostapd on the same wireless interface doesn't make any sense
-with builtins;
 with lib; let
-  cfg = config.networking.wirelessAP;
+  cfg = config.services.hostapd;
 
   options_bss = {
     bssid = mkOption {
@@ -107,15 +106,37 @@ with lib; let
       enable = mkOption {
         type = types.bool;
         default = true;
+        description = lib.mdDoc ''
+          Enable putting a wireless interface into infrastructure mode, allowing
+          other wireless devices to associate with the wireless interface and do
+          wireless networking. A simple access point will
+          {option}`enable hostapd.wpa`,
+          {option}`hostapd.wpaPassphrase`, and
+          {option}`hostapd.ssid`, as well as DHCP on the wireless interface to
+          provide IP addresses to the associated stations, and NAT (from the
+          wireless interface to an upstream interface).
+        '';
+      };
+
+      environmentFile = mkOption {
+        type = types.nullOr types.path;
+        default = null;
+        example = "/run/secrets/hostapd-phy0.env";
         description = ''
-          Enable putting a wireless interface into infrastructure mode,
-          allowing other wireless devices to associate with the wireless
-          interface and do wireless networking. A simple access point will
-          <option>enable hostapd.<name>.wpa</option>, set
-          <option>hostapd.<name>.wpaPassphrase</option>, and
-          <option>hostapd.<name>.ssid</option>, as well as DHCP on the wireless
-          interface to provide IP addresses to the associated stations, and
-          NAT (from the wireless interface to an upstream interface).
+          File consisting of lines of the form <literal>varname=value</literal>
+          to define variables for the wireless access point configuration.
+
+          This overrides <option>services.hostapd.environmentFile</option> for
+          this interface.
+
+          See section "EnvironmentFile=" in <citerefentry>
+          <refentrytitle>systemd.exec</refentrytitle><manvolnum>5</manvolnum>
+          </citerefentry> for a syntax reference.
+
+          Secrets (PSKs, passwords, etc.) can be provided without adding them to
+          the world-readable Nix store by defining them in the environment file and
+          referring to them in option <option>services.hostapd</option>
+          with the syntax <literal>@varname@</literal>.
         '';
       };
 
@@ -179,23 +200,6 @@ with lib; let
         description = ''
           Operation mode.
           (a = IEEE 802.11a, b = IEEE 802.11b, g = IEEE 802.11g).
-        '';
-      };
-
-      countryCode = mkOption {
-        default = null;
-        example = "US";
-        type = with types; nullOr str;
-        description = ''
-          Country code (ISO/IEC 3166-1). Used to set regulatory domain.
-          Set as needed to indicate country in which device is operating.
-          This can limit available channels and transmit power.
-          These two octets are used as the first two octets of the Country String
-          (dot11CountryString).
-          This enables IEEE 802.11d. This advertises the countryCode and the set
-          of allowed channels and transmit power levels based on the regulatory
-          limits.
-          This is required in most places by law and thus enforced to be set!
         '';
       };
 
@@ -419,8 +423,8 @@ with lib; let
       };
 
       vht_oper_centr_freq_seg0_idx = mkOption {
-        type = types.int;
-        default = 42;
+        type = with types; nullOr int;
+        default = null;
         description = ''
           center freq 5 GHz + (5 * index)
           So index 42 gives center freq 5.210 GHz which is channel 42 in 5G band.
@@ -477,65 +481,62 @@ with lib; let
       };
     };
 
-  mkConfig = iface: let
-    icfg = cfg.interfaces."${iface}";
-  in
-    if icfg.config != null
-    then icfg.config
-    else ''
-      ctrl_interface=/run/hostapd
-      ctrl_interface_group=${icfg.group}
-
-      # logging (debug level)
-      logger_syslog=-1
-      logger_syslog_level=${toString icfg.logLevel}
-      logger_stdout=-1
-      logger_stdout_level=${toString icfg.logLevel}
-
-      interface=${iface}
-      driver=${icfg.driver}
-      use_driver_iface_addr=1
-      hw_mode=${icfg.hwMode}
-      channel=${toString icfg.channel}
-      country_code=${icfg.countryCode}
-      ieee80211d=1
-      ${optionalString (icfg.ieee80211h) "ieee80211h=1"}
-      wmm_enabled=${boolean icfg.wmm_enabled}
-      ${optionalString icfg.ieee80211n ''
-        ieee80211n=1
-        ht_capab=${mapCapab icfg.ht_capab}
-        require_ht=${boolean icfg.require_ht}
-      ''}
-      ${optionalString icfg.ieee80211ac ''
-        ieee80211ac=1
-        vht_capab=${mapCapab icfg.vht_capab}
-        require_vht=${boolean icfg.require_vht}
-        vht_oper_chwidth=${toString icfg.vht_oper_chwidth}
-        vht_oper_centr_freq_seg0_idx=${toString icfg.vht_oper_centr_freq_seg0_idx}
-        ${optionalString (icfg.vht_oper_centr_freq_seg1_idx != null) "vht_oper_centr_freq_seg1_idx=${toString icfg.vht_oper_centr_freq_seg1_idx}"}
-        use_sta_nsts=${boolean icfg.use_sta_nsts}
-      ''}
-      ${optionalString icfg.ieee80211ax ''
-        ieee80211ax=1
-      ''}
-
-      ssid=${icfg.ssid}
-      ${configBss icfg}
-
-      ${concatMapStringsSep "\n" (bss: ''
-        bss=${bss}
-        ssid=${icfg.bss.${bss}.ssid}
-        ${configBss icfg.bss."${bss}"}
-      '') (attrNames icfg.bss)}
-
-      ${icfg.extraConfig}
-    '';
-
   mapCapab = list: concatStrings (map (key: "[${key}]") list);
-  boolean = bool:
+  strBool = bool:
     if bool
     then "1"
     else "0";
+
+  mkConfig = iface: icfg: ''
+    ctrl_interface=@RUNTIME_DIRECTORY@
+    ctrl_interface_group=${icfg.group}
+
+    # logging (debug level)
+    logger_syslog=-1
+    logger_syslog_level=${toString icfg.logLevel}
+    logger_stdout=-1
+    logger_stdout_level=${toString icfg.logLevel}
+
+    interface=${iface}
+    driver=${icfg.driver}
+    use_driver_iface_addr=1
+    hw_mode=${icfg.hwMode}
+    channel=${toString icfg.channel}
+    country_code=${cfg.countryCode}
+    ieee80211d=1
+    ${optionalString (icfg.ieee80211h) "ieee80211h=1"}
+    wmm_enabled=${strBool icfg.wmm_enabled}
+    ${optionalString icfg.ieee80211n ''
+      ieee80211n=1
+      ht_capab=${mapCapab icfg.ht_capab}
+      require_ht=${strBool icfg.require_ht}
+    ''}
+    ${optionalString icfg.ieee80211ac ''
+      ieee80211ac=1
+      vht_capab=${mapCapab icfg.vht_capab}
+      require_vht=${strBool icfg.require_vht}
+      vht_oper_chwidth=${toString icfg.vht_oper_chwidth}
+      ${optionalString (icfg.vht_oper_centr_freq_seg0_idx != null)
+        "vht_oper_centr_freq_seg0_idx=${toString icfg.vht_oper_centr_freq_seg0_idx}"}
+      ${optionalString (icfg.vht_oper_centr_freq_seg1_idx != null)
+        "vht_oper_centr_freq_seg1_idx=${toString icfg.vht_oper_centr_freq_seg1_idx}"}
+      use_sta_nsts=${strBool icfg.use_sta_nsts}
+    ''}
+    ${optionalString icfg.ieee80211ax ''
+      ieee80211ax=1
+    ''}
+
+    ssid=${icfg.ssid}
+    ${configBss icfg}
+
+    ${concatMapStringsSep "\n" (bss: ''
+      bss=${bss}
+      ssid=${icfg.bss.${bss}.ssid}
+      ${configBss icfg.bss."${bss}"}
+    '') (attrNames icfg.bss)}
+
+    ${icfg.extraConfig}
+  '';
 
   configBss = bsscfg: ''
     ${optionalString (bsscfg.bssid != null) "bssid=${bsscfg.bssid}"}
@@ -552,38 +553,53 @@ with lib; let
       ${optionalString (bsscfg.wpaPskFile != null) "wpa_psk_file=${bsscfg.wpaPskFile}"}
     ''}
   '';
-in {
-  #disabledModules = [ "services/networking/hostapd.nix" ];
 
-  ###### interface
+  mkHostapdService = iface: icfg: let
+    device = ["sys-subsystem-net-devices-${iface}.device"];
+    links = [iface] ++ (map utils.escapeSystemdPath (attrNames icfg.bss));
+    services = map (iface: "network-link-${iface}.service") links;
+    environmentFile = findFirst (x: x != null) null (catAttrs "environmentFile" [icfg cfg]);
+    hasEnvironmentFile = environmentFile != null;
+  in {
+    description = "Hostapd wireless AP for ${iface}";
+    after = device;
+    bindsTo = device;
+    requiredBy = services;
+    wantedBy = ["multi-user.target"];
+
+    serviceConfig = {
+      RuntimeDirectory = "hostapd-${iface}";
+      RuntimeDirectoryMode = "700";
+      EnvironmentFile = mkIf hasEnvironmentFile (builtins.toString environmentFile);
+      Restart = "always";
+    };
+    script = let
+      configFile =
+        if icfg.config != null
+        then icfg.config
+        else pkgs.writeText "hostapd-${iface}.conf" (mkConfig iface icfg);
+      finalConfig =
+        if hasEnvironmentFile
+        then "$RUNTIME_DIRECTORY/${iface}.conf"
+        else configFile;
+    in ''
+      ${optionalString hasEnvironmentFile ''
+        export RUNTIME_DIRECTORY
+        ${pkgs.gawk}/bin/awk '{
+          for(varname in ENVIRON)
+            gsub("@"varname"@", ENVIRON[varname])
+          print
+        }' "${configFile}" > "${finalConfig}"
+        cp "${finalConfig}" /
+      ''}
+      exec ${pkgs.hostapd}/bin/hostapd "${finalConfig}"
+    '';
+  };
+in {
+  disabledModules = ["services/networking/hostapd.nix"];
 
   options = {
-    networking.wirelessAP = {
-      enable = mkOption {
-        type = types.bool;
-        default = false;
-        description = "Whether to enable hostapd.";
-      };
-
-      environmentFile = mkOption {
-        type = types.nullOr types.path;
-        default = null;
-        example = "/run/secrets/wirelessAP.env";
-        description = ''
-          File consisting of lines of the form <literal>varname=value</literal>
-          to define variables for the wireless access point configuration.
-
-          See section "EnvironmentFile=" in <citerefentry>
-          <refentrytitle>systemd.exec</refentrytitle><manvolnum>5</manvolnum>
-          </citerefentry> for a syntax reference.
-
-          Secrets (PSKs, passwords, etc.) can be provided without adding them to
-          the world-readable Nix store by defining them in the environment file and
-          referring to them in option <option>networking.wirelessAP</option>
-          with the syntax <literal>@varname@</literal>.
-        '';
-      };
-
+    services.hostapd = {
       interfaces = mkOption {
         type = with types; attrsOf (submodule {options = options_interface;});
         default = {};
@@ -596,63 +612,65 @@ in {
             };
           }
         '';
+        description = lib.mdDoc ''
+          Interface for which to start {command}`hostapd`.
+        '';
+      };
+
+      environmentFile = mkOption {
+        type = types.nullOr types.path;
+        default = null;
+        example = "/run/secrets/hostapd.env";
         description = ''
-          Interface for which to start <command>hostapd</command>.
+          File consisting of lines of the form <literal>varname=value</literal>
+          to define variables for the wireless access point configuration.
+
+          See section "EnvironmentFile=" in <citerefentry>
+          <refentrytitle>systemd.exec</refentrytitle><manvolnum>5</manvolnum>
+          </citerefentry> for a syntax reference.
+
+          Secrets (PSKs, passwords, etc.) can be provided without adding them to
+          the world-readable Nix store by defining them in the environment file and
+          referring to them in option <option>services.hostapd</option>
+          with the syntax <literal>@varname@</literal>.
+        '';
+      };
+
+      countryCode = mkOption {
+        default = null;
+        example = "US";
+        type = with types; nullOr str;
+        description = ''
+          Country code (ISO/IEC 3166-1). Used to set regulatory domain.
+          Set as needed to indicate country in which device is operating.
+          This can limit available channels and transmit power.
+          These two octets are used as the first two octets of the Country String
+          (dot11CountryString).
+          This enables IEEE 802.11d. This advertises the countryCode and the set
+          of allowed channels and transmit power levels based on the regulatory
+          limits.
+          This is required in most places by law and thus enforced to be set!
         '';
       };
     };
   };
 
-  ###### implementation
-
-  config = mkIf (cfg.enable && (any (val: val.enable) (attrValues cfg.interfaces))) {
+  config = mkIf (any (val: val.enable) (attrValues cfg.interfaces)) {
+    ## TODO mkRenamedOptionModule
     assertions = [
       {
-        assertion = all (val: ! val.enable or val.countryCode != null) (attrValues cfg.interfaces);
+        assertion = cfg.countryCode != null || all (v: !v.enable) (attrValues cfg.interfaces);
         message = "Country code has to be specified to prevent violation of the law.";
       }
     ];
-    ## TODO mkRenamedOptionModule
 
     environment.systemPackages = [pkgs.hostapd];
     services.udev.packages = [pkgs.crda];
 
-    systemd.services.hostapd = let
-      interfaces = map utils.escapeSystemdPath (attrNames (filterAttrs (n: v: v.enable) cfg.interfaces));
-      links = interfaces ++ (map utils.escapeSystemdPath (concatMap attrNames (catAttrs "bss" (attrValues (filterAttrs (n: v: v.enable) cfg.interfaces)))));
-      # TODO also include bridge??
-      devices = map (ifc: "sys-subsystem-net-devices-${ifc}.device") interfaces;
-      services = map (ifc: "network-link-${ifc}.service") links;
-    in {
-      description = "Hostapd wireless AP";
-      after = devices;
-      bindsTo = devices;
-      requiredBy = services;
-      wantedBy = ["multi-user.target"];
-
-      path = [pkgs.hostapd];
-      serviceConfig = {
-        RuntimeDirectory = "hostapd";
-        RuntimeDirectoryMode = "700";
-        EnvironmentFile = mkIf (cfg.environmentFile != null) (builtins.toString cfg.environmentFile);
-        Restart = "always";
-      };
-      script = ''
-        # substitute environment variables
-        ${concatStrings (forEach (attrNames cfg.interfaces) (iface: let
-          configFile = pkgs.writeText "hostapd_${iface}.conf" (mkConfig iface);
-          finalConfig = ''"$RUNTIME_DIRECTORY"/${iface}.conf'';
-        in ''
-          ${pkgs.gawk}/bin/awk '{
-            for(varname in ENVIRON)
-              gsub("@"varname"@", ENVIRON[varname])
-            print
-          }' "${configFile}" > "${finalConfig}"
-        ''))}
-
-        # run hostapd
-        exec hostapd ${concatStringsSep " " (forEach (attrNames cfg.interfaces) (iface: ''"$RUNTIME_DIRECTORY"/${iface}.conf''))}
-      '';
-    };
+    systemd.services = let
+      enabledInterfaces = filterAttrs (n: v: v.enable) cfg.interfaces;
+      mkService = n: v: nameValuePair "hostapd-${n}" (mkHostapdService n v);
+    in
+      mapAttrs' mkService enabledInterfaces;
   };
 }

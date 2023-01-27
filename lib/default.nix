@@ -4,5 +4,5 @@
 } @ args:
 import ./system.nix args
 // {
-  wifiAP = import ./wifiAP.nix args;
+  hostapd = import ./hostapd.nix args;
 }

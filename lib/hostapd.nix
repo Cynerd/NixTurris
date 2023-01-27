@@ -29,30 +29,31 @@ with lib; let
     cap_max_amsdu ? 3839, # Capability Max AMSDU length: X bytes
     vhtcap_max_mpdu ? 11454, # VHT Capabilty Max MPDU length: X
   }: {
-    countryCode ? "CZ",
     channel ? channelDefault,
     channelWidth ? 40,
-  }:
+    ...
+  } @ args:
     assert elem channel freqs;
-    assert elem channelWidth channelWidths; {
-      inherit countryCode channel;
-      hwMode =
-        if channel > 15
-        then "a"
-        else "g";
-      ieee80211ac = channel > 15;
-      ht_capab =
-        [
-          "SHORT-GI-20"
-          "SHORT-GI-40"
-          "TX-STBC"
-          "RX-STBC1"
-          "DSSS_CCK-40"
-          "MAX-AMSDU-${toString cap_max_amsdu}"
-        ]
-        ++ (optional (channelWidth >= 40) (ht40x channel))
-        ++ (optional cap_ldpc "LDPC");
-      vht_capab = optionals (channel > 15) ([
+    assert elem channelWidth channelWidths;
+      {
+        inherit channel;
+        hwMode =
+          if channel > 15
+          then "a"
+          else "g";
+        ieee80211ac = channel > 15;
+        ht_capab =
+          [
+            "SHORT-GI-20"
+            "SHORT-GI-40"
+            "TX-STBC"
+            "RX-STBC1"
+            "DSSS_CCK-40"
+            "MAX-AMSDU-${toString cap_max_amsdu}"
+          ]
+          ++ (optional (channelWidth >= 40) (ht40x channel))
+          ++ (optional cap_ldpc "LDPC");
+        vht_capab = optionals (channel > 15) [
           "RXLDPC"
           "SHORT-GI-80"
           "TX-STBC-2BY1"
@@ -61,14 +62,17 @@ with lib; let
           "RX-ANTENNA-PATTERN"
           "TX-ANTENNA-PATTERN"
           "MAX-MPDU-${toString vhtcap_max_mpdu}"
-        ]
-        ++ (optional (channelWidth >= 0) ""));
-      vht_oper_chwidth =
-        if channelWidths == 80
-        then 1
-        else 0;
-    };
+        ];
+        vht_oper_chwidth =
+          if channelWidths == 80
+          then 1
+          else 0;
+        # TODO when channelWidth == 80 the vht_oper_centr_freq_seg0_idx has to
+        # be set. The same applies for 160 vht_oper_centr_freq_seg1_idx.
+      }
+      // (filterAttrs (n: v: ! (elem n ["channel" "channelWidth"])) args);
 in {
+  qualcomAtherosAR9287 = func {};
   qualcomAtherosQCA988x = func {
     freqs = freq24 ++ freq5;
     channelWidths = [20 40 80];
@@ -76,5 +80,4 @@ in {
     cap_ldpc = true;
     cap_max_amsdu = 7935;
   };
-  qualcomAtherosAR9287 = func {};
 }
