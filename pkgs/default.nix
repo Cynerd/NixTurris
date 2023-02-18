@@ -57,7 +57,7 @@ with nixpkgs.lib; let
       extraMeta.platforms = ["aarch64-linux"];
       filesToInstall = ["u-boot.bin"];
       extraPatches = [./patches/include-configs-turris_mox-increase-space-for-the-ke.patch];
-      BL31 = "${armTrustedFirmwareTurrisMox}/bl31.bin";
+      BL31 = "${turrispkgs.armTrustedFirmwareTurrisMox}/bl31.bin";
     };
     ubootTurrisOmnia = nixpkgs.buildUBoot {
       defconfig = "turris_omnia_defconfig";

@@ -6,15 +6,12 @@
     flake-utils,
     nixpkgs,
   }:
-    with builtins;
     with nixpkgs.lib;
     with flake-utils.lib; let
+      # Note: crossTarball* targets are broken on darwin so it gets disabled here
+      isNotDarwin = system: ! hasSuffix "-darwin" system;
       supportedHostSystems =
-        (
-          # Note: crossTarball* targets are broken on darwin so it gets disabled here
-          filter (system: ! hasSuffix "-darwin" system) defaultSystems
-        )
-        ++ [system.armv7l-linux];
+        filter isNotDarwin defaultSystems ++ [system.armv7l-linux];
     in
       {
         overlays.default = final: prev: import ./pkgs {nixpkgs = prev;};
@@ -33,7 +30,9 @@
         };
       }
       // eachSystem supportedHostSystems (
-        system: {
+        system: let
+          pkgs = nixpkgs.legacyPackages."${system}";
+        in {
           packages = let
             tarball = nixos: nixos.config.system.build.tarball;
           in
@@ -45,18 +44,14 @@
               crossTarballOmnia = tarball self.nixosConfigurations.omnia.config.system.build.cross.${system};
             }
             // filterPackages system (flattenTree (
-              import ./pkgs {nixpkgs = nixpkgs.legacyPackages."${system}";}
+              import ./pkgs {nixpkgs = pkgs;}
             ));
 
           # The legacyPackages imported as overlay allows us to use pkgsCross to
           # cross-compile those packages.
-          legacyPackages = import nixpkgs {
-            inherit system;
-            overlays = [self.overlays.default];
-            crossOverlays = [self.overlays.default];
-          };
+          legacyPackages = pkgs.extend self.overlays.default;
 
-          formatter = nixpkgs.legacyPackages.${system}.alejandra;
+          formatter = pkgs.alejandra;
         }
       );
 }
