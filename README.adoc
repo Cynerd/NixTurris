@@ -31,7 +31,7 @@ NixOS:
 * Improved Hostapd configuration as the default one in NixOS supports only
   single wireless network and adapter.
 * Simple way to cross build NixOS with path:
-  `config.system.build.cross.${system}.config.system.build.toplevel`
+  `buildPlatform.${system}.config.system.build.toplevel`
 * Simple way to build tarball to deploy NixOS to Turris:
   `config.system.built.tarball`
 

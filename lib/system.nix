@@ -21,6 +21,25 @@ in rec {
     };
   };
 
+  # Adds cross to the NixOS system attribute set.
+  addBuildPlatform = nixos:
+    nixos
+    // {
+      buildPlatform = genAttrs lib.systems.flakeExposed (
+        system: let
+          nixos' = nixos.extendModules {
+            modules = [
+              {
+                nixpkgs.localSystem = mkForce system;
+                nixpkgs.crossSystem = nixos.config.nixpkgs.localSystem;
+              }
+            ];
+          };
+        in
+          nixos' // {inherit (nixos'._module.args) pkgs;}
+      );
+    };
+
   # NixOS system for specific Turris board
   nixturrisSystem = {
     board,
@@ -28,24 +47,25 @@ in rec {
     modules ? [],
     specialArgs ? {},
     ...
-  } @ args:
-    nixpkgs.lib.nixosSystem ((filterAttrs (n: v: ! (elem n ["board" "nixpkgs"])) args)
+  } @ args: let
+    nixosArgs = filterAttrs (n: v: ! (elem n ["board" "nixpkgs"])) args;
+    nixosLib = (attrByPath ["lib"] nixpkgs.lib specialArgs).extend libOverlay;
+    nixosModules =
+      modules
+      ++ [
+        self.nixosModules.default
+        {
+          nixpkgs.system = boardSystem.${board}.system;
+          turris.board = board;
+        }
+      ];
+    nixos = nixpkgs.lib.nixosSystem (nixosArgs
       // {
-        modules =
-          [
-            self.nixosModules.default
-            {
-              nixpkgs.system = boardSystem.${board}.system;
-              turris.board = board;
-            }
-          ]
-          ++ modules;
-        specialArgs =
-          specialArgs
-          // {
-            lib = (attrByPath ["lib"] nixpkgs.lib specialArgs).extend libOverlay;
-          };
+        modules = nixosModules;
+        specialArgs = specialArgs // {lib = nixosLib;};
       });
+  in
+    addBuildPlatform nixos;
 
   # The minimalized system to decrease amount of ram needed for rebuild
   # TODO this does not work right now as it requires just load of work to do.
@@ -57,7 +77,7 @@ in rec {
     modules ? [],
     ...
   } @ args:
-    nixpkgs.lib.nixos.evalModules ({
+    addBuildPlatform (nixpkgs.lib.nixos.evalModules ({
         modules =
           (map (v: nixpkgs.outPath + "/nixos/modules" + v) (import ./nixos-min-modules.nix))
           ++ [
@@ -69,5 +89,5 @@ in rec {
           ]
           ++ modules;
       }
-      // (filterAttrs (n: v: ! (elem n ["board" "nixpkgs" "modules"])) args));
+      // (filterAttrs (n: v: ! (elem n ["board" "nixpkgs" "modules"])) args)));
 }

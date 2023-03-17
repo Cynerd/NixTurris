@@ -32,16 +32,15 @@
       // eachSystem supportedHostSystems (
         system: let
           pkgs = nixpkgs.legacyPackages."${system}";
+          tarball = nixos: nixos.config.system.build.tarball;
         in {
-          packages = let
-            tarball = nixos: nixos.config.system.build.tarball;
-          in
+          packages =
             {
               tarballMox = tarball self.nixosConfigurations.mox;
               tarballOmnia = tarball self.nixosConfigurations.omnia;
 
-              crossTarballMox = tarball self.nixosConfigurations.mox.config.system.build.cross.${system};
-              crossTarballOmnia = tarball self.nixosConfigurations.omnia.config.system.build.cross.${system};
+              crossTarballMox = tarball self.nixosConfigurations.mox.buildPlatform.${system};
+              crossTarballOmnia = tarball self.nixosConfigurations.omnia.buildPlatform.${system};
             }
             // filterPackages system (flattenTree (
               import ./pkgs {nixpkgs = pkgs;}
