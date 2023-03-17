@@ -5,11 +5,12 @@
   ...
 }:
 with lib; let
-  is_native = config.nixpkgs.crossSystem == null && config.nixpkgs.system == "armv7l-linux";
-  is_cross = config.nixpkgs.crossSystem != null && config.nixpkgs.crossSystem.system == "armv7l-linux";
+  is_cross = config.nixpkgs.hostPlatform != config.nixpkgs.buildPlatform;
+  crossArmv7 = !is_cross && config.nixpkgs.hostPlatform.isAarch32;
+  nativeArmv7 = is_cross && config.nixpkgs.hostPlatform.isAarch32;
 in {
   nixpkgs.overlays =
-    (optionals is_native [
+    (optionals nativeArmv7 [
       (self: super: let
         disableCheck = pkg:
           pkg.overrideAttrs (oldAttrs: {
@@ -45,7 +46,7 @@ in {
         pythonPackages = self.python.pkgs;
       })
     ])
-    ++ (optionals is_cross [
+    ++ (optionals crossArmv7 [
       (self: super: {
         btrfs-progs = super.btrfs-progs.overrideAttrs (oldAttrs: {
           configureFlags = ["--disable-python"];

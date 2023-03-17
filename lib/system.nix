@@ -10,7 +10,7 @@ with lib; let
       lib = prev;
     };
 in rec {
-  boardSystem = {
+  boardPlatform = {
     omnia = {
       config = "armv7l-unknown-linux-gnueabihf";
       system = "armv7l-linux";
@@ -20,6 +20,8 @@ in rec {
       system = "aarch64-linux";
     };
   };
+  # Backward compatibility but boardPlatform is more exact name.
+  boardSystem = lib.warn "boardSystem is deprecard. Please use boardPlatform instead." boardPlatform;
 
   # Adds cross to the NixOS system attribute set.
   addBuildPlatform = nixos:
@@ -30,8 +32,7 @@ in rec {
           nixos' = nixos.extendModules {
             modules = [
               {
-                nixpkgs.localSystem = mkForce system;
-                nixpkgs.crossSystem = nixos.config.nixpkgs.localSystem;
+                nixpkgs.buildPlatform.system = system;
               }
             ];
           };
@@ -55,7 +56,7 @@ in rec {
       ++ [
         self.nixosModules.default
         {
-          nixpkgs.system = boardSystem.${board}.system;
+          nixpkgs.hostPlatform = boardPlatform.${board};
           turris.board = board;
         }
       ];
@@ -83,7 +84,7 @@ in rec {
           ++ [
             self.nixosModules.default
             {
-              nixpkgs.system = boardSystem.${board}.system;
+              nixpkgs.hostPlatform = boardPlatform.${board};
               turris.board = board;
             }
           ]
