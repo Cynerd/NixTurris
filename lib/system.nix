@@ -36,8 +36,11 @@ in rec {
               }
             ];
           };
+          nixos'' = nixos' // {inherit (nixos'._module.args) pkgs;};
         in
-          nixos' // {inherit (nixos'._module.args) pkgs;}
+          if system == nixos.config.nixpkgs.hostPlatform.system
+          then nixos
+          else nixos''
       );
     };
 

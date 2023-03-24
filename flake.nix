@@ -19,28 +19,27 @@
         lib = import ./lib {inherit self;};
 
         nixosConfigurations = {
-          mox = self.lib.nixturrisSystem {
+          installMox = self.lib.nixturrisSystem {
             board = "mox";
             nixpkgs = nixpkgs;
+            modules = [{turris.install-settings = true;}];
           };
-          omnia = self.lib.nixturrisSystem {
+          installOmnia = self.lib.nixturrisSystem {
             board = "omnia";
             nixpkgs = nixpkgs;
+            modules = [{turris.install-settings = true;}];
           };
         };
       }
       // eachSystem supportedHostSystems (
         system: let
           pkgs = nixpkgs.legacyPackages."${system}";
-          tarball = nixos: nixos.config.system.build.tarball;
+          tarball = nixos: nixos.buildPlatform.${system}.config.system.build.tarball;
         in {
           packages =
             {
-              tarballMox = tarball self.nixosConfigurations.mox;
-              tarballOmnia = tarball self.nixosConfigurations.omnia;
-
-              crossTarballMox = tarball self.nixosConfigurations.mox.buildPlatform.${system};
-              crossTarballOmnia = tarball self.nixosConfigurations.omnia.buildPlatform.${system};
+              tarballMox = tarball self.nixosConfigurations.installMox;
+              tarballOmnia = tarball self.nixosConfigurations.installOmnia;
             }
             // filterPackages system (flattenTree (
               import ./pkgs {nixpkgs = pkgs;}
