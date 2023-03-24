@@ -43,6 +43,7 @@ with lib; {
     boot.kernelModules = [
       "leds_turris_omnia"
     ];
+    boot.initrd.availableKernelModules = ["ahci_mvebu" "rtc_armada38x"];
 
     # The additional administration packages
     environment.systemPackages = with pkgs; [
