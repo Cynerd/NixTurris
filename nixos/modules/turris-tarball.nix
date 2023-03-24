@@ -21,8 +21,10 @@ with lib; let
         # Allow root access over SSH
         services.openssh = {
           enable = true;
-          passwordAuthentication = true;
-          permitRootLogin = "yes";
+          settings = {
+            passwordAuthentication = true;
+            permitRootLogin = "yes";
+          };
         };
 
         # TODO we have to generate the hardware specific configuration on first boot
