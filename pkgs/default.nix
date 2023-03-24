@@ -2,6 +2,43 @@
 with builtins;
 with nixpkgs.lib; let
   callPackage = nixpkgs.newScope turrispkgs;
+
+  kernelPatchesTurris = {
+    mvebu_pci_aadvark = {
+      # This patch is required to fix PCI for Mox
+      name = "mvebu-pci-aadvark";
+      patch = ./patches/linux-6.0-pci-aadvark-controller-changes.patch;
+    };
+    mvebu_pci_omnia_fix = {
+      # This is special hack for Turris Omnia as PCI doesn't work with
+      # PCIEASPM configuration symbol.
+      name = "mvebu-pci-fix";
+      patch = null;
+      extraStructuredConfig = with nixpkgs.lib.kernel; {PCIEASPM = no;};
+    };
+    omnia_separate_dtb = {
+      # The long term patch that provides two separate device trees for Turris
+      # Omnia. The armada-385-turris-omnia-phy.dtb uses metallic Ethernet and
+      # armada-385-turris-omnia-spf uses SFP cage.
+      name = "omnia-separate-dtb";
+      patch = ./patches/linux-omnia-separate-dts.patch;
+    };
+  };
+  overrideMox = kernel:
+    kernel.override (oldAttrs: {
+      kernelPatches = oldAttrs.kernelPatches ++ (optional (versionOlder kernel.version "6.2") kernelPatchesTurris.mvebu_pci_aadvark);
+    });
+  overrideOmnia = kernel:
+    kernel.override (oldAttrs: {
+      kernelPatches =
+        oldAttrs.kernelPatches
+        ++ [
+          kernelPatchesTurris.mvebu_pci_omnia_fix
+          kernelPatchesTurris.omnia_separate_dtb
+        ];
+      features.turrisOmniaSplitDTB = true;
+    });
+
   turrispkgs = {
     # Crypto and certificates
     libatsha204 = callPackage ./libatsha204 {};
@@ -9,37 +46,17 @@ with nixpkgs.lib; let
     crypto-wrapper = callPackage ./crypto-wrapper {};
 
     # Kernel patches and board specific kernels
-    kernelPatchesTurris = {
-      mvebu_pci_aadvark = {
-        # This patch is required to fix PCI for Mox
-        name = "mvebu-pci-aadvark";
-        patch = ./patches/linux-6.0-pci-aadvark-controller-changes.patch;
-      };
-      mvebu_pci_omnia_fix = {
-        # This is special hack for Turris Omnia as PCI doesn't work with
-        # PCIEASPM configuration symbol.
-        name = "mvebu-pci-fix";
-        patch = null;
-        extraStructuredConfig = with nixpkgs.lib.kernel; {PCIEASPM = no;};
-      };
-      omnia_separate_dtb = {
-        # The long term patch that provides two separate device trees for Turris
-        # Omnia. The armada-385-turris-omnia-phy.dtb uses metallic Ethernet and
-        # armada-385-turris-omnia-spf uses SFP cage.
-        name = "omnia-separate-dtb";
-        patch = ./patches/linux-omnia-separate-dts.patch;
-      };
-    };
-    linux_6_1_turris_omnia = nixpkgs.linux_6_1.override (oldAttrs: {
-      kernelPatches = [
-        turrispkgs.kernelPatchesTurris.mvebu_pci_omnia_fix
-        turrispkgs.kernelPatchesTurris.omnia_separate_dtb
-      ];
-      features.turrisOmniaSplitDTB = true;
-    });
-    linux_6_1_turris_mox = nixpkgs.linux_6_1.override (oldAttrs: {
-      kernelPatches = [turrispkgs.kernelPatchesTurris.mvebu_pci_aadvark];
-    });
+    inherit kernelPatchesTurris;
+    # Mox kernels
+    linux_turris_mox = overrideMox nixpkgs.linux;
+    linux_latest_turris_mox = overrideMox nixpkgs.linux_latest;
+    linux_6_1_turris_mox = overrideMox nixpkgs.linux_6_1;
+    linux_6_2_turris_mox = overrideMox nixpkgs.linux_6_1;
+    # Omnia kernels
+    linux_turris_omnia = overrideOmnia nixpkgs.linux;
+    linux_latest_turris_omnia = overrideOmnia nixpkgs.linux_latest;
+    linux_6_1_turris_omnia = overrideOmnia nixpkgs.linux_6_1;
+    linux_6_2_turris_omnia = overrideOmnia nixpkgs.linux_6_1;
 
     # NOR Firmware as considered stable by Turris and shipped in Turris OS
     tosFirmwareOmnia = callPackage ./tos-firmware {board = "omnia";};

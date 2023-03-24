@@ -11,7 +11,7 @@ stdenvNoCC.mkDerivation rec {
   version = "6.0";
   src = fetchgit {
     url = "https://gitlab.nic.cz/turris/os/packages.git";
-    rev = "v" + version;
+    rev = "v${version}";
     sha256 = "087gxdvkrykm2ghn23zscq5nw86am4jqf4nj5hzf6bmc6zxgdnhg";
   };
 
