@@ -3,27 +3,42 @@
   lib,
   pkgs,
   modulesPath,
+  extendModules,
   ...
 }:
 with lib; let
-  inherit (config.system.build) toplevel;
-in {
-  system.build.tarball = pkgs.callPackage "${modulesPath}/../lib/make-system-tarball.nix" {
-    contents = [
+  variant = extendModules {
+    modules = [
       {
-        source = pkgs.writeText "tarball-extlinux" ''
-          DEFAULT nixturris-tarball
-          TIMEOUT 0
-          LABEL nixturris-tarball
-            MENU LABEL NixOS Turris - Tarball
-            LINUX ${toplevel}/kernel
-            FDTDIR ${toplevel}/dtbs
-            INITRD ${toplevel}/initrd
-            APPEND init=${toplevel}/init ${builtins.toString config.boot.kernelParams}
+        boot.postBootCommands = ''
+          # On the first boot do some maintenance tasks
+          if [ -f /nix-path-registration ]; then
+            set -euo pipefail
+
+            # Register the contents of the initial Nix store
+            ${config.nix.package.out}/bin/nix-store --load-db < /nix-path-registration
+
+            # nixos-rebuild also requires a "system" profile and an /etc/NIXOS tag.
+            touch /etc/NIXOS
+            ${config.nix.package.out}/bin/nix-env -p /nix/var/nix/profiles/system --set /run/current-system
+
+            # Prevents this from running on later boots.
+            rm -f /nix-path-registration
+          fi
         '';
-        target = "./boot/extlinux/extlinux.conf";
+        # We do not have generations in the initial image
+        boot.loader.generic-extlinux-compatible.configurationLimit = 0;
       }
     ];
+  };
+  inherit (variant.config.system.build) toplevel;
+in {
+  system.build.tarball = pkgs.callPackage "${modulesPath}/../lib/make-system-tarball.nix" {
+    extraCommands = pkgs.writeShellScript "tarball-extra-commands" ''
+      ${variant.config.boot.loader.generic-extlinux-compatible.populateCmd} \
+        -c ${toplevel} -d ./boot
+    '';
+    contents = [];
 
     storeContents =
       map (x: {

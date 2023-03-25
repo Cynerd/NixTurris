@@ -27,27 +27,9 @@ in {
       };
     };
 
-    # TODO we have to generate the hardware specific configuration on first boot
     boot.postBootCommands = ''
+      ${pkgs.bash}/bin/bash ${./turris-initial-config.sh} \
+        '${config.turris.board}'
     '';
-
-    environment.etc."nixos/flake.nix" = {
-      mode = "0600";
-      text = ''
-        {
-          inputs.nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-21.11";
-          inputs.nixturris.url = "git+https://git.cynerd.cz/nixturris";
-          outputs = { self, nixpkgs-stable, nixturris }: {
-            nixosConfigurations.nixturris = nixturris.lib.nixturrisSystem {
-              nixpkgs = nixpkgs-stable;
-              board = "${config.turris.board}";
-              modules = [({ config, lib, pkgs, ... }: {
-                # Optionally place your configuration here
-              })];
-            };
-          };
-        }
-      '';
-    };
   };
 }
