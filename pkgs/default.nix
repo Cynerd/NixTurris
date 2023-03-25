@@ -23,6 +23,15 @@ with nixpkgs.lib; let
       name = "omnia-separate-dtb";
       patch = ./patches/linux-omnia-separate-dts.patch;
     };
+    extra_led_triggers = {
+      name = "extra-led-triggers";
+      patch = null;
+      extraStructuredConfig = with nixpkgs.lib.kernel; {
+        LEDS_TRIGGER_DISK = yes;
+        LEDS_TRIGGER_MTD = yes;
+        LEDS_TRIGGER_PANIC = yes;
+      };
+    };
   };
   overrideMox = kernel:
     kernel.override (oldAttrs: {
@@ -35,6 +44,7 @@ with nixpkgs.lib; let
         ++ [
           kernelPatchesTurris.mvebu_pci_omnia_fix
           kernelPatchesTurris.omnia_separate_dtb
+          kernelPatchesTurris.extra_led_triggers
         ];
       features.turrisOmniaSplitDTB = true;
     });
