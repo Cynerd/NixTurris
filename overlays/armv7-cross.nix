@@ -10,6 +10,9 @@ final: prev: {
 
   python310 = prev.python310.override {
     packageOverrides = pyfinal: pyprev: {
+      sphinx-rtd-theme = pyprev.sphinx-rtd-theme.overrideAttrs (oldAttrs: {
+        nativeBuildInputs = oldAttrs.nativeBuildInputs ++ [pyfinal.pythonRelaxDepsHook];
+      });
       sphinxcontrib-jquery = pyprev.sphinxcontrib-jquery.overrideAttrs (oldAttrs: {
         nativeBuildInputs = oldAttrs.nativeBuildInputs ++ [pyfinal.setuptools];
       });
