@@ -62,7 +62,7 @@ that was build with latest commit to the NixTurris repository.
 * TODO (we do not have CI builds yet)
 * link:./build-tarball.adoc[Documentation on how to build your own tarball]
 
-== 3a.) Boot from USB drive
+== 3.) Boot from USB drive
 
 This is the easies option to get NixOS on Turris Omnia. You can prepare the
 drive in any Linux system and then just plug it into the Omnia.
@@ -130,33 +130,13 @@ Now you can reboot your Omnia to NixOS. The next step is to do first
 configuration and for that you have to be able to
 link:./initial-access.adoc[access the router].
 
-== 3b.) Install on internal storage
-
-It is highly suggested not to use internal MMC for the whole system. The
-suggested deployment is rather the `/boot` partition on MMC or the whole system
-on internal drive (note that U-Boot might not be able to boot from all internal
-drives).
-
-TODO
-
-WARNING: this is not fully supported at the moment as tarball contains in
-`/boot` only Syslinux configuration and thus boot simply from `/boot` is not
-possible. You have to copy kernel, initrd and dtb to the `/boot` partition and
-modify Syslinux's configuration file.
-
 
 == Reverting to Turris OS
 
-The steps required to revert to Turris OS differ from how deep have you went
-with installation. If you are lucky it is just about restarting U-Boot
-environment, if not then you have to use Medkit to install Turris OS back.
-
-=== Resetting U-Boot environment to the default
-
-The modification suggested by this document are only to the single variable
-(`boot_targets`). The revert to the previous value should be in most cases
-enough. This can be done by (see previous usage in this document for required
-packages):
+The simplest step is to remove the USB drive with NixOS (remove it when system
+is not running). That way Omnia fallbacks back on MMC and boots TurrisOS, but
+you should still revert also the boot order because this way any flash drive
+with valid system that gets plugged to the system gets precedence.
 
 ----
 fw_setenv boot_targets mmc0 nvme0 scsi0 usb0 pxe dhcp
@@ -176,10 +156,9 @@ saveenv
 
 To continue boot you can enter command `boot`.
 
-=== Using Medkit to install Turris OS back to the MMC
 
-You have to do this only if you attempted installation on internal storage.
-First you have to reset U-Boot environment and thus follow steps in the previous
-section. Next follow the
-https://docs.turris.cz/hw/omnia/rescue-modes/#re-flash-router[official medkit
-steps].
+== Installing more permanently
+
+The USB flash drive is a good option for testing it out but you might want to
+have NixOS installed in a more permanent way. There is a separate
+link:./omnia-install-layouts.adoc[article describing various alternatives].

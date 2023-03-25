@@ -24,4 +24,5 @@ Some additional topics:
 
 * link:./qemu-vs-cross.adoc[*Cross build vs Qemu build*]
 * link:./build-tarball.adoc[*Building system tarball*]
+* link:./omnia-install-layouts.adoc[*Omnia installation layouts*]
 * link:./todo.adoc[*Things to be done and improved*]

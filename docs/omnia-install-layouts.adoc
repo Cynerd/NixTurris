@@ -1,0 +1,52 @@
+= Some of the possible layouts for NixOS install on Turris Omnia
+
+This is followup to the instructions on how to install
+link:./install-omnia.adoc[NixOS on Turris Omnia].
+
+We discuss here some of the possible deployment layouts and its possible issues
+so you can decide on more permanent installation option.
+
+WARNING: It is highly suggested not to use internal MMC for the whole system.
+At most you should use the internal MMC for the `/boot` partition to boot from
+the drivers that are not supported in the U-Boot.
+
+
+== USB drive
+
+This is discussed in the basic install guide and is here just for completeness.
+The advantage is that you can always unplug the drive to revert to the TurrisOS.
+It is also unlikely that you will end up with not enough space with this layout
+to deploy NixOS.
+
+
+== mSATA internal drive
+
+The right most slot on Omnia supports mSATA drive. You can insert drive there
+(make sure that it is not M.3 key but mPCIE key!). The U-Boot version that is
+required to boot NixOS has support for this drive and thus you can use it as a
+single system drive.
+
+To deploy NixOS to the mSATA drive you can either connect it to your PC and
+install it the same way as USB drive or just insert it to the Omnia and do the
+same steps from Turris OS. The only difference you have to have in mind is that
+you have to use a different boot order and instead of moving `usb0` to the front
+you have to move `scsi0` to the front.
+
+----
+fw_setenv boot_targets scsi0 mmc0 nvme0 usb0 pxe dhcp
+----
+
+To revert back to the TurrisOS you can either just remove mSATA drive or you can
+just revert the boot order back to its original set (see the relevant section
+in the install instructions).
+
+
+== NVMe internal drive
+
+The NVMe drive with PCIe support can be also used but you need interconnection
+card to insert M.2 to the mPCIE. With that the steps are the same as for mSATA
+with exception that you want to prioritize `nvme0` instead.
+
+----
+fw_setenv boot_targets nvme0 mmc0 scsi0 usb0 pxe dhcp
+----
