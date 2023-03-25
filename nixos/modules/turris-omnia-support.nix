@@ -54,10 +54,10 @@ with lib; {
     # U-Boot environment access
     firmware.environment = {
       enable = true;
-      device = "/dev/mtd0";
-      offset = 786432; # 0xC0000
+      device = "/dev/mtd2";
+      offset = 0; # 0x0
       size = 65536; # 0x10000
-      secsize = 262144; # 0x40000
+      secsize = 65536; # 0x10000
     };
   };
 }
