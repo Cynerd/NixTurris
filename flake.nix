@@ -14,7 +14,11 @@
         filter isNotDarwin defaultSystems ++ [system.armv7l-linux];
     in
       {
-        overlays.default = final: prev: import ./pkgs {nixpkgs = prev;};
+        overlays = {
+          default = final: prev: import ./pkgs {nixpkgs = prev;};
+          armv7-cross = import ./overlays/armv7-cross.nix;
+          armv7-native = import ./overlays/armv7-native.nix;
+        };
         nixosModules = import ./nixos self;
         lib = import ./lib {inherit self;};
 

@@ -9,8 +9,6 @@ self: let
     turris-omnia-support = import ./modules/turris-omnia-support.nix;
     turris-tarball = import ./modules/turris-tarball.nix;
 
-    armv7l-overlay = import ./modules/armv7l-overlay.nix;
-
     hostapd = import ./modules/hostapd.nix;
     fwenv = import ./modules/fwenv.nix;
   };
@@ -18,7 +16,18 @@ in
   modules
   // {
     default = {
-      imports = builtins.attrValues modules;
-      nixpkgs.overlays = [self.overlays.default];
-    };
+      config,
+      lib,
+      ...
+    }:
+      with lib; let
+        isCross = config.nixpkgs.hostPlatform != config.nixpkgs.buildPlatform;
+        inherit (config.nixpkgs.hostPlatform) isArmv7;
+      in {
+        imports = builtins.attrValues modules;
+        nixpkgs.overlays =
+          [self.overlays.default]
+          ++ (optional (isCross && isArmv7) self.overlays.armv7-cross)
+          ++ (optional (!isCross && isArmv7) self.overlays.armv7-native);
+      };
   }
