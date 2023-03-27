@@ -42,7 +42,7 @@ with lib; {
     ];
 
     # U-Boot environment access
-    firmware.environment = {
+    firmware.environment = mkDefault {
       enable = true;
       device = "/dev/mtd2";
       size = 65536; # 0x10000

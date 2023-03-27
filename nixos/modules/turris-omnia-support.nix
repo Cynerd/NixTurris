@@ -52,7 +52,7 @@ with lib; {
     ];
 
     # U-Boot environment access
-    firmware.environment = {
+    firmware.environment = mkDefault {
       enable = true;
       device = "/dev/mtd2";
       offset = 0; # 0x0
