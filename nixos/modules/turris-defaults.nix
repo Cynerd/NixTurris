@@ -46,7 +46,7 @@ in {
 
     fileSystems = mkDefault {
       "/" = {
-        label = cnf.rootLabel;
+        device = "/dev/disk/by-partlabel/" + cnf.rootLabel;
         fsType = "btrfs";
       };
     };
