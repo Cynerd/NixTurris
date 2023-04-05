@@ -66,5 +66,7 @@ in {
 
     # No need for installer tools in standard system
     system.disableInstallerTools = true;
+    # No need for NixOS documentation in headless system
+    documentation.nixos.enable = mkDefault false;
   };
 }
