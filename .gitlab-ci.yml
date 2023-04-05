@@ -43,6 +43,7 @@ variables:
   extends: .nix
   script:
     - "nix build .#$ARG"
+    - "cp result/tarball/* ."
     - "[ -z \"$CACHIX_KEY\" ] || cachix authtoken $CACHIX_KEY"
     - "[ -z \"$CACHIX_KEY\" ] || cachix push $CACHIX_NAME $(readlink -f result)"
 
@@ -50,11 +51,20 @@ build:tarballMox:
   extends: .build
   variables:
     ARG: tarballMox
+  artifacts:
+    expose_as: 'Installation Tarball Mox'
+    paths:
+      - nixos-system-aarch64-linux.tar.xz
+
 
 build:tarballOmnia:
   extends: .build
   variables:
     ARG: tarballOmnia
+  artifacts:
+    expose_as: 'Installation Tarball Omnia'
+    paths:
+      - nixos-system-armv7l-linux.tar.xz
 
 # TODO build in libvirtd or something to test also native build
 
