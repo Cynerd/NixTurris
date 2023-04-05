@@ -8,6 +8,9 @@ workflow:
     - if: $CI_PIPELINE_SOURCE == "push"
 
 variables:
+  GIT_DEPTH: 0
+  GIT_SUBMODULE_STRATEGY: recursive
+  GIT_SUBMODULE_UPDATE_FLAGS: --jobs 2
   CACHIX_NAME: nixturris
 
 .nix:
@@ -27,10 +30,11 @@ variables:
     - echo "system-features = nixos-test benchmark big-parallel" >>/etc/nix/nix.conf
     - echo "cores = 0" >>/etc/nix/nix.conf
     - echo "max-jobs = 32" >>/etc/nix/nix.conf
-    - echo "extra-substituters = file://$PWD/.nix-cache" >>/etc/nix/nix.conf
+    - echo "substituters = https://cache.nixos.org/ https://arm.cachix.org file://$PWD/.nix-cache" >>/etc/nix/nix.conf
     - find /nix/store -maxdepth 1 ! -name \*.drv | sort >/nix/.before
     - nix profile install nixpkgs#cachix
     - cachix use "$CACHIX_NAME"
+    - cat /etc/nix/nix.conf
   after_script:
     - find /nix/store -maxdepth 1 ! -name \*.drv | sort >/nix/.after
     - comm -13 /nix/.before /nix/.after | xargs nix copy --to "file://$PWD/.nix-cache"
