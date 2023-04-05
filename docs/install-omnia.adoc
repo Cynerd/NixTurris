@@ -59,7 +59,7 @@ The initial system can either be downloaded from Gitlab or build locally. Note
 that version available for download can be pretty old. It is just some version
 that was build with latest commit to the NixTurris repository.
 
-* TODO (we do not have CI builds yet)
+* link:https://gitlab.com/api/v4/projects/40690089/jobs/artifacts/master/raw/nixos-system-armv7l-linux.tar.xz?job=build:tarballOmnia[Tarball from Gitlab.com build by CI from the latest master]
 * link:./build-tarball.adoc[Documentation on how to build your own tarball]
 
 == 3.) Boot from USB drive
