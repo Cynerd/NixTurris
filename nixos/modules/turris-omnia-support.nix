@@ -48,7 +48,6 @@ with lib; {
     # The additional administration packages
     environment.systemPackages = with pkgs; [
       libatsha204
-      tosFirmwareOmnia
     ];
 
     # U-Boot environment access
