@@ -17,8 +17,21 @@ with lib; {
   };
 
   config = mkIf (config.turris.board == "omnia") {
-    # Use Omnia specific kernel. It is required as otherwise PCI won't work.
-    boot.kernelPackages = mkDefault (pkgs.linuxPackagesFor pkgs.linux_turris_omnia);
+    boot = {
+      # Use Omnia specific kernel. It is required as otherwise PCI won't work.
+      kernelPackages = mkDefault (pkgs.linuxPackagesFor pkgs.linux_turris_omnia);
+      # This includes modules to support common PC manufacturers but is not
+      # something required on Turris.
+      initrd.includeDefaultModules = false;
+      # Use early print to the serial console
+      kernelParams = [
+        "earlyprintk"
+        "console=ttyS0,115200"
+      ];
+      # Force load of Turris Omnia leds
+      kernelModules = ["leds_turris_omnia"];
+      initrd.availableKernelModules = ["ahci_mvebu" "rtc_armada38x"];
+    };
     # Explicitly set device tree to ensure we load the correct one.
     # This also allows switch between SFP and PHY.
     hardware.deviceTree.name = mkDefault "armada-385-turris-omnia${
@@ -31,19 +44,6 @@ with lib; {
         else "-phy"
       )
     }.dtb";
-    # This includes modules to support common PC manufacturers but is not
-    # something required on Turris.
-    boot.initrd.includeDefaultModules = false;
-    # Use early print to the serial console
-    boot.kernelParams = [
-      "earlyprintk"
-      "console=ttyS0,115200"
-    ];
-    # Force load of Turris Omnia leds
-    boot.kernelModules = [
-      "leds_turris_omnia"
-    ];
-    boot.initrd.availableKernelModules = ["ahci_mvebu" "rtc_armada38x"];
 
     # The additional administration packages
     environment.systemPackages = with pkgs; [

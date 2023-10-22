@@ -26,13 +26,17 @@ in {
     system.stateVersion = mkDefault "22.11";
 
     # We do not need Grub as U-Boot supports boot using extlinux like file
-    boot.loader.grub.enable = mkDefault false;
-    boot.loader.systemd-boot.enable = mkDefault false;
-    boot.loader.generic-extlinux-compatible.enable = mkDefault true;
-    # Use early print to the serial console
-    boot.kernelParams = [
-      "boot.shell_on_fail"
-    ];
+    boot = {
+      loader = {
+        grub.enable = mkDefault false;
+        systemd-boot.enable = mkDefault false;
+        generic-extlinux-compatible.enable = mkDefault true;
+      };
+      # Use early print to the serial console
+      kernelParams = [
+        "boot.shell_on_fail"
+      ];
+    };
 
     # The supported deployment is on BTRFS
     boot.supportedFilesystems = ["btrfs"];

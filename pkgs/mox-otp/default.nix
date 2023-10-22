@@ -2,7 +2,6 @@
   buildPythonApplication,
   lib,
   fetchgit,
-  python3,
 }:
 buildPythonApplication rec {
   pname = "mox-otp";

@@ -25,12 +25,12 @@
         nixosConfigurations = {
           installMox = self.lib.nixturrisSystem {
             board = "mox";
-            nixpkgs = nixpkgs;
+            inherit nixpkgs;
             modules = [{turris.install-settings = true;}];
           };
           installOmnia = self.lib.nixturrisSystem {
             board = "omnia";
-            nixpkgs = nixpkgs;
+            inherit nixpkgs;
             modules = [{turris.install-settings = true;}];
           };
         };

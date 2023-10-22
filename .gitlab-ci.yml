@@ -80,8 +80,20 @@ nix-check:
   script:
     - nix flake check
 
+statix:
+  stage: test
+  extends: .nix
+  script:
+    - nix run .#statix -- check .
+
+deadnix:
+  stage: test
+  extends: .nix
+  allow_failure: true
+  script:
+    - nix run .#deadnix -- -f .
+
 include:
-  - template: Security/SAST.gitlab-ci.yml
   - template: Security/Secret-Detection.gitlab-ci.yml
 
 ## Style stage #################################################################

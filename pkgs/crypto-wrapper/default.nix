@@ -2,7 +2,6 @@
   stdenv,
   lib,
   fetchgit,
-  bash,
   openssl,
   makeWrapper,
   libatsha204,

@@ -504,7 +504,7 @@ with lib; let
     channel=${toString icfg.channel}
     country_code=${cfg.countryCode}
     ieee80211d=1
-    ${optionalString (icfg.ieee80211h) "ieee80211h=1"}
+    ${optionalString icfg.ieee80211h "ieee80211h=1"}
     wmm_enabled=${strBool icfg.wmm_enabled}
     ${optionalString icfg.ieee80211n ''
       ieee80211n=1
@@ -541,7 +541,7 @@ with lib; let
   configBss = bsscfg: ''
     ${optionalString (bsscfg.bssid != null) "bssid=${bsscfg.bssid}"}
     ${optionalString (bsscfg.bridge != null) "bridge=${bsscfg.bridge}"}
-    ${optionalString (bsscfg.wpa != false) ''
+    ${optionalString (!(isBool bsscfg.wpa && !bsscfg.wpa)) ''
       wpa=2
       wpa_pairwise=CCMP TKIP
       wpa_key_mgmt=${
