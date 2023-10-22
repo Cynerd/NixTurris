@@ -38,7 +38,6 @@ with lib; {
     # The additional administration packages
     environment.systemPackages = with pkgs; [
       mox-otp
-      tosFirmwareMox
     ];
 
     # U-Boot environment access
