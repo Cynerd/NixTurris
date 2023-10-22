@@ -23,6 +23,10 @@ with nixpkgs.lib; let
       name = "omnia-separate-dtb";
       patch = ./patches/linux-omnia-separate-dts.patch;
     };
+    omnia_separate_dtb_6_1 = {
+      name = "omnia-separate-dtb";
+      patch = ./patches/linux-6.1-omnia-separate-dts.patch;
+    };
     extra_led_triggers = {
       name = "extra-led-triggers";
       patch = null;
@@ -43,7 +47,11 @@ with nixpkgs.lib; let
         oldAttrs.kernelPatches
         ++ [
           kernelPatchesTurris.mvebu_pci_omnia_fix
-          kernelPatchesTurris.omnia_separate_dtb
+          (
+            if (versionOlder kernel.version "6.5")
+            then kernelPatchesTurris.omnia_separate_dtb_6_1
+            else kernelPatchesTurris.omnia_separate_dtb
+          )
           kernelPatchesTurris.extra_led_triggers
         ];
       features.turrisOmniaSplitDTB = true;
@@ -61,12 +69,12 @@ with nixpkgs.lib; let
     linux_turris_mox = overrideMox nixpkgs.linux;
     linux_latest_turris_mox = overrideMox nixpkgs.linux_latest;
     linux_6_1_turris_mox = overrideMox nixpkgs.linux_6_1;
-    linux_6_2_turris_mox = overrideMox nixpkgs.linux_6_1;
+    linux_6_5_turris_mox = overrideMox nixpkgs.linux_6_5;
     # Omnia kernels
     linux_turris_omnia = overrideOmnia nixpkgs.linux;
     linux_latest_turris_omnia = overrideOmnia nixpkgs.linux_latest;
     linux_6_1_turris_omnia = overrideOmnia nixpkgs.linux_6_1;
-    linux_6_2_turris_omnia = overrideOmnia nixpkgs.linux_6_1;
+    linux_6_5_turris_omnia = overrideOmnia nixpkgs.linux_6_5;
 
     # NOR Firmware as considered stable by Turris and shipped in Turris OS
     tosFirmwareOmnia = callPackage ./tos-firmware {board = "omnia";};

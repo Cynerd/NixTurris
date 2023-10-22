@@ -1,4 +1,4 @@
-From fb595fa47ff30ed0c3f2a023d447619d0e6ba0e0 Mon Sep 17 00:00:00 2001
+From 0e3f94ca0321daca728898b3f6273f55fa193b2d Mon Sep 17 00:00:00 2001
 From: Tomas Hlavacek <tmshlvck@gmail.com>
 Date: Tue, 5 May 2020 20:40:24 +0200
 Subject: [PATCH] ARM: dts: mvebu: armada-385-turris-omnia: separate dts for
@@ -31,20 +31,20 @@ Disable the second CPU port until there is a suitable driver to use it.
 Signed-off-by: Tomas Hlavacek <tmshlvck@gmail.com>
 Signed-off-by: Marek Behún <marek.behun@nic.cz>
 ---
- arch/arm/boot/dts/Makefile                    |  3 ++-
- .../boot/dts/armada-385-turris-omnia-phy.dts  | 22 ++++++++++++++++++
- .../boot/dts/armada-385-turris-omnia-sfp.dts  | 23 +++++++++++++++++++
- ...omnia.dts => armada-385-turris-omnia.dtsi} | 23 ++++++++-----------
- 4 files changed, 57 insertions(+), 14 deletions(-)
- create mode 100644 arch/arm/boot/dts/armada-385-turris-omnia-phy.dts
- create mode 100644 arch/arm/boot/dts/armada-385-turris-omnia-sfp.dts
- rename arch/arm/boot/dts/{armada-385-turris-omnia.dts => armada-385-turris-omnia.dtsi} (96%)
+ arch/arm/boot/dts/marvell/Makefile            |  3 ++-
+ .../marvell/armada-385-turris-omnia-phy.dts   | 22 ++++++++++++++++++
+ .../marvell/armada-385-turris-omnia-sfp.dts   | 23 +++++++++++++++++++
+ ...omnia.dts => armada-385-turris-omnia.dtsi} |  2 --
+ 4 files changed, 47 insertions(+), 3 deletions(-)
+ create mode 100644 arch/arm/boot/dts/marvell/armada-385-turris-omnia-phy.dts
+ create mode 100644 arch/arm/boot/dts/marvell/armada-385-turris-omnia-sfp.dts
+ rename arch/arm/boot/dts/marvell/{armada-385-turris-omnia.dts => armada-385-turris-omnia.dtsi} (99%)
 
-diff --git a/arch/arm/boot/dts/Makefile b/arch/arm/boot/dts/Makefile
-index 05d8aef6e5d2..96670dbbfdb4 100644
---- a/arch/arm/boot/dts/Makefile
-+++ b/arch/arm/boot/dts/Makefile
-@@ -1512,7 +1512,8 @@ dtb-$(CONFIG_MACH_ARMADA_38X) += \
+diff --git a/arch/arm/boot/dts/marvell/Makefile b/arch/arm/boot/dts/marvell/Makefile
+index 1e0f5ff492f7..958d26fc457d 100644
+--- a/arch/arm/boot/dts/marvell/Makefile
++++ b/arch/arm/boot/dts/marvell/Makefile
+@@ -44,7 +44,8 @@ dtb-$(CONFIG_MACH_ARMADA_38X) += \
  	armada-385-linksys-rango.dtb \
  	armada-385-linksys-shelby.dtb \
  	armada-385-synology-ds116.dtb \
@@ -54,11 +54,11 @@ index 05d8aef6e5d2..96670dbbfdb4 100644
  	armada-388-clearfog.dtb \
  	armada-388-clearfog-base.dtb \
  	armada-388-clearfog-pro.dtb \
-diff --git a/arch/arm/boot/dts/armada-385-turris-omnia-phy.dts b/arch/arm/boot/dts/armada-385-turris-omnia-phy.dts
+diff --git a/arch/arm/boot/dts/marvell/armada-385-turris-omnia-phy.dts b/arch/arm/boot/dts/marvell/armada-385-turris-omnia-phy.dts
 new file mode 100644
 index 000000000000..706f6a2f8065
 --- /dev/null
-+++ b/arch/arm/boot/dts/armada-385-turris-omnia-phy.dts
++++ b/arch/arm/boot/dts/marvell/armada-385-turris-omnia-phy.dts
 @@ -0,0 +1,22 @@
 +// SPDX-License-Identifier: (GPL-2.0 OR MIT)
 +/*
@@ -82,11 +82,11 @@ index 000000000000..706f6a2f8065
 +	phy-mode = "sgmii";
 +	phy = <&phy1>;
 +};
-diff --git a/arch/arm/boot/dts/armada-385-turris-omnia-sfp.dts b/arch/arm/boot/dts/armada-385-turris-omnia-sfp.dts
+diff --git a/arch/arm/boot/dts/marvell/armada-385-turris-omnia-sfp.dts b/arch/arm/boot/dts/marvell/armada-385-turris-omnia-sfp.dts
 new file mode 100644
 index 000000000000..b9f2b88834be
 --- /dev/null
-+++ b/arch/arm/boot/dts/armada-385-turris-omnia-sfp.dts
++++ b/arch/arm/boot/dts/marvell/armada-385-turris-omnia-sfp.dts
 @@ -0,0 +1,23 @@
 +// SPDX-License-Identifier: (GPL-2.0 OR MIT)
 +/*
@@ -111,86 +111,22 @@ index 000000000000..b9f2b88834be
 +	managed = "in-band-status";
 +	sfp = <&sfp>;
 +};
-diff --git a/arch/arm/boot/dts/armada-385-turris-omnia.dts b/arch/arm/boot/dts/armada-385-turris-omnia.dtsi
-similarity index 96%
-rename from arch/arm/boot/dts/armada-385-turris-omnia.dts
-rename to arch/arm/boot/dts/armada-385-turris-omnia.dtsi
-index 0b64d7505dca..85799e37d4b8 100644
---- a/arch/arm/boot/dts/armada-385-turris-omnia.dts
-+++ b/arch/arm/boot/dts/armada-385-turris-omnia.dtsi
-@@ -8,8 +8,6 @@
-  * Schematic available at https://www.turris.cz/doc/_media/rtrom01-schema.pdf
-  */
- 
--/dts-v1/;
--
- #include <dt-bindings/gpio/gpio.h>
- #include <dt-bindings/input/input.h>
- #include <dt-bindings/leds/common.h>
-@@ -97,11 +95,11 @@ pcie@3,0 {
- 	sfp: sfp {
- 		compatible = "sff,sfp";
- 		i2c-bus = <&sfp_i2c>;
--		tx-fault-gpios = <&pcawan 0 GPIO_ACTIVE_HIGH>;
--		tx-disable-gpios = <&pcawan 1 GPIO_ACTIVE_HIGH>;
--		rate-select0-gpios = <&pcawan 2 GPIO_ACTIVE_HIGH>;
--		los-gpios = <&pcawan 3 GPIO_ACTIVE_HIGH>;
--		mod-def0-gpios = <&pcawan 4 GPIO_ACTIVE_LOW>;
-+		tx-fault-gpios = <&sfpgpio 0 GPIO_ACTIVE_HIGH>;
-+		tx-disable-gpios = <&sfpgpio 1 GPIO_ACTIVE_HIGH>;
-+		rate-select0-gpios = <&sfpgpio 2 GPIO_ACTIVE_HIGH>;
-+		los-gpios = <&sfpgpio 3 GPIO_ACTIVE_HIGH>;
-+		mod-def0-gpios = <&sfpgpio 4 GPIO_ACTIVE_LOW>;
- 		maximum-power-milliwatt = <3000>;
- 
- 		/*
-@@ -153,7 +151,7 @@ fixed-link {
- 	};
- };
- 
--/* WAN port */
-+/* WAN dual-personality port */
- &eth2 {
- 	/*
- 	 * eth2 is connected via a multiplexor to both the SFP cage and to
-@@ -164,9 +162,8 @@ &eth2 {
- 	 * is present, U-Boot has to enable the sfp node above, remove phy
+diff --git a/arch/arm/boot/dts/marvell/armada-385-turris-omnia.dts b/arch/arm/boot/dts/marvell/armada-385-turris-omnia.dtsi
+similarity index 99%
+rename from arch/arm/boot/dts/marvell/armada-385-turris-omnia.dts
+rename to arch/arm/boot/dts/marvell/armada-385-turris-omnia.dtsi
+index 2d8d319bec83..11be7bfa46f6 100644
+--- a/arch/arm/boot/dts/marvell/armada-385-turris-omnia.dts
++++ b/arch/arm/boot/dts/marvell/armada-385-turris-omnia.dtsi
+@@ -192,8 +192,6 @@ &eth2 {
  	 * handle and add managed = "in-band-status" property.
  	 */
-+	phys = <&comphy5 2>;
  	status = "okay";
 -	phy-mode = "sgmii";
 -	phy-handle = <&phy1>;
  	phys = <&comphy5 2>;
  	sfp = <&sfp>;
  	buffer-manager = <&bm>;
-@@ -371,7 +368,7 @@ i2c@7 {
- 			#size-cells = <0>;
- 			reg = <7>;
- 
--			pcawan: gpio@71 {
-+			sfpgpio: gpio@71 {
- 				/*
- 				 * GPIO expander for SFP+ signals and
- 				 * and phy irq
-@@ -380,7 +377,7 @@ pcawan: gpio@71 {
- 				reg = <0x71>;
- 
- 				pinctrl-names = "default";
--				pinctrl-0 = <&pcawan_pins>;
-+				pinctrl-0 = <&wanint_pins>;
- 
- 				interrupt-parent = <&gpio1>;
- 				interrupts = <14 IRQ_TYPE_LEVEL_LOW>;
-@@ -477,7 +474,7 @@ fixed-link {
- };
- 
- &pinctrl {
--	pcawan_pins: pcawan-pins {
-+	wanint_pins: wanint-pins {
- 		marvell,pins = "mpp46";
- 		marvell,function = "gpio";
- 	};
 -- 
-2.38.1
+2.42.0
 
