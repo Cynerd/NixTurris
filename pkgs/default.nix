@@ -113,6 +113,18 @@ with nixpkgs.lib; let
         ln -sf fw_printenv $out/bin/fw_setenv
       '';
     };
+
+    # Nixpkgs patches
+    systemd = nixpkgs.systemd.overrideAttrs (oldAttrs: {
+      patches =
+        oldAttrs.patches
+        ++ [
+          (nixpkgs.fetchpatch {
+            url = "https://github.com/systemd/systemd/commit/cecbb162a3134b43d2ca160e13198c73ff34c3ef.patch";
+            hash = "sha256-hWpUosTDA18mYm5nIb9KnjwOlnzbEHgzha/WpyHoC54=";
+          })
+        ];
+    });
   };
 in
   turrispkgs

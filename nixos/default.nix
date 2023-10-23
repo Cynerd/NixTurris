@@ -16,18 +16,7 @@ in
   modules
   // {
     default = {
-      config,
-      lib,
-      ...
-    }:
-      with lib; let
-        isCross = config.nixpkgs.hostPlatform != config.nixpkgs.buildPlatform;
-        inherit (config.nixpkgs.hostPlatform) isArmv7;
-      in {
-        imports = builtins.attrValues modules;
-        nixpkgs.overlays =
-          [self.overlays.default]
-          ++ (optional (isCross && isArmv7) self.overlays.armv7-cross)
-          ++ (optional (!isCross && isArmv7) self.overlays.armv7-native);
-      };
+      imports = builtins.attrValues modules;
+      nixpkgs.overlays = [self.overlays.default];
+    };
   }
