@@ -9,7 +9,6 @@ self: let
     turris-omnia-support = import ./modules/turris-omnia-support.nix;
     turris-tarball = import ./modules/turris-tarball.nix;
 
-    hostapd = import ./modules/hostapd.nix;
     fwenv = import ./modules/fwenv.nix;
   };
 in
