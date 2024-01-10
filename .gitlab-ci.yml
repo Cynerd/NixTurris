@@ -31,10 +31,14 @@ variables:
 .build:
   stage: build
   extends: .nix
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_PIPELINE_SOURCE == "push"
   script:
-    - "echo 'auto-allocate-uids = false' >> /etc/nix/nix.conf"
-    - "nix build .#$ARG"
-    - "cp result/tarball/* ."
+    - echo 'auto-allocate-uids = false' >> /etc/nix/nix.conf
+    - "[ -z \"$NIX_FLAKE_UPDATE\" ] || nix flake update"
+    - nix build .#$ARG
+    - cp result/tarball/* .
     - "[ -z \"$CACHIX_KEY\" ] || cachix authtoken $CACHIX_KEY"
     - "[ -z \"$CACHIX_KEY\" ] || cachix push $CACHIX_NAME $(readlink -f result)"
 
@@ -90,5 +94,5 @@ nixfmt:
   extends: .nix
   allow_failure: true
   script:
-    - "nix fmt"
-    - "git diff --exit-code"
+    - nix fmt
+    - git diff --exit-code
