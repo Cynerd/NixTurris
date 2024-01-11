@@ -32,12 +32,11 @@ variables:
   stage: build
   extends: .nix
   rules:
-    - if: $CI_PIPELINE_SOURCE == "schedule"
-    - if: $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_PIPELINE_SOURCE == "schedule" || $CI_PIPELINE_SOURCE == "push"
   script:
     - echo 'auto-allocate-uids = false' >> /etc/nix/nix.conf
     - "[ -z \"$NIX_FLAKE_UPDATE\" ] || nix flake update"
-    - nix build .#$ARG
+    - nix build --log-lines 1000 .#$ARG
     - cp result/tarball/* .
     - "[ -z \"$CACHIX_KEY\" ] || cachix authtoken $CACHIX_KEY"
     - "[ -z \"$CACHIX_KEY\" ] || cachix push $CACHIX_NAME $(readlink -f result)"
