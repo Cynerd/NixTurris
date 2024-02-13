@@ -32,6 +32,7 @@ same steps from Turris OS. The only difference you have to have in mind is that
 you have to use a different boot order and instead of moving `usb0` to the front
 you have to move `scsi0` to the front.
 
+[source,console]
 ----
 fw_setenv boot_targets scsi0 mmc0 nvme0 usb0 pxe dhcp
 ----
@@ -47,6 +48,7 @@ The NVMe drive with PCIe support can be also used but you need interconnection
 card to insert M.2 to the mPCIE. With that the steps are the same as for mSATA
 with exception that you want to prioritize `nvme0` instead.
 
+[source,console]
 ----
 fw_setenv boot_targets nvme0 mmc0 scsi0 usb0 pxe dhcp
 ----

@@ -5,35 +5,38 @@ device and push only resulting build to the device. The reason for this are
 memory requirements for Nix itself. NixOS and its packages repository evaluation
 consumes a lot of memory and thus doing that on different PC is just faster.
 
-Prepare directory where you are going to be managing your Turris device(s) and
-paste this `flake.nix` file in it:
+You can use template from this repository. Navigate to directory where you want
+to create system configuration and invoke the following command:
 
-[source,nix]
+[source,console]
 ----
-{
-  description = "Turris system management flake";
-
-  inputs = {
-    nixturris.url = "github:cynerd/nixturris";
-  };
-
-  outputs = { self, nixpkgs, flake-utils, nixturris }:
-    with flake-utils.lib;
-    {
-      nixosConfigurations.turris = nixturris.lib.nixturrisSystem {
-      nixpkgs = nixpkgs;
-      board = "mox"; # <1>
-      modules = [
-        # Place for your modules
-      ];
-    };
-    };
-}
+nix flake init -t github:cynerd/nixturris
 ----
 
-<1> Declares board type. Change to `omnia` if you are managing Turris Omnia.
+This will copy over two files `flake.nix` and `configuration.nix`. You must set
+Turris model in `configuration.nix`. Next you can add any configuration you want
+to that file as well and build and deploy NixOS (update your target host):
+
+[source,console]
+----
+nix build .
+nix copy --to ssh://root@192.168.0.42 $(readlink -f result)
+ssh -t root@192.168.0.42 sudo nix-env --profile /nix/var/nix/profiles/system --set "$(readlink -f result)"
+ssh -t root@192.168.0.42 /nix/var/nix/profiles/system/bin/switch-to-configuration switch
+----
+
+The first command builds NixOS and creates link `result` to it. The second
+command copies it to Turris router. The third command sets system profile to it.
+The last command performs the real configuration switch.
+
 
 **TODO** describe here how to generate key, sign build and distribute it to the
 device.
 
-To update system before build run `nix flake update`.
+Later when you want to update system you must run `nix flake update` before
+build.
+
+INFO: `nixos-rebuild` is not used here because it doesn't support opt-in
+cross-build. The only option is to hard-code the build platform to NixOS
+configuration and that might not be desirable. The steps here are in short what
+`nixos-rebuild` does and this a replacement.

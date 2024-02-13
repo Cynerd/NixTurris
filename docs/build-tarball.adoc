@@ -1,24 +1,46 @@
 = NixTurris tarball
 
-TODO
+Turris official system Turris OS is provided and installed using tarballs called
+"medkit". This is not it. This is really just a tarball with all files you need
+to unpack to the filesystem to install NixOS. It could potentially be used as
+"medkit" but on Omnia that would install it to internal flash (that is not
+desirable) and on Mox it installs it to subvolume `@` which is not default
+configuration. TLDR this is not "medkit".
 
 == Building standard tarball
 
-Add nixturris repository to your local Nix registry and build it. The image is
-cross compiled in this case (unless you are running on the target platform). You
-can also build it natively and this is discussed in the chapter "Native build
-using Qemu" in this document.
-
+[source,console]
 ----
-~$ nix registry add nixturris github:cynerd/nixturris
-~$ nix build nixturris#tarballMox
+nix build github:cynerd/nixturris#tarballMox
+----
+
+The image is cross compiled in this case (unless you are running on the target
+platform).
+
+== Building custom tarball
+
+If you already have NixOS configuration prepared
+(link:./nixos-rebuild-remote[discussed in remote rebuild]) for your device then
+you can generate tarball with it instead of standard one. The advantage is that
+you skip one step and you get prepared device immediately.
+
+Unless you modified the initial template too much you can run the following
+command in the template directory to build your customized tarball:
+
+[source,console]
+----
+nix build .#tarballMox
 ----
 
 == Native build using Qemu
 
-TODO
+For this to work you need to be running either on target platform (aarch64 for
+Mox and armv7l for Omnia) or you need to configure binfmt and Nix to run these
+architectures in emulation (Qemu). You can use option
+`boot.binfmt.emulatedSystems` on NixOS. Next you can just force a different
+build platform when building tarball.
 
+[source,console]
 ----
-~$ nix registry add nixturris github:cynerd/nixturris
-~$ nix build nixturris#aarch64-linux.tarballMox
+nix build github:cynerd/nixturris#aarch64-linux.tarballMox
 ----

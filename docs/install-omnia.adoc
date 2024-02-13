@@ -21,6 +21,7 @@ from USB or internal drive. The newer Turris Omnia routers have newer U-Boot
 versions but always verify the U-Boot version before you continue by running the
 following command as root on the router:
 
+[source,console]
 ----
 strings /dev/mtd0 | grep 'U-Boot [0-9.]\+'
 ----
@@ -35,6 +36,7 @@ before you continue.
 
 The next step is to install `turris-nor-update` and run it:
 
+[source,console]
 ----
 opkg update
 opkg install turris-nor-update
@@ -81,6 +83,7 @@ It is up to you which tool are you going to use. The instructions here are going
 to be for GNU Parted. The following shell log should give you an idea of what
 you should do to get the correct layout:
 
+[source,console]
 ----
 ~# parted /dev/sdx
 (parted) mktable gpt
@@ -92,12 +95,13 @@ you should do to get the correct layout:
 
 The next step is to unpack the tarball to the USB drive.
 
+[source,console]
 ----
-~# mkdir -p mnt
-~# mount /dev/sdx1 mnt
-~# tar -xf nixos-system-armv7-linux.tar.xz -C mnt
-~# umount mnt
-~# eject /dev/sdx
+mkdir -p mnt
+mount /dev/sdx1 mnt
+tar -xf nixos-system-armv7-linux.tar.xz -C mnt
+umount mnt
+eject /dev/sdx
 ----
 
 Now you can take this drive and plug it in the Turris Omnia. The last step is to
@@ -119,6 +123,7 @@ message informing you about invalid CRC. Do not proceed if you get it.
 
 To set USB boot as a preferred method run:
 
+[source,console]
 ----
 fw_setenv boot_targets usb0 mmc0 nvme0 scsi0 pxe dhcp
 ----
@@ -137,6 +142,7 @@ is not running). That way Omnia fallbacks back on MMC and boots TurrisOS, but
 you should still revert also the boot order because this way any flash drive
 with valid system that gets plugged to the system gets precedence.
 
+[source,console]
 ----
 fw_setenv boot_targets mmc0 nvme0 scsi0 usb0 pxe dhcp
 ----
@@ -148,6 +154,7 @@ the board and halt boot process by pressing kbd:[Enter] few times once you see
 `U-Boot` booting. You should get U-Boot prompt shortly after (the line starting
 with `> `). To reset environment enter:
 
+[source,console]
 ----
 env default -a
 saveenv

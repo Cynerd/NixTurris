@@ -32,21 +32,22 @@ with lib; let
     ];
   };
   inherit (variant.config.system.build) toplevel;
-in mkIf (config.turris.board != null) {
-  system.build.tarball = pkgs.callPackage "${modulesPath}/../lib/make-system-tarball.nix" {
-    extraCommands = pkgs.buildPackages.writeShellScript "tarball-extra-commands" ''
-      ${variant.config.boot.loader.generic-extlinux-compatible.populateCmd} \
-        -c ${toplevel} -d ./boot
-    '';
-    contents = [];
+in
+  mkIf (config.turris.board != null) {
+    system.build.tarball = pkgs.callPackage "${modulesPath}/../lib/make-system-tarball.nix" {
+      extraCommands = pkgs.buildPackages.writeShellScript "tarball-extra-commands" ''
+        ${variant.config.boot.loader.generic-extlinux-compatible.populateCmd} \
+          -c ${toplevel} -d ./boot
+      '';
+      contents = [];
 
-    storeContents =
-      map (x: {
-        object = x;
-        symlink = "none";
-      }) [
-        toplevel
-        pkgs.stdenv
-      ];
-  };
-}
+      storeContents =
+        map (x: {
+          object = x;
+          symlink = "none";
+        }) [
+          toplevel
+          pkgs.stdenv
+        ];
+    };
+  }

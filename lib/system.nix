@@ -43,8 +43,7 @@ in {
     specialArgs ? {},
     ...
   } @ args: let
-    nixosArgs = prev.filterAttrs (n: v: ! (prev.elem n ["board" "nixpkgs"])) args;
-    nixosLib = final;
+    nixosArgs = prev.filterAttrs (n: _: ! (prev.elem n ["board" "nixpkgs"])) args;
     nixosModules =
       modules
       ++ [
@@ -78,5 +77,5 @@ in {
           ]
           ++ modules;
       }
-      // (filterAttrs (n: v: ! (elem n ["board" "nixpkgs" "modules"])) args)));
+      // (filterAttrs (n: _: ! (elem n ["board" "nixpkgs" "modules"])) args)));
 }

@@ -11,7 +11,7 @@ highly suggested to create swap file of something like 2GB or 4GB size.
 The creation and first addition of swap can be done like this (this expects that
 used file-system is BTRFS):
 
-[source,sh]
+[source,console]
 ----
 sudo truncate -s 4G /run/swap
 sudo chattr +C /run/swap

@@ -16,7 +16,7 @@ with lib; let
     enabled = mkOption {
       type = types.bool;
       default = true;
-      description = "If LED should be enabled at all";
+      description = "If LED ${name} should be enabled at all";
     };
     brightness = mkOption {
       type = types.ints.u8;

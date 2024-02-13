@@ -6,7 +6,7 @@
     flake-utils,
     nixpkgs,
   }: let
-    inherit (flake-utils.lib) eachDefaultSystem filterPackages flattenTree;
+    inherit (flake-utils.lib) eachDefaultSystem;
     inherit (nixpkgs.lib) fixedPoints;
   in
     {
@@ -28,15 +28,9 @@
         };
       };
 
-      templates = {
-        omnia = {
-          path = ./template;
-          description = "NixOS configuration for Turris Omnia";
-        };
-        mox = {
-          path = ./template;
-          description = "NixOS configuration for Turris Mox";
-        };
+      templates.default = {
+        path = ./template;
+        description = "NixOS configuration for Turris";
       };
     }
     // eachDefaultSystem (
