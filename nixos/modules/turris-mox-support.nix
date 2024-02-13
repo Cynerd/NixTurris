@@ -6,6 +6,8 @@
 }:
 with lib; {
   config = mkIf (config.turris.board == "mox") {
+    nixpkgs.hostPlatform = lib.boardPlatform.mox;
+
     boot = {
       # Use Turris Mox specific kernel. It fixes SError with patch.
       kernelPackages = mkDefault (pkgs.linuxPackagesFor pkgs.linux_turris_mox);

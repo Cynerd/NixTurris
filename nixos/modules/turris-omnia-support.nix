@@ -17,6 +17,8 @@ with lib; {
   };
 
   config = mkIf (config.turris.board == "omnia") {
+    nixpkgs.hostPlatform = lib.boardPlatform.omnia;
+
     boot = {
       # Use Omnia specific kernel. It is required as otherwise PCI won't work.
       kernelPackages = mkDefault (pkgs.linuxPackagesFor pkgs.linux_turris_omnia);

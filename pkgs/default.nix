@@ -1,7 +1,5 @@
-{nixpkgs}:
-with builtins;
-with nixpkgs.lib; let
-  callPackage = nixpkgs.newScope turrispkgs;
+prev: final: let
+  inherit (prev.lib) optional versionOlder;
 
   kernelPatchesTurris = {
     mvebu_pci_aadvark = {
@@ -14,7 +12,7 @@ with nixpkgs.lib; let
       # PCIEASPM configuration symbol.
       name = "mvebu-pci-fix";
       patch = null;
-      extraStructuredConfig = with nixpkgs.lib.kernel; {PCIEASPM = no;};
+      extraStructuredConfig = with final.lib.kernel; {PCIEASPM = no;};
     };
     omnia_separate_dtb = {
       # The long term patch that provides two separate device trees for Turris
@@ -30,7 +28,7 @@ with nixpkgs.lib; let
     extra_led_triggers = {
       name = "extra-led-triggers";
       patch = null;
-      extraStructuredConfig = with nixpkgs.lib.kernel; {
+      extraStructuredConfig = with final.lib.kernel; {
         LEDS_TRIGGER_DISK = yes;
         LEDS_TRIGGER_MTD = yes;
         LEDS_TRIGGER_PANIC = yes;
@@ -59,54 +57,54 @@ with nixpkgs.lib; let
 
   turrispkgs = {
     # Crypto and certificates
-    libatsha204 = callPackage ./libatsha204 {};
-    mox-otp = nixpkgs.python3Packages.callPackage ./mox-otp {};
-    crypto-wrapper = callPackage ./crypto-wrapper {};
+    libatsha204 = final.callPackage ./libatsha204 {};
+    mox-otp = final.python3Packages.callPackage ./mox-otp {};
+    crypto-wrapper = final.callPackage ./crypto-wrapper {};
 
     # Kernel patches and board specific kernels
     inherit kernelPatchesTurris;
     # Mox kernels
-    linux_turris_mox = overrideMox nixpkgs.linux;
-    linux_latest_turris_mox = overrideMox nixpkgs.linux_latest;
-    linux_6_1_turris_mox = overrideMox nixpkgs.linux_6_1;
-    linux_6_5_turris_mox = overrideMox nixpkgs.linux_6_5;
+    linux_turris_mox = overrideMox prev.linux;
+    linux_latest_turris_mox = overrideMox prev.linux_latest;
+    linux_6_1_turris_mox = overrideMox prev.linux_6_1;
+    linux_6_5_turris_mox = overrideMox prev.linux_6_5;
     # Omnia kernels
-    linux_turris_omnia = overrideOmnia nixpkgs.linux;
-    linux_latest_turris_omnia = overrideOmnia nixpkgs.linux_latest;
-    linux_6_1_turris_omnia = overrideOmnia nixpkgs.linux_6_1;
-    linux_6_5_turris_omnia = overrideOmnia nixpkgs.linux_6_5;
+    linux_turris_omnia = overrideOmnia prev.linux;
+    linux_latest_turris_omnia = overrideOmnia prev.linux_latest;
+    linux_6_1_turris_omnia = overrideOmnia prev.linux_6_1;
+    linux_6_5_turris_omnia = overrideOmnia prev.linux_6_5;
 
     # NOR Firmware as considered stable by Turris and shipped in Turris OS
-    tosFirmwareOmnia = callPackage ./tos-firmware {board = "omnia";};
-    tosFirmwareMox = callPackage ./tos-firmware {board = "mox";};
+    tosFirmwareOmnia = final.callPackage ./tos-firmware {board = "omnia";};
+    tosFirmwareMox = final.callPackage ./tos-firmware {board = "mox";};
 
     # NOR Firmwares build in Nix
-    armTrustedFirmwareTurrisMox = nixpkgs.buildArmTrustedFirmware rec {
+    armTrustedFirmwareTurrisMox = prev.buildArmTrustedFirmware rec {
       platform = "a3700";
       extraMeta.platforms = ["aarch64-linux"];
       extraMakeFlags = ["USE_COHERENT_MEM=0" "CM3_SYSTEM_RESET=1" "FIP_ALIGN=0x100"];
       filesToInstall = ["build/${platform}/release/bl31.bin"];
     };
-    ubootTurrisMox = nixpkgs.buildUBoot {
+    ubootTurrisMox = prev.buildUBoot {
       defconfig = "turris_mox_defconfig";
       extraMeta.platforms = ["aarch64-linux"];
       filesToInstall = ["u-boot.bin"];
       extraPatches = [./patches/include-configs-turris_mox-increase-space-for-the-ke.patch];
       BL31 = "${turrispkgs.armTrustedFirmwareTurrisMox}/bl31.bin";
     };
-    ubootTurrisOmnia = nixpkgs.buildUBoot {
+    ubootTurrisOmnia = prev.buildUBoot {
       defconfig = "turris_omnia_defconfig";
       extraMeta.platforms = ["armv7l-linux"];
       filesToInstall = ["u-boot-spl.kwb"];
     };
 
     # Firmware environment tools
-    ubootEnvTools = nixpkgs.buildUBoot {
+    ubootEnvTools = prev.buildUBoot {
       defconfig = "tools-only_defconfig";
       installDir = "$out/bin";
       hardeningDisable = [];
       dontStrip = false;
-      extraMeta.platforms = nixpkgs.lib.platforms.linux;
+      extraMeta.platforms = prev.lib.platforms.linux;
       extraMakeFlags = ["envtools"];
       filesToInstall = ["tools/env/fw_printenv"];
       postInstall = ''

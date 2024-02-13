@@ -1,15 +1,6 @@
-{
-  self,
-  lib ? self.inputs.nixpkgs.lib,
-}:
-with builtins;
-with lib; let
-  libOverlay = prev: final:
-    import ./. {
-      inherit self;
-      lib = prev;
-    };
-in rec {
+self: prev: final: let
+  inherit (self.nixpkgs.lib) filterAttrs elem;
+in {
   boardPlatform = {
     omnia = {
       config = "armv7l-unknown-linux-gnueabihf";
@@ -21,13 +12,13 @@ in rec {
     };
   };
   # Backward compatibility but boardPlatform is more exact name.
-  boardSystem = lib.warn "boardSystem is deprecard. Please use boardPlatform instead." boardPlatform;
+  boardSystem = prev.warn "boardSystem is deprecard. Please use boardPlatform instead." final.boardPlatform;
 
-  # Adds cross to the NixOS system attribute set.
+  # Adds buildPlatform attribute to the NixOS system attribute set.
   addBuildPlatform = nixos:
     nixos
     // {
-      buildPlatform = genAttrs lib.systems.flakeExposed (
+      buildPlatform = prev.genAttrs prev.systems.flakeExposed (
         system: let
           nixos' = nixos.extendModules {
             modules = [
@@ -46,30 +37,27 @@ in rec {
 
   # NixOS system for specific Turris board
   nixturrisSystem = {
-    board,
+    board ? "mox",
     nixpkgs ? self.inputs.nixpkgs,
     modules ? [],
     specialArgs ? {},
     ...
   } @ args: let
-    nixosArgs = filterAttrs (n: v: ! (elem n ["board" "nixpkgs"])) args;
-    nixosLib = (attrByPath ["lib"] nixpkgs.lib specialArgs).extend libOverlay;
+    nixosArgs = prev.filterAttrs (n: v: ! (prev.elem n ["board" "nixpkgs"])) args;
+    nixosLib = final;
     nixosModules =
       modules
       ++ [
         self.nixosModules.default
-        {
-          nixpkgs.hostPlatform = boardPlatform.${board};
-          turris.board = board;
-        }
+        {turris.board = nixpkgs.lib.mkDefault board;}
       ];
     nixos = nixpkgs.lib.nixosSystem (nixosArgs
       // {
         modules = nixosModules;
-        specialArgs = specialArgs // {lib = nixosLib;};
+        specialArgs = specialArgs // {lib = nixpkgs.lib.extend self.overlays.lib;};
       });
   in
-    addBuildPlatform nixos;
+    final.addBuildPlatform nixos;
 
   # The minimalized system to decrease amount of ram needed for rebuild
   # TODO this does not work right now as it requires just load of work to do.
@@ -81,15 +69,12 @@ in rec {
     modules ? [],
     ...
   } @ args:
-    addBuildPlatform (nixpkgs.lib.nixos.evalModules ({
+    final.addBuildPlatform (nixpkgs.lib.nixos.evalModules ({
         modules =
           (map (v: nixpkgs.outPath + "/nixos/modules" + v) (import ./nixos-min-modules.nix))
           ++ [
             self.nixosModules.default
-            {
-              nixpkgs.hostPlatform = boardPlatform.${board};
-              turris.board = board;
-            }
+            {turris.board = board;}
           ]
           ++ modules;
       }

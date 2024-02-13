@@ -22,8 +22,8 @@ in {
     };
   };
 
-  config = mkIf cnf.enable {
-    system.stateVersion = mkDefault "22.11";
+  config = mkIf (cnf.enable && config.turris.board != null) {
+    system.stateVersion = mkDefault "24.05";
 
     # We do not need Grub as U-Boot supports boot using extlinux like file
     boot = {

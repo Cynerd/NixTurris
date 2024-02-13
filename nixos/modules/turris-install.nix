@@ -9,7 +9,7 @@ with lib; let
 in {
   options.turris.install-settings = mkEnableOption "Install configuration for NixTurris.";
 
-  config = mkIf cnf {
+  config = mkIf (cnf && config.turris.board != null) {
     boot.consoleLogLevel = lib.mkDefault 7;
 
     # Allow access to the root account right after installation

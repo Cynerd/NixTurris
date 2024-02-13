@@ -7,22 +7,16 @@
 with lib; {
   options = {
     turris.board = mkOption {
-      type = types.enum ["omnia" "mox"];
+      type = types.enum ["omnia" "mox" null];
+      default = null;
       description = "The unique Turris board identifier.";
     };
   };
 
   config = {
-    assertions = [
-      {
-        assertion = config.turris.board != null;
-        message = "Turris board has to be specified";
-      }
-    ];
-
-    environment.systemPackages = with pkgs; [
+    environment.systemPackages = [
       # The Git is required to access this repository
-      git
+      pkgs.git
     ];
   };
 }

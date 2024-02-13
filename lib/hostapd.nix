@@ -1,7 +1,4 @@
 {
-  self,
-  lib,
-}: {
   qualcomAtherosAR9287 = {
     wifi4.capabilities = [
       "SHORT-GI-20"

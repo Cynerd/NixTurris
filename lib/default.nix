@@ -1,8 +1,5 @@
+self: final: prev:
 {
-  self,
-  lib ? self.inputs.nixpkgs.lib,
-} @ args:
-import ./system.nix args
-// {
-  hostapd = import ./hostapd.nix args;
+  hostapd = import ./hostapd.nix;
 }
+// import ./system.nix self final prev
