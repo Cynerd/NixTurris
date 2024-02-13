@@ -1,7 +1,6 @@
 = NixOS for Turris routers documentation
 
-Please see general remarks about this project in the top level
-../README.adoc[README file].
+Please see general remarks about this project in the top level README.
 
 To start with NixOS on Turris please read install documentation for your
 specific board:
@@ -16,9 +15,9 @@ how to manage it:
 * link:./initial-access.adoc[*Initial router access*]
 * link:./nixos-rebuild-remote.adoc[*NixOS rebuild remotely and pushing changes*]
 * link:./nixos-rebuild-onsite.adoc[*NixOS rebuild on the router*]
-* link:./switch.adoc[*Switch setup*]
-* link:./router.adoc[*Router setup*]
-* link:./wifi-ap.adoc[*Wi-Fi Access Point*]
+
+TODO: we should create articles about switch, router and hostapd setup but that
+makes more sense to be on official wiki.
 
 Some additional topics:
 

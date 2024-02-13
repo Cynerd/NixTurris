@@ -6,17 +6,17 @@ these topics if you have some free time.
 
 These are big tasks. For the smaller ones please use Gitlab issues.
 
+We should add Turris to https://nixos.wiki/wiki/NixOS_on_ARM.
+
 
 == Bugs to be solved
 
-Generate template configuration in `/etc/nixos/`:: This is common way
-the installation of NixOS proceeds. We would use it only with NixOS rebuild on
-site but we should still do it.
+Latest kernel doesn't work:: Only stable kernel seems to correctly work right
+now. Quick test showed that latest Linux kernel crashes on PCI initialization.
 
-Boot files should be copied to `/boot` on tarball:: The standard syslinux
-generator copies boot files (linux, initrd and dtb) to `/boot` while current
-implementation in tarball keeps them in Nix store. This prevents installation on
-separate boot partition.
+Mox with module G:: Kernel is unstable when Turris Mox is used with G module
+(Super Extension) and two Wi-Fi cards. This might be tied to used cards or even
+to the module itself. The result is that this setup is known to be problematic.
 
 Native build for Turris Omnia doesn't work:: There are multiple packages that
 fail to build when compiled natively on armv7. This can be either due to Qemu or
@@ -26,19 +26,9 @@ the packages fail their test phases as they most likely expect 64bit system.
 
 == Improvements to be tackled
 
-Bridge VLAN filtering:: The current bridge configuration can't be used with VLAN
-filtering. This should be extension that could be easily pushed to the upstream.
-
-Firewall configuration with zones and masquarade:: The NixOS firewall should be
-expanded or replaced by firewall configuration that provides multiple zones with
-ability to set NAT between them.
-
-Easier Wi-Fi AP configuration:: There should be some better way to configure
-Wi-Fi without reading load of documentation on how to setup Hostapd. One option
-is to have minimal user configuration and fill the rest when generating
-configuration based on Wi-Fi adapter. The second and probably easier option is
-to just provide simple configuration with verified settings for the Wi-Fi cards
-shipped with Turris routers.
+Native build in CI:: It would be good if we would check not only cross
+compilation but also native build but for that we need Gitlab Runner on aarch64
+and armv7l. We could probably spawn virtual machine using Qemu.
 
 Minimal system build:: The Nix evaluation consumes considerable amount of RAM
 and thus it is not possible to rebuild NixOS on the device itself without using
@@ -46,11 +36,6 @@ SWAP. The option is to cut out all modules that are just not required as they
 deal with graphics output and desktop. The initial work on that is already
 started in this repository but issue is that even core modules depend on desktop
 specific ones.
-
-Nix build of U-Boot:: The initial support for this is already present but we are
-missing some helper script to flash files to the appropriate block devices. The
-Turris Mox firmware also requires combination with ARM Trusted Firmware which is
-not done yet.
 
 Boot modes on Omnia to select previous profiles:: By modifying the U-Boot
 environment for rescue we might be able to use Omnia standard LEDs rescue mode

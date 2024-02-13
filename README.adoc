@@ -12,24 +12,18 @@ away so here is a list of issues you should expect:
   required on evaluation. The peak is around 2 GB and thus device with 512 MB is
   pretty much screwed. Thankfully Nix is not using that memory most of the time,
   and thus we can use swap without hampering the performance that much.
-* Firewall configuration right now expects at most one NAT network thus forget
-  about multiple networks. There can't be dedicated network for you IOT devices
-  or for your guests.
-* Hostapd configuration is complex and it is pretty hard to configure functional
-  Wi-Fi with higher standards than 802.11b.
-* VLAN filtering on the switch is not easilly configured and thus you have to
-  use multiple bridges to separate networks. This also means that having
-  untagged traffic on the same trunk as tagged one is not easilly possible
-  unless you accept that bridge that contains untagged interface distributes all
-  traffic including the tagged one.
+* Stability is not ensured. This is community project and it is possible that
+  system can get unstable with update. There are no tests, right now, outside of
+  what users are deploying at home. Thankfully NixOS allows rollbacks but you
+  should be prepared to use serial console, because it is not integrated with
+  rollback functionality of Turris.
+
 
 This repository provides the following functionality on top of the standard
 NixOS:
 
 * Minimal system configuration to support Turris Omnia and Mox.
 * Simple module for LEDs configurations for Turris Omnia and Mox.
-* Improved Hostapd configuration as the default one in NixOS supports only
-  single wireless network and adapter.
 * Simple way to cross build NixOS with path:
   `buildPlatform.${system}.config.system.build.toplevel`
 * Simple way to build tarball to deploy NixOS to Turris:
@@ -38,4 +32,4 @@ NixOS:
 IMPORTANT: This repository required Nix with flakes support thus update your Nix
 to the latest version and allow flakes.
 
-For more info feel free to read link:./docs/README.adoc[documentation].
+link:./docs/README.adoc[Follow to documentation].

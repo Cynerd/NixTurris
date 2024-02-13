@@ -45,10 +45,8 @@ This should give you at least U-Boot 2022.07.
 
 === Updating U-Boot on NixOS
 
-The tarball version of NixOS should be possible to boot with all versions
-available for Turris Mox. Thus you can choose to just boot tarball and update
-firmware from NixOS. If so feel free to continue and return to this section once
-you have access to the NixOS installation.
+You won't be able to boot NixOS without updated U-Boot but for completeness and
+for the future there is also an update path on NixOS.
 
 The NixTurris provides you with latest stable version of Turris Mox firmware in
 default. You can find it under command `turris-firmware-update`. You have to run

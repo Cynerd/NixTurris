@@ -29,10 +29,9 @@ The minimal suggested version is U-Boot 2022.07.
 
 === Updating U-Boot on Turris OS
 
-These instructions apply if you have SD card with Turris OS and want to use the
-official way of updating firmware on Turris Mox. The minimal version of Turris
-OS to get new stable version of U-Boot is Turris OS 6.0. Please update the
-Turris OS installation to this version or newer before you continue.
+The minimal version of Turris OS to get new stable version of U-Boot is Turris
+OS 6.0. Please update the Turris OS installation to this version or newer
+before you continue.
 
 The next step is to install `turris-nor-update` and run it:
 
