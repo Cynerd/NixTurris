@@ -14,6 +14,8 @@ configuration. TLDR this is not "medkit".
 nix build github:cynerd/nixturris#tarballMox
 ----
 
+Replace `tarballMox` with `tarballOmnia` for Turris Omnia.
+
 The image is cross compiled in this case (unless you are running on the target
 platform).
 
@@ -29,7 +31,7 @@ command in the template directory to build your customized tarball:
 
 [source,console]
 ----
-nix build .#tarballMox
+nix build .#tarball
 ----
 
 == Native build using Qemu
