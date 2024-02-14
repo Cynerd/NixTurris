@@ -22,7 +22,7 @@ platform).
 == Building custom tarball
 
 If you already have NixOS configuration prepared
-(link:./nixos-rebuild-remote[discussed in remote rebuild]) for your device then
+(link:./nixos-rebuild-remote.adoc[discussed in remote rebuild]) for your device then
 you can generate tarball with it instead of standard one. The advantage is that
 you skip one step and you get prepared device immediately.
 
