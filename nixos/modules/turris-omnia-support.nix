@@ -56,7 +56,6 @@ with lib; {
     firmware.environment = mkDefault {
       enable = true;
       device = "/dev/mtd2";
-      offset = 0; # 0x0
       size = 65536; # 0x10000
       secsize = 65536; # 0x10000
     };

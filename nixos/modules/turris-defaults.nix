@@ -48,8 +48,8 @@ in {
       memoryPercent = 80;
     };
 
-    fileSystems = mkDefault {
-      "/" = {
+    fileSystems = {
+      "/" = mkDefault {
         device = "/dev/disk/by-partlabel/" + cnf.rootLabel;
         fsType = "btrfs";
       };
