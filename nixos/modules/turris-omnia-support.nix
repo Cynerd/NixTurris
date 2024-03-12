@@ -21,7 +21,7 @@ with lib; {
 
     boot = {
       # Use Omnia specific kernel. It is required as otherwise PCI won't work.
-      kernelPackages = mkDefault (pkgs.linuxPackagesFor pkgs.linux_turris_omnia);
+      kernelPackages = mkDefault (pkgs.linuxPackagesFor pkgs.linux_6_1_turris_omnia);
       # This includes modules to support common PC manufacturers but is not
       # something required on Turris.
       initrd.includeDefaultModules = false;
