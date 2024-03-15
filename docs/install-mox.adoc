@@ -40,7 +40,7 @@ The next step is to install `turris-nor-update` and run it:
 ----
 opkg update
 opkg install turris-nor-update
-turris-nor-update
+nor-update
 ----
 
 This should give you at least U-Boot 2022.07.
