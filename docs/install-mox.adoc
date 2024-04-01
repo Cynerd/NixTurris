@@ -79,7 +79,7 @@ to set required settings:
 
 [source,console]
 ----
-setenv ramdisk_addr_r 0x9000000
+setenv ramdisk_addr_r 0xa000000
 saveenv
 ----
 
