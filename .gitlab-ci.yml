@@ -5,7 +5,7 @@ stages:
 
 workflow:
   rules:
-    - if: $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "schedule"
 
 variables:
   GIT_DEPTH: 0
@@ -15,6 +15,8 @@ variables:
   image: registry.gitlab.com/cynerd/gitlab-ci-nix
   tags:
     - docker
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
   cache:
     key: "nix"
     paths:
@@ -29,7 +31,9 @@ variables:
   stage: build
   extends: .nix
   rules:
-    - if: $CI_PIPELINE_SOURCE == "schedule" || $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      allow_failure: true
   script:
     - echo 'auto-allocate-uids = false' >> /etc/nix/nix.conf
     - "[ \"$CI_PIPELINE_SOURCE\" != 'schedule' ] || nix flake update"
