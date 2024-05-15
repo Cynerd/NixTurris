@@ -24,10 +24,7 @@ variables:
   after_script:
     - gitlab-ci-nix-cache-after
 
-
-
 ## Build stage #################################################################
-
 .build:
   stage: build
   extends: .nix
@@ -35,11 +32,9 @@ variables:
     - if: $CI_PIPELINE_SOURCE == "schedule" || $CI_PIPELINE_SOURCE == "push"
   script:
     - echo 'auto-allocate-uids = false' >> /etc/nix/nix.conf
-    - "[ -z \"$NIX_FLAKE_UPDATE\" ] || nix flake update"
+    - "[ \"$CI_PIPELINE_SOURCE\" != 'schedule' ] || nix flake update"
     - nix build --log-lines 1000 .#$ARG
     - cp result/tarball/* .
-    - "[ -z \"$CACHIX_KEY\" ] || cachix authtoken $CACHIX_KEY"
-    - "[ -z \"$CACHIX_KEY\" ] || cachix push $CACHIX_NAME $(readlink -f result)"
 
 build:tarballMox:
   extends: .build
@@ -63,35 +58,43 @@ build:tarballOmnia:
 # TODO build in libvirtd or something to test also native build
 
 ## Test stage ##################################################################
+.test:
+  stage: test
+  extends: .nix
+  needs: []
 
 nix-check:
   stage: test
-  extends: .nix
+  extends: .test
   script:
     - nix flake check
 
 statix:
   stage: test
-  extends: .nix
+  extends: .test
   script:
     - nix run .#statix -- check .
 
-deadnix:
-  stage: test
-  extends: .nix
-  allow_failure: true
-  script:
-    - nix run .#deadnix -- -f .
-
-include:
-  - template: Security/Secret-Detection.gitlab-ci.yml
-
 ## Style stage #################################################################
-
-nixfmt:
+.style:
   stage: style
   extends: .nix
+  needs: []
   allow_failure: true
+
+nixfmt:
+  extends: .style
   script:
     - nix fmt
     - git diff --exit-code
+
+deadnix:
+  extends: .style
+  script:
+    - nix run .#deadnix -- -f .
+
+gitlint:
+  extends: .style
+  script:
+    - git fetch
+    - nix run --quiet .#gitlint -- --commits origin/master..$CI_COMMIT_SHA
