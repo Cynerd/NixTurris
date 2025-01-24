@@ -67,12 +67,12 @@ prev: final: let
     linux_turris_mox = overrideMox prev.linux;
     linux_latest_turris_mox = overrideMox prev.linux_latest;
     linux_6_1_turris_mox = overrideMox prev.linux_6_1;
-    linux_6_5_turris_mox = overrideMox prev.linux_6_5;
+    linux_6_6_turris_mox = overrideMox prev.linux_6_6;
     # Omnia kernels
     linux_turris_omnia = overrideOmnia prev.linux;
     linux_latest_turris_omnia = overrideOmnia prev.linux_latest;
     linux_6_1_turris_omnia = overrideOmnia prev.linux_6_1;
-    linux_6_5_turris_omnia = overrideOmnia prev.linux_6_5;
+    linux_6_6_turris_omnia = overrideOmnia prev.linux_6_6;
 
     # NOR Firmware as considered stable by Turris and shipped in Turris OS
     tosFirmwareOmnia = final.callPackage ./tos-firmware {board = "omnia";};
