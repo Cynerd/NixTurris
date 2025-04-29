@@ -1,5 +1,5 @@
 prev: final: let
-  inherit (prev.lib) optional versionOlder;
+  inherit (prev.lib) optional versionOlder versionAtLeast;
 
   kernelPatchesTurris = {
     mvebu_pci_aadvark = {
@@ -34,11 +34,20 @@ prev: final: let
         LEDS_TRIGGER_PANIC = yes;
       };
     };
+    builtin_mmc = {
+      name = "builtin-mmc";
+      patch = null;
+      extraStructuredConfig = with final.lib.kernel; {
+        RPMB = yes;
+        MMC_BLOCK = yes;
+      };
+    };
   };
   overrideMox = kernel:
     kernel.override (oldAttrs: {
       kernelPatches =
         oldAttrs.kernelPatches
+        ++ (optional (versionAtLeast kernel.version "6.12") kernelPatchesTurris.builtin_mmc)
         ++ (optional (versionOlder kernel.version "6.2") kernelPatchesTurris.mvebu_pci_aadvark);
     });
   overrideOmnia = kernel:
@@ -47,13 +56,14 @@ prev: final: let
         oldAttrs.kernelPatches
         ++ [
           kernelPatchesTurris.mvebu_pci_omnia_fix
+          kernelPatchesTurris.extra_led_triggers
           (
             if (versionOlder kernel.version "6.5")
             then kernelPatchesTurris.omnia_separate_dtb_6_1
             else kernelPatchesTurris.omnia_separate_dtb
           )
-          kernelPatchesTurris.extra_led_triggers
-        ];
+        ]
+        ++ (optional (versionAtLeast kernel.version "6.12") kernelPatchesTurris.builtin_mmc);
       features.turrisOmniaSplitDTB = true;
     });
 in {
