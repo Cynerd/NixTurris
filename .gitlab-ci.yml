@@ -89,7 +89,7 @@ statix:
 nixfmt:
   extends: .style
   script:
-    - nix fmt
+    - nix fmt .
     - git diff --exit-code
 
 deadnix:
