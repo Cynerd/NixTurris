@@ -8,11 +8,11 @@
 }:
 stdenvNoCC.mkDerivation rec {
   pname = "tos-firmware-" + board;
-  version = "6.0";
+  version = "7.1.4";
   src = fetchgit {
     url = "https://gitlab.nic.cz/turris/os/packages.git";
     rev = "v${version}";
-    sha256 = "087gxdvkrykm2ghn23zscq5nw86am4jqf4nj5hzf6bmc6zxgdnhg";
+    sha256 = "sha256-sTgguSfADXXCYui/GqdpLNLtHGYpNzM+++joqga2xzI=";
   };
 
   nativeBuildInputs = [makeWrapper];
