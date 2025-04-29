@@ -53,11 +53,11 @@ with lib; {
     ];
 
     # U-Boot environment access
-    firmware.environment = mkDefault {
+    programs.uboot-fwenv = mkDefault {
       enable = true;
       device = "/dev/mtd2";
-      size = 65536; # 0x10000
-      secsize = 65536; # 0x10000
+      size = "0x10000";
+      secsize = "0x10000";
     };
   };
 }

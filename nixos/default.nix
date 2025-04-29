@@ -9,7 +9,7 @@ self: let
     turris-omnia-support = ./modules/turris-omnia-support.nix;
     turris-tarball = ./modules/turris-tarball.nix;
 
-    fwenv = ./modules/fwenv.nix;
+    uboot-fwenv = ./modules/uboot-fwenv.nix;
   };
 in
   modules
