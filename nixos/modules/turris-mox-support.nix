@@ -10,7 +10,7 @@ with lib; {
 
     boot = {
       # Use Turris Mox specific kernel. It fixes SError with patch.
-      kernelPackages = mkDefault (pkgs.linuxPackagesFor pkgs.linux_6_6_turris_mox);
+      kernelPackages = mkDefault (pkgs.linuxPackagesFor pkgs.linux_6_12_turris_mox);
       # This includes modules to support common PC manufacturers but is not
       # something required on Turris.
       initrd.includeDefaultModules = false;
