@@ -12,7 +12,7 @@ prev: final: let
       # PCIEASPM configuration symbol.
       name = "mvebu-pci-fix";
       patch = null;
-      extraStructuredConfig = with final.lib.kernel; {PCIEASPM = no;};
+      structuredExtraConfig = with final.lib.kernel; {PCIEASPM = no;};
     };
     omnia_separate_dtb = {
       # The long term patch that provides two separate device trees for Turris
@@ -28,7 +28,7 @@ prev: final: let
     extra_led_triggers = {
       name = "extra-led-triggers";
       patch = null;
-      extraStructuredConfig = with final.lib.kernel; {
+      structuredExtraConfig = with final.lib.kernel; {
         LEDS_TRIGGER_DISK = yes;
         LEDS_TRIGGER_MTD = yes;
         LEDS_TRIGGER_PANIC = yes;
@@ -37,7 +37,7 @@ prev: final: let
     builtin_mmc = {
       name = "builtin-mmc";
       patch = null;
-      extraStructuredConfig = with final.lib.kernel; {
+      structuredExtraConfig = with final.lib.kernel; {
         RPMB = yes;
         MMC_BLOCK = yes;
       };
