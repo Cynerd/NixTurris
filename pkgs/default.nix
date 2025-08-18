@@ -1,48 +1,7 @@
-prev: final: let
+final: prev: let
   inherit (prev.lib) optional versionOlder versionAtLeast;
+  inherit (final) kernelPatchesTurris;
 
-  kernelPatchesTurris = {
-    mvebu_pci_aadvark = {
-      # This patch is required to fix PCI for Mox
-      name = "mvebu-pci-aadvark";
-      patch = ./patches/linux-6.0-pci-aadvark-controller-changes.patch;
-    };
-    mvebu_pci_omnia_fix = {
-      # This is special hack for Turris Omnia as PCI doesn't work with
-      # PCIEASPM configuration symbol.
-      name = "mvebu-pci-fix";
-      patch = null;
-      structuredExtraConfig = with final.lib.kernel; {PCIEASPM = no;};
-    };
-    omnia_separate_dtb = {
-      # The long term patch that provides two separate device trees for Turris
-      # Omnia. The armada-385-turris-omnia-phy.dtb uses metallic Ethernet and
-      # armada-385-turris-omnia-spf uses SFP cage.
-      name = "omnia-separate-dtb";
-      patch = ./patches/linux-omnia-separate-dts.patch;
-    };
-    omnia_separate_dtb_6_1 = {
-      name = "omnia-separate-dtb";
-      patch = ./patches/linux-6.1-omnia-separate-dts.patch;
-    };
-    extra_led_triggers = {
-      name = "extra-led-triggers";
-      patch = null;
-      structuredExtraConfig = with final.lib.kernel; {
-        LEDS_TRIGGER_DISK = yes;
-        LEDS_TRIGGER_MTD = yes;
-        LEDS_TRIGGER_PANIC = yes;
-      };
-    };
-    builtin_mmc = {
-      name = "builtin-mmc";
-      patch = null;
-      structuredExtraConfig = with final.lib.kernel; {
-        RPMB = yes;
-        MMC_BLOCK = yes;
-      };
-    };
-  };
   overrideMox = kernel:
     kernel.override (oldAttrs: {
       kernelPatches =
@@ -73,7 +32,7 @@ in {
   crypto-wrapper = final.callPackage ./crypto-wrapper {};
 
   # Kernel patches and board specific kernels
-  inherit kernelPatchesTurris;
+  kernelPatchesTurris = import ./kernel-patches final.lib;
   # Mox kernels
   linux_turris_mox = overrideMox prev.linux;
   linux_latest_turris_mox = overrideMox prev.linux_latest;
@@ -102,7 +61,7 @@ in {
     defconfig = "turris_mox_defconfig";
     extraMeta.platforms = ["aarch64-linux"];
     filesToInstall = ["u-boot.bin"];
-    extraPatches = [./patches/include-configs-turris_mox-increase-space-for-the-ke.patch];
+    extraPatches = [./uboot-patches/include-configs-turris_mox-increase-space-for-the-ke.patch];
     BL31 = "${final.armTrustedFirmwareTurrisMox}/bl31.bin";
   };
   ubootTurrisOmnia = prev.buildUBoot {

@@ -10,7 +10,7 @@
   in {
     overlays = {
       lib = final: prev: import ./lib self final prev;
-      default = final: prev: import ./pkgs prev final;
+      default = final: prev: import ./pkgs final prev;
     };
     nixosModules = import ./nixos self;
     lib = fixedPoints.fix (import ./lib self nixpkgs.lib);
