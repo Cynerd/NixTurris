@@ -6,6 +6,10 @@ final: prev: let
     kernel.override (oldAttrs: {
       kernelPatches =
         oldAttrs.kernelPatches
+        ++ [kernelPatchesTurris.mox_arch_only]
+        ++ (optional (versionAtLeast kernel.version "6.6") kernelPatchesTurris.mox_arch_only_6_6)
+        ++ (optional (versionAtLeast kernel.version "6.12") kernelPatchesTurris.mox_arch_only_6_12)
+        ++ (optional (versionAtLeast kernel.version "6.16") kernelPatchesTurris.mox_arch_only_6_16)
         ++ (optional (versionAtLeast kernel.version "6.12") kernelPatchesTurris.builtin_mmc)
         ++ (optional (versionOlder kernel.version "6.2") kernelPatchesTurris.mvebu_pci_aadvark);
     });
@@ -14,6 +18,7 @@ final: prev: let
       kernelPatches =
         oldAttrs.kernelPatches
         ++ [
+          kernelPatchesTurris.omnia_arch_only
           kernelPatchesTurris.mvebu_pci_omnia_fix
           kernelPatchesTurris.extra_led_triggers
           (
