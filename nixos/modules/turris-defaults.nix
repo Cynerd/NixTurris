@@ -58,9 +58,8 @@ in {
     # The default hostname
     networking.hostName = mkDefault "nixturris";
 
-    # Set default editor
-    # TODO probably switch to nano later on
-    programs.vim.defaultEditor = mkDefault true;
+    # Enable some extra editors
+    programs.vim.enable = mkDefault true;
 
     # The additional administration packages
     environment.systemPackages = with pkgs; [
