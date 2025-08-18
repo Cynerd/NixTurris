@@ -42,5 +42,10 @@
         nixpkgs.legacyPackages.${system}.extend self.overlays.default);
 
     formatter = forSystems (system: nixpkgs.legacyPackages.${system}.alejandra);
+
+    nixConfig = {
+      extra-trusted-substituters = "https://nixturris.cachix.org";
+      extra-trusted-public-keys = "nixturris.cachix.org-1:GOipKuBCV53eoXodrDoS+gy7LZTAaUC8NpjTsx4cWAs=";
+    };
   };
 }
